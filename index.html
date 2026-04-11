@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>MiS-MaS</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{background:#f5f5f0;font-family:'Courier New',monospace;padding:30px 20px;}
+        .page{max-width:1000px;margin:0 auto;}
+        .forum-header{border-bottom:2px solid #000;margin-bottom:30px;padding-bottom:10px;}
+        .forum-title{font-size:2.5rem;font-weight:700;}
+        .back-link{margin-bottom:20px;display:inline-block;}
+        .back-link a{color:#00c;text-decoration:none;}
+        .form-section{background:#fff;border:1px solid #aaa;padding:20px;margin-bottom:40px;}
+        .form-group{margin-bottom:15px;}
+        label{font-weight:bold;display:block;margin-bottom:5px;}
+        input,textarea{width:100%;padding:8px;border:1px solid #aaa;font-family:'Courier New',monospace;}
+        textarea{min-height:80px;}
+        button{background:transparent;border:1px solid #000;padding:8px 20px;cursor:pointer;font-weight:bold;}
+        button:hover{background:#000;color:#fff;}
+        .message{background:#fff;border:1px solid #ccc;padding:15px;margin-bottom:15px;}
+        .message-header{display:flex;justify-content:space-between;margin-bottom:10px;border-bottom:1px solid #eee;padding-bottom:5px;flex-wrap:wrap;gap:5px;}
+        .username{font-weight:bold;color:#00c;}
+        .date{font-size:0.7rem;color:#888;}
+        .message-text{line-height:1.5;word-wrap:break-word;}
+        .delete-btn{background:transparent;border:1px solid #c00;color:#c00;padding:3px 10px;margin-top:10px;cursor:pointer;}
+        .empty{text-align:center;padding:40px;color:#888;border:1px dashed #ccc;}
+        .status-bar{margin-top:20px;padding-top:10px;border-top:1px solid #aaa;text-align:center;font-size:0.75rem;}
+        .info{background:#ccffcc;border:1px solid #00aa00;padding:10px;margin-bottom:20px;text-align:center;display:none;}
+        .error{background:#ffcccc;border:1px solid #cc0000;padding:10px;margin-bottom:20px;text-align:center;display:none;}
+    </style>
+</head>
+<body>
+<div class="page">
+    <div class="forum-header">
+        <div class="forum-title">MiS-MaS</div>
+        <div class="forum-subtitle">MiS-MaS</div>
+    </div>
+    
+    <div id="infoMsg" class="info"></div>
+    <div id="errorMsg" class="error"></div>
+    
+    <div class="form-section">
+        <div class="form-group">
+            <label>Ваше имя:</label>
+            <input type="text" id="username" placeholder="Аноним">
+        </div>
+        <div class="form-group">
+            <label>Сообщение:</label>
+            <textarea id="message" required placeholder="Напишите что-нибудь..."></textarea>
+        </div>
+        <button id="sendBtn">Отправить сообщение</button>
+    </div>
+    
+    <div class="messages-section">
+        <h3>Все сообщения <span id="count">0</span></h3>
+        <div id="messagesList">
+            <div style="text-align:center;padding:40px;color:#888;">Загрузка...</div>
+        </div>
+    </div>
+    <div class="status-bar">
+        Спасибо что выбераете нас!
+    </div>
+</div>
+
+<script>
+    // ===== ВАШ РАБОЧИЙ URL ИЗ MOCKAPI =====
+    const API_URL = 'https://69da27d226585bd92dd3a309.mockapi.io/messages';
+    // ======================================
+    
+    let currentUser = localStorage.getItem('mios_user');
+    if (!currentUser) {
+        currentUser = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 8);
+        localStorage.setItem('mios_user', currentUser);
+    }
+    
+    function showInfo(text) {
+        const div = document.getElementById('infoMsg');
+        div.textContent = text;
+        div.style.display = 'block';
+        setTimeout(() => { div.style.display = 'none'; }, 3000);
+    }
+    
+    function showError(text) {
+        const div = document.getElementById('errorMsg');
+        div.textContent = text;
+        div.style.display = 'block';
+        setTimeout(() => { div.style.display = 'none'; }, 5000);
+    }
+    
+    async function loadMessages() {
+        try {
+            const response = await fetch(API_URL);
+            
+            if (!response.ok) {
+                throw new Error('HTTP ' + response.status);
+            }
+            
+            let messages = await response.json();
+            
+            const messagesList = document.getElementById('messagesList');
+            const countSpan = document.getElementById('count');
+            
+            countSpan.innerText = messages.length;
+            
+            if (messages.length === 0) {
+                messagesList.innerHTML = '<div class="empty">😊 Пока нет сообщений. Будьте первым!</div>';
+                return;
+            }
+            
+            messagesList.innerHTML = [...messages].reverse().map(msg => {
+                const isOwn = (msg.user_id === currentUser);
+                return `
+                    <div class="message">
+                        <div class="message-header">
+                            <span class="username">👤 ${escapeHtml(msg.username)}</span>
+                            <span class="date">📅 ${escapeHtml(msg.date)}</span>
+                        </div>
+                        <div class="message-text">
+                            ${escapeHtml(msg.message).replace(/\n/g, '<br>')}
+                        </div>
+                        ${isOwn ? `<button class="delete-btn" onclick="deleteMessage('${msg.id}')">🗑️ Удалить</button>` : ''}
+                    </div>
+                `;
+            }).join('');
+            
+        } catch (error) {
+            console.error('Ошибка:', error);
+            document.getElementById('messagesList').innerHTML = '<div class="empty">❌ Ошибка загрузки: ' + error.message + '</div>';
+            showError('Ошибка загрузки: ' + error.message);
+        }
+    }
+    
+    async function sendMessage() {
+        const username = document.getElementById('username').value.trim();
+        const message = document.getElementById('message').value.trim();
+        
+        if (!message) {
+            showError('Напишите сообщение!');
+            return;
+        }
+        
+        if (message.length > 5000) {
+            showError('Сообщение слишком длинное (максимум 5000 символов)');
+            return;
+        }
+        
+        try {
+            const newMessage = {
+                username: username || 'Аноним',
+                message: message,
+                date: new Date().toLocaleString('ru-RU'),
+                user_id: currentUser
+            };
+            
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(newMessage)
+            });
+            
+            if (response.ok) {
+                document.getElementById('message').value = '';
+                showInfo('✅ Сообщение отправлено!');
+                await loadMessages();
+            } else {
+                const error = await response.text();
+                showError('Ошибка при сохранении: ' + error);
+            }
+        } catch (error) {
+            showError('Ошибка: ' + error.message);
+        }
+    }
+    
+    async function deleteMessage(id) {
+        if (!confirm('Удалить это сообщение?')) return;
+        
+        try {
+            const getResponse = await fetch(`${API_URL}/${id}`);
+            const msg = await getResponse.json();
+            
+            if (msg.user_id === currentUser) {
+                await fetch(`${API_URL}/${id}`, {
+                    method: 'DELETE'
+                });
+                showInfo('✅ Сообщение удалено!');
+                await loadMessages();
+            } else {
+                showError('Нельзя удалить чужое сообщение');
+            }
+        } catch (error) {
+            showError('Ошибка: ' + error.message);
+        }
+    }
+    
+    function escapeHtml(text) {
+        if (!text) return '';
+        return text.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+    
+    document.getElementById('sendBtn').onclick = sendMessage;
+    window.deleteMessage = deleteMessage;
+    
+    // Загружаем сообщения
+    loadMessages();
+    
+    // Автообновление каждые 10 секунд
+    setInterval(loadMessages, 10000);
+</script>
+</body>
+</html>
