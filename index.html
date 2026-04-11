@@ -48,32 +48,8 @@
             -webkit-backdrop-filter: blur(10px);
             display: flex;
             align-items: center;
+            justify-content: space-between;
             gap: 12px;
-        }
-
-        .back-btn {
-            background: none;
-            border: none;
-            color: #3390ec;
-            font-size: 20px;
-            padding: 6px 8px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            width: 36px;
-            height: 36px;
-            transition: background 0.15s;
-        }
-
-        .back-btn:hover {
-            background: #2c2c2e;
-        }
-
-        .back-btn span {
-            font-size: 24px;
-            line-height: 1;
         }
 
         .header-title {
@@ -94,6 +70,39 @@
             display: flex;
             align-items: center;
             gap: 6px;
+        }
+
+        .count-badge {
+            background: #3a3a3c;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 13px;
+            color: #e0e0e0;
+            margin-left: 6px;
+        }
+
+        /* Кнопка очистки всех сообщений */
+        .clear-all-btn {
+            background: none;
+            border: none;
+            color: #ff5e5e;
+            font-size: 14px;
+            padding: 8px 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border-radius: 20px;
+            transition: background 0.15s;
+            font-weight: 500;
+        }
+
+        .clear-all-btn:hover {
+            background: #2c2c2e;
+        }
+
+        .clear-all-btn:active {
+            background: #3a3a3c;
         }
 
         /* ----- ОСНОВНОЙ КОНТЕНТ — сообщения ----- */
@@ -224,28 +233,10 @@
             -webkit-backdrop-filter: blur(10px);
         }
 
-        .input-fields {
-            flex: 1;
-            background: #2c2c2e;
-            border-radius: 22px;
-            padding: 2px 4px 2px 16px;
-            display: flex;
-            align-items: center;
-        }
-
-        .input-fields input {
-            background: transparent;
-            border: none;
-            padding: 10px 0;
-            color: #fff;
-            font-size: 16px;
-            width: 100%;
-            outline: none;
-            font-family: inherit;
-        }
-
-        .input-fields input::placeholder {
-            color: #8e8e93;
+        .attach-placeholder {
+            color: #aaa;
+            font-size: 22px;
+            padding: 6px;
         }
 
         .message-input-wrapper {
@@ -298,12 +289,6 @@
 
         .send-button:active {
             background: #1e6bb0;
-        }
-
-        .attach-placeholder {
-            color: #aaa;
-            font-size: 22px;
-            padding: 6px;
         }
 
         /* строка имени */
@@ -362,6 +347,13 @@
             color: #ff5e5e;
         }
 
+        .save-hint {
+            font-size: 11px;
+            color: #6a6a6e;
+            margin-left: 8px;
+            white-space: nowrap;
+        }
+
         /* уведомления */
         .toast-notify {
             position: fixed;
@@ -408,27 +400,6 @@
             -webkit-appearance: none;
             appearance: none;
         }
-
-        .forum-header, .back-link, .form-section, .status-bar {
-            display: none;
-        }
-
-        .count-badge {
-            background: #3a3a3c;
-            padding: 2px 8px;
-            border-radius: 20px;
-            font-size: 13px;
-            color: #e0e0e0;
-            margin-left: 6px;
-        }
-
-        /* Подсказка о сохранении имени */
-        .save-hint {
-            font-size: 11px;
-            color: #6a6a6e;
-            margin-left: 8px;
-            white-space: nowrap;
-        }
     </style>
 </head>
 <body>
@@ -438,9 +409,11 @@
         <div class="header-title">
             <h1>MiS-MaS <span style="font-weight:400; color:#aaa;">чат</span></h1>
             <div class="sub">
-                <span>💬 </span><span id="onlineCount">сообщений: <span id="count">0</span></span>
+                <span>💬 </span><span>сообщений: <span id="count">0</span></span>
             </div>
         </div>
+        <!-- КНОПКА ОЧИСТКИ ВСЕХ СООБЩЕНИЙ -->
+        <button id="clearAllBtn" class="clear-all-btn">🗑️ Очистить всё</button>
     </div>
 
     <!-- Область сообщений -->
@@ -496,7 +469,9 @@
         const infoToast = document.getElementById('infoToast');
         const errorToast = document.getElementById('errorToast');
         const clearNameBtn = document.getElementById('clearNameBtn');
+        const clearAllBtn = document.getElementById('clearAllBtn');
         const saveHint = document.getElementById('saveHint');
+        const chatContainer = document.getElementById('chatContainer');
 
         // ID пользователя (локальный идентификатор)
         let currentUser = localStorage.getItem('mios_user_tele');
@@ -505,10 +480,16 @@
             localStorage.setItem('mios_user_tele', currentUser);
         }
 
+        // ===== ВЛАДЕЛЕЦ (кто может очистить все сообщения) =====
+        let ownerId = localStorage.getItem('mios_owner_id');
+        if (!ownerId) {
+            ownerId = currentUser;
+            localStorage.setItem('mios_owner_id', ownerId);
+        }
+
         // ===== РАБОТА С СОХРАНЕНИЕМ ИМЕНИ =====
         const STORAGE_NAME_KEY = 'mios_saved_username';
         
-        // Загружаем сохранённое имя
         function loadSavedName() {
             const savedName = localStorage.getItem(STORAGE_NAME_KEY);
             if (savedName) {
@@ -519,7 +500,6 @@
             }
         }
         
-        // Сохраняем имя в localStorage
         function saveUsername(name) {
             if (name && name.trim()) {
                 localStorage.setItem(STORAGE_NAME_KEY, name.trim());
@@ -531,7 +511,6 @@
             }
         }
         
-        // Показываем/скрываем подсказку о сохранении
         function showSaveHint(hasName) {
             if (hasName && usernameField.value.trim()) {
                 saveHint.style.opacity = '1';
@@ -542,7 +521,6 @@
             }
         }
         
-        // Очистка имени
         function clearUsername() {
             usernameField.value = '';
             localStorage.removeItem(STORAGE_NAME_KEY);
@@ -551,11 +529,9 @@
             usernameField.focus();
         }
         
-        // Обработчики для имени
         usernameField.addEventListener('input', function() {
             const val = this.value.trim();
             if (val) {
-                // Сохраняем при вводе (с небольшой задержкой)
                 clearTimeout(window._saveTimeout);
                 window._saveTimeout = setTimeout(() => {
                     saveUsername(val);
@@ -569,31 +545,37 @@
             if (val) {
                 saveUsername(val);
             } else {
-                // Если поле пустое при уходе, удаляем из хранилища
                 localStorage.removeItem(STORAGE_NAME_KEY);
                 showSaveHint(false);
             }
         });
         
-        clearNameBtn.addEventListener('click', clearUsername);
-        
-        // Загружаем имя при старте
+        if (clearNameBtn) clearNameBtn.addEventListener('click', clearUsername);
         loadSavedName();
 
         // Функции показа уведомлений
+        let toastTimeout = null;
+        
         function showInfo(text) {
+            if (!infoToast) return;
             infoToast.textContent = '✅ ' + text;
             infoToast.classList.add('show');
-            setTimeout(() => infoToast.classList.remove('show'), 2800);
+            if (toastTimeout) clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                infoToast.classList.remove('show');
+            }, 2800);
         }
 
         function showError(text) {
+            if (!errorToast) return;
             errorToast.textContent = '⚠️ ' + text;
             errorToast.classList.add('show');
-            setTimeout(() => errorToast.classList.remove('show'), 3500);
+            if (toastTimeout) clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                errorToast.classList.remove('show');
+            }, 3500);
         }
 
-        // Экранирование
         function escapeHtml(text) {
             if (!text) return '';
             return String(text).replace(/[&<>]/g, function(m) {
@@ -604,27 +586,38 @@
             });
         }
 
-        // Авто-ресайз textarea
         function autoResize(textarea) {
+            if (!textarea) return;
             textarea.style.height = 'auto';
             textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
         }
 
-        messageField.addEventListener('input', () => autoResize(messageField));
+        if (messageField) {
+            messageField.addEventListener('input', () => autoResize(messageField));
+        }
+
+        let isLoading = false;
 
         // Загрузка сообщений
         async function loadMessages() {
+            if (isLoading) return;
+            isLoading = true;
+            
             try {
                 const response = await fetch(API_URL);
                 if (!response.ok) throw new Error('HTTP ' + response.status);
                 
                 let messages = await response.json();
+                if (!Array.isArray(messages)) messages = [];
                 messages.sort((a, b) => new Date(a.date) - new Date(b.date));
                 
-                countSpan.innerText = messages.length;
+                if (countSpan) countSpan.innerText = messages.length;
+                
+                if (!messagesListEl) return;
                 
                 if (messages.length === 0) {
                     messagesListEl.innerHTML = `<div class="empty-chat">✨ Пока нет сообщений. Начните общение!</div>`;
+                    isLoading = false;
                     return;
                 }
                 
@@ -638,24 +631,23 @@
                     let timeShort = '';
                     try {
                         const d = new Date(dateStr);
-                        if (!isNaN(d)) {
+                        if (!isNaN(d.getTime())) {
                             timeShort = d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
-                        } else {
-                            timeShort = dateStr.split(' ')[1] || '';
                         }
                     } catch(e) { timeShort = ''; }
                     
                     const textFormatted = escapeHtml(msg.message).replace(/\n/g, '<br>');
+                    const messageId = msg.id;
                     
                     html += `
-                        <div class="${rowClass}">
+                        <div class="${rowClass}" data-msg-id="${messageId}">
                             <div class="bubble">
                                 <div class="bubble-header">
                                     <span class="name">${nameDisplay}</span>
                                     <span class="time">${timeShort}</span>
                                 </div>
                                 <div class="text-content">${textFormatted}</div>
-                                ${isOwn ? `<button class="delete-btn" data-id="${msg.id}" onclick="window.deleteMsg('${msg.id}')">🗑️ Удалить</button>` : ''}
+                                ${isOwn ? `<button class="delete-btn" onclick="window.deleteMsg('${messageId}')">🗑️ Удалить</button>` : ''}
                             </div>
                         </div>
                     `;
@@ -663,20 +655,25 @@
                 
                 messagesListEl.innerHTML = html;
                 
-                const container = document.getElementById('chatContainer');
-                container.scrollTop = container.scrollHeight;
+                if (chatContainer) {
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                }
                 
             } catch (error) {
                 console.error('Ошибка:', error);
-                messagesListEl.innerHTML = `<div class="empty-chat">❌ Ошибка загрузки: ${error.message}</div>`;
+                if (messagesListEl && messagesListEl.children.length === 0) {
+                    messagesListEl.innerHTML = `<div class="empty-chat">❌ Ошибка загрузки: ${error.message}</div>`;
+                }
                 showError('Ошибка загрузки: ' + error.message);
+            } finally {
+                isLoading = false;
             }
         }
 
         // Отправка сообщения
         async function sendMessage() {
-            const username = usernameField.value.trim();
-            const message = messageField.value.trim();
+            const username = usernameField ? usernameField.value.trim() : '';
+            const message = messageField ? messageField.value.trim() : '';
             
             if (!message) {
                 showError('Введите текст сообщения');
@@ -688,9 +685,13 @@
                 return;
             }
             
-            // Если имя не пустое, сохраняем его при отправке
             if (username) {
                 saveUsername(username);
+            }
+            
+            if (sendBtn) {
+                sendBtn.disabled = true;
+                sendBtn.style.opacity = '0.5';
             }
             
             try {
@@ -708,8 +709,10 @@
                 });
                 
                 if (response.ok) {
-                    messageField.value = '';
-                    autoResize(messageField);
+                    if (messageField) {
+                        messageField.value = '';
+                        autoResize(messageField);
+                    }
                     showInfo('Сообщение отправлено');
                     await loadMessages();
                 } else {
@@ -718,10 +721,15 @@
                 }
             } catch (error) {
                 showError('Ошибка сети: ' + error.message);
+            } finally {
+                if (sendBtn) {
+                    sendBtn.disabled = false;
+                    sendBtn.style.opacity = '1';
+                }
             }
         }
 
-        // Удаление сообщения
+        // Удаление одного сообщения
         async function deleteMessage(id) {
             if (!confirm('Удалить это сообщение?')) return;
             
@@ -747,37 +755,78 @@
             }
         }
 
+        // ===== ОЧИСТКА ВСЕХ СООБЩЕНИЙ =====
+        async function clearAllMessages() {
+            if (currentUser !== ownerId) {
+                showError('Только владелец чата может очистить все сообщения');
+                return;
+            }
+            
+            const confirmed = confirm('⚠️ ВНИМАНИЕ! Это удалит ВСЕ сообщения в чате. Отменить будет невозможно. Продолжить?');
+            if (!confirmed) return;
+            
+            if (clearAllBtn) {
+                clearAllBtn.disabled = true;
+                clearAllBtn.style.opacity = '0.5';
+            }
+            
+            try {
+                const response = await fetch(API_URL);
+                if (!response.ok) throw new Error('Не удалось загрузить сообщения');
+                
+                const messages = await response.json();
+                if (!Array.isArray(messages)) return;
+                
+                let deletedCount = 0;
+                for (const msg of messages) {
+                    const delResp = await fetch(`${API_URL}/${msg.id}`, { method: 'DELETE' });
+                    if (delResp.ok) deletedCount++;
+                    await new Promise(r => setTimeout(r, 50));
+                }
+                
+                if (deletedCount > 0) {
+                    showInfo(`Очищено ${deletedCount} сообщений`);
+                    await loadMessages();
+                } else {
+                    showInfo('Сообщений для удаления не найдено');
+                }
+            } catch (error) {
+                showError('Ошибка при очистке: ' + error.message);
+            } finally {
+                if (clearAllBtn) {
+                    clearAllBtn.disabled = false;
+                    clearAllBtn.style.opacity = '1';
+                }
+            }
+        }
+
         window.deleteMsg = function(id) {
             deleteMessage(id);
         };
 
         // Обработчики
-        sendBtn.addEventListener('click', sendMessage);
+        if (sendBtn) sendBtn.addEventListener('click', sendMessage);
+        if (clearAllBtn) clearAllBtn.addEventListener('click', clearAllMessages);
         
-        messageField.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
-            }
-        });
+        if (messageField) {
+            messageField.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+        }
 
-        // Подгрузка начальных сообщений
+        if (usernameField) {
+            usernameField.addEventListener('focus', () => {
+                if (usernameField.value.trim()) {
+                    showInfo('Имя сохранено: ' + usernameField.value.trim());
+                }
+            });
+        }
+        
         loadMessages();
-        
-        // Автообновление каждые 8 секунд
         setInterval(loadMessages, 8000);
-
-        // Кнопка назад
-        window.history.back = function() {
-            showInfo('← Вы в главном чате MiS-MaS');
-        };
-
-        // При фокусе на поле имени показываем подсказку
-        usernameField.addEventListener('focus', () => {
-            if (usernameField.value.trim()) {
-                showInfo('Имя сохранено: ' + usernameField.value.trim());
-            }
-        });
         
     })();
 </script>
