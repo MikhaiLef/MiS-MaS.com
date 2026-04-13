@@ -852,7 +852,7 @@
     <!-- ЭКРАН СПИСКА ЧАТОВ -->
     <div id="chatsScreen" class="chats-screen">
         <div class="chats-header">
-            <h1>Чаты</h1>
+            <h1>все Чаты</h1>
             <div class="header-actions">
                 <button class="header-icon" id="addChatBtn" title="Новый чат">➕</button>
             </div>
@@ -1280,7 +1280,7 @@
             }
             botChat.messages.push({
                 id: 'bot_welcome_' + Date.now(),
-                text: '👋 Добро пожаловать в MiS-MaS! Это новый мессенджер без регистрации!\n\n📱 Ваш IP: ' + myIP + '\n🔗 Поделитесь им с друзьями для создания чата!\n\nНажмите "+" и введите IP друга.',
+                text: 'Добро пожаловать в MiS-MaS! Это новый мессенджер без регистрации!\n\n📱 Ваш IP: ' + myIP + '\n🔗 Поделитесь им с друзьями для создания чата!\n\nНажмите "+" и введите IP друга.',
                 date: new Date().toLocaleString('ru-RU'),
                 senderIP: 'bot.official',
                 senderName: BOT_NAME
@@ -1392,9 +1392,9 @@
                 const lastText = lastMsg ? (lastMsg.senderName || 'Собеседник') + ': ' + lastMsg.text.substring(0,25) : 'Нет сообщений';
                 const time = lastMsg ? formatTime(lastMsg.date) : '';
                 const isBot = chat.id === 'bot_chat';
-                const avatarIcon = isBot ? '🤖' : '👤';
+                const avatarIcon = isBot ? 'i' : '👤';
                 const avatarClass = isBot ? 'avatar-bot' : 'avatar-private';
-                const nameDisplay = chat.name + (isBot ? ' <span class="verified-badge">✅</span>' : '');
+                const nameDisplay = chat.name + (isBot ? ' <span class="verified-badge">!</span>' : '');
                 const statusBadge = !isBot && !chat.accepted ? ' <span class="connection-status">⏳ Ожидание</span>' : '';
                 
                 chatsHtml += `<div class="chat-item" data-chat-id="${chat.id}"><div class="chat-avatar ${avatarClass}">${avatarIcon}</div><div class="chat-content"><div class="chat-header-row"><span class="chat-name">${nameDisplay}${statusBadge}</span>${time?`<span class="chat-time">${time}</span>`:''}</div><div class="chat-message-row"><span class="chat-last-message">${lastText}</span></div></div></div>`;
