@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>MiS-MaS</title>
+    <title>MiS-MaS ✦ BIN Chat</title>
     <style>
         * {
             margin: 0;
@@ -845,6 +845,22 @@
             background: transparent;
             color: #8e8e93;
         }
+        
+        /* Индикатор загрузки */
+        .loading-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border: 2px solid #8e8e93;
+            border-top-color: #3390ec;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-left: 8px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -852,7 +868,7 @@
     <!-- ЭКРАН СПИСКА ЧАТОВ -->
     <div id="chatsScreen" class="chats-screen">
         <div class="chats-header">
-            <h1>все Чаты</h1>
+            <h1>Чаты</h1>
             <div class="header-actions">
                 <button class="header-icon" id="addChatBtn" title="Новый чат">➕</button>
             </div>
@@ -928,10 +944,10 @@
         <div class="settings-content">
             <div class="settings-section">
                 <div class="settings-section-title">Основные</div>
-                <div class="setting-item" id="changeIpBtn">
+                <div class="setting-item" id="showMyBinBtn">
                     <div class="setting-info">
-                        <div class="setting-label">Мой IP адрес</div>
-                        <div class="setting-description" id="currentIpDisplay">Загрузка...</div>
+                        <div class="setting-label">Мой BIN ID</div>
+                        <div class="setting-description" id="currentBinDisplay">Загрузка...</div>
                     </div>
                     <span class="setting-value">📋</span>
                 </div>
@@ -965,22 +981,19 @@
     (function(){
         "use strict";
 
-        const API_URL = 'https://69da27d226585bd92dd3a309.mockapi.io/messages';
-        const WS_SERVER = 'wss://ws.postman-echo.com/raw'; // Публичный WebSocket сервер
+        // Главный чат - НЕ ТРОГАЕМ
+        const MAIN_API_URL = 'https://69da27d226585bd92dd3a309.mockapi.io/messages';
+        // API для личных чатов
+        const PRIVATE_API_URL = 'https://69da27d226585bd92dd3a309.mockapi.io/mi';
         
         // Состояние
         let currentChat = 'main';
         let favoritesMessages = [];
         let privateChats = [];
-        let pendingRequests = [];
         let mainMessagesCount = 0;
         let notificationsEnabled = true;
         let currentTheme = 'dark';
-        let myIP = 'Загрузка...';
-        
-        // WebSocket
-        let ws = null;
-        let wsConnected = false;
+        let myBinId = null;
         
         // Пользователь
         let currentUser = localStorage.getItem('mios_user_id');
@@ -991,7 +1004,6 @@
         let savedUsername = localStorage.getItem('mios_username') || '';
         
         // Бот
-        const BOT_ID = 'official_bot_mismas';
         const BOT_NAME = 'MiS-MaS Bot';
         
         // Экраны и элементы
@@ -1020,7 +1032,7 @@
         const notificationsStatus = document.getElementById('notificationsStatus');
         const themeDescription = document.getElementById('themeDescription');
         const themeIcon = document.getElementById('themeIcon');
-        const currentIpDisplay = document.getElementById('currentIpDisplay');
+        const currentBinDisplay = document.getElementById('currentBinDisplay');
         
         // Загрузка настроек
         notificationsEnabled = localStorage.getItem('mios_notifications') !== 'false';
@@ -1035,211 +1047,42 @@
             notificationsStatus.textContent = 'Отключены';
         }
         
-        // Получение IP
-        async function getMyIP() {
+        // Получение или создание BIN ID
+        async function getOrCreateBinId() {
+            let binId = localStorage.getItem('mios_bin_id');
+            if (binId) {
+                myBinId = binId;
+                currentBinDisplay.textContent = binId;
+                return binId;
+            }
+            
+            // Создаём новую запись для получения ID
             try {
-                const resp = await fetch('https://api.ipify.org?format=json');
+                const resp = await fetch(PRIVATE_API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        binId: 'bin_' + Date.now() + '_' + Math.random().toString(36),
+                        username: savedUsername || 'Пользователь',
+                        createdAt: new Date().toISOString()
+                    })
+                });
                 const data = await resp.json();
-                myIP = data.ip;
-                currentIpDisplay.textContent = myIP;
-                return myIP;
+                binId = data.id || data.binId;
+                localStorage.setItem('mios_bin_id', binId);
+                myBinId = binId;
+                currentBinDisplay.textContent = binId;
+                return binId;
             } catch(e) {
-                myIP = 'Неизвестно';
-                currentIpDisplay.textContent = myIP;
-                return myIP;
+                binId = 'bin_' + Date.now();
+                localStorage.setItem('mios_bin_id', binId);
+                myBinId = binId;
+                currentBinDisplay.textContent = binId;
+                return binId;
             }
         }
         
-        // WebSocket соединение
-        function connectWebSocket() {
-            ws = new WebSocket(WS_SERVER);
-            
-            ws.onopen = () => {
-                wsConnected = true;
-                console.log('WebSocket connected');
-                // Отправляем информацию о себе
-                sendWSMessage({
-                    type: 'register',
-                    ip: myIP,
-                    username: savedUsername || 'Аноним'
-                });
-            };
-            
-            ws.onmessage = (event) => {
-                try {
-                    const data = JSON.parse(event.data);
-                    handleWSMessage(data);
-                } catch(e) {
-                    console.error('WS message parse error:', e);
-                }
-            };
-            
-            ws.onclose = () => {
-                wsConnected = false;
-                console.log('WebSocket disconnected, reconnecting...');
-                setTimeout(connectWebSocket, 3000);
-            };
-            
-            ws.onerror = (error) => {
-                console.error('WebSocket error:', error);
-            };
-        }
-        
-        function sendWSMessage(data) {
-            if (ws && ws.readyState === WebSocket.OPEN) {
-                ws.send(JSON.stringify(data));
-            }
-        }
-        
-        function handleWSMessage(data) {
-            if (data.type === 'chat_request') {
-                // Кто-то хочет начать чат с нами
-                const fromIP = data.from;
-                const fromUsername = data.username || 'Пользователь';
-                
-                // Проверяем, нет ли уже такого чата
-                const existing = privateChats.find(c => c.ip === fromIP);
-                if (existing) {
-                    // Отправляем подтверждение
-                    sendWSMessage({
-                        type: 'chat_accept',
-                        to: fromIP,
-                        from: myIP,
-                        username: savedUsername
-                    });
-                    return;
-                }
-                
-                // Показываем запрос
-                pendingRequests.push({
-                    ip: fromIP,
-                    username: fromUsername,
-                    timestamp: Date.now()
-                });
-                savePendingRequests();
-                
-                showRequestModal(fromIP, fromUsername);
-            } else if (data.type === 'chat_accept') {
-                // Наш запрос принят
-                const fromIP = data.from;
-                const chat = privateChats.find(c => c.ip === fromIP && !c.accepted);
-                if (chat) {
-                    chat.accepted = true;
-                    savePrivateChats();
-                    renderChatsList();
-                    showInfo(`✅ ${data.username || fromIP} принял запрос!`);
-                    
-                    if (currentChat === chat.id) {
-                        chatHeaderStatus.textContent = '🟢 Онлайн';
-                    }
-                }
-            } else if (data.type === 'chat_decline') {
-                // Наш запрос отклонён
-                const fromIP = data.from;
-                const chatIndex = privateChats.findIndex(c => c.ip === fromIP && !c.accepted);
-                if (chatIndex !== -1) {
-                    privateChats.splice(chatIndex, 1);
-                    savePrivateChats();
-                    renderChatsList();
-                    showError(`❌ ${data.username || fromIP} отклонил запрос`);
-                }
-            } else if (data.type === 'message') {
-                // Получили сообщение
-                const fromIP = data.from;
-                const chat = privateChats.find(c => c.ip === fromIP);
-                
-                if (chat) {
-                    const message = {
-                        id: 'msg_' + Date.now() + '_' + Math.random(),
-                        text: data.text,
-                        date: data.date || new Date().toLocaleString('ru-RU'),
-                        senderIP: fromIP,
-                        senderName: data.username || fromIP
-                    };
-                    
-                    chat.messages.push(message);
-                    savePrivateChats();
-                    
-                    if (currentChat === chat.id) {
-                        renderPrivateMessages(chat);
-                    }
-                    
-                    if (notificationsEnabled && currentChat !== chat.id) {
-                        sendNotification(`💬 ${chat.name}`, `${message.senderName}: ${message.text}`);
-                    }
-                    
-                    renderChatsList();
-                }
-            }
-        }
-        
-        function showRequestModal(ip, username) {
-            const overlay = document.createElement('div');
-            overlay.className = 'modal-overlay';
-            overlay.innerHTML = `
-                <div class="modal">
-                    <h3>🔔 Запрос на диалог</h3>
-                    <p style="margin-bottom: 16px; color: #8e8e93;">
-                        IP <strong style="color: #3390ec;">${ip}</strong><br>
-                        (${username})<br>
-                        хочет начать с вами чат.
-                    </p>
-                    <div class="modal-actions">
-                        <button class="modal-btn cancel">❌ Отклонить</button>
-                        <button class="modal-btn">✅ Принять</button>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(overlay);
-            
-            overlay.querySelector('.cancel').onclick = () => {
-                sendWSMessage({
-                    type: 'chat_decline',
-                    to: ip,
-                    from: myIP,
-                    username: savedUsername
-                });
-                
-                pendingRequests = pendingRequests.filter(r => r.ip !== ip);
-                savePendingRequests();
-                overlay.remove();
-                showInfo('Запрос отклонён');
-            };
-            
-            overlay.querySelector('.modal-btn:not(.cancel)').onclick = () => {
-                // Создаём чат
-                const chatId = 'priv_' + Date.now();
-                const newChat = {
-                    id: chatId,
-                    ip: ip,
-                    name: username !== 'Пользователь' ? `Чат с ${username}` : `Чат с ${ip}`,
-                    messages: [],
-                    accepted: true
-                };
-                privateChats.push(newChat);
-                savePrivateChats();
-                
-                sendWSMessage({
-                    type: 'chat_accept',
-                    to: ip,
-                    from: myIP,
-                    username: savedUsername
-                });
-                
-                pendingRequests = pendingRequests.filter(r => r.ip !== ip);
-                savePendingRequests();
-                overlay.remove();
-                renderChatsList();
-                showInfo('✅ Чат создан!');
-                openChat(chatId);
-            };
-            
-            overlay.addEventListener('click', e => {
-                if (e.target === overlay) overlay.remove();
-            });
-        }
-        
-        // Загрузка данных
+        // Загрузка личных чатов
         function loadPrivateChats() {
             try {
                 const stored = localStorage.getItem('mios_private_chats');
@@ -1250,19 +1093,7 @@
         function savePrivateChats() {
             localStorage.setItem('mios_private_chats', JSON.stringify(privateChats));
         }
-        
-        function loadPendingRequests() {
-            try {
-                const stored = localStorage.getItem('mios_pending_requests');
-                pendingRequests = stored ? JSON.parse(stored) : [];
-            } catch(e) { pendingRequests = []; }
-        }
-        function savePendingRequests() {
-            localStorage.setItem('mios_pending_requests', JSON.stringify(pendingRequests));
-        }
-        
         loadPrivateChats();
-        loadPendingRequests();
         
         // Бот приветствие
         const hasSeenWelcome = localStorage.getItem('mios_welcome_bot');
@@ -1273,18 +1104,11 @@
                 botChat = {
                     id: 'bot_chat',
                     name: BOT_NAME,
-                    ip: 'bot.official',
+                    binId: 'bot.official',
                     messages: []
                 };
                 privateChats.push(botChat);
             }
-            botChat.messages.push({
-                id: 'bot_welcome_' + Date.now(),
-                text: 'Добро пожаловать в MiS-MaS! Это новый мессенджер без регистрации!\n\n📱 Ваш IP: ' + myIP + '\n🔗 Поделитесь им с друзьями для создания чата!\n\nНажмите "+" и введите IP друга.',
-                date: new Date().toLocaleString('ru-RU'),
-                senderIP: 'bot.official',
-                senderName: BOT_NAME
-            });
             savePrivateChats();
         }
         
@@ -1359,11 +1183,36 @@
         function autoResize(ta) { if(ta) { ta.style.height = 'auto'; ta.style.height = Math.min(ta.scrollHeight, 120) + 'px'; } }
         messageField?.addEventListener('input', () => autoResize(messageField));
         
+        // Загрузка сообщений личного чата с сервера
+        async function loadPrivateMessagesFromServer(chat) {
+            try {
+                // Ищем сообщения для этого чата по binId
+                const resp = await fetch(PRIVATE_API_URL);
+                const allData = await resp.json();
+                
+                // Фильтруем сообщения для этого чата
+                const chatMessages = allData.filter(item => 
+                    item.chatId === chat.id || 
+                    (item.fromBin === chat.binId && item.toBin === myBinId) ||
+                    (item.toBin === chat.binId && item.fromBin === myBinId)
+                );
+                
+                chat.messages = chatMessages.sort((a, b) => 
+                    new Date(a.date || a.createdAt) - new Date(b.date || b.createdAt)
+                );
+                savePrivateChats();
+                return chat.messages;
+            } catch(e) {
+                console.error('Ошибка загрузки сообщений:', e);
+                return chat.messages;
+            }
+        }
+        
         // Рендер списка чатов
         async function renderChatsList() {
             let mainLastMsg = 'Нет сообщений', mainTime = '', mainUnread = 0;
             try {
-                const resp = await fetch(API_URL);
+                const resp = await fetch(MAIN_API_URL);
                 if (resp.ok) {
                     const msgs = await resp.json();
                     if (Array.isArray(msgs) && msgs.length) {
@@ -1389,15 +1238,14 @@
             // Приватные чаты
             privateChats.forEach(chat => {
                 const lastMsg = chat.messages.length ? chat.messages[chat.messages.length-1] : null;
-                const lastText = lastMsg ? (lastMsg.senderName || 'Собеседник') + ': ' + lastMsg.text.substring(0,25) : 'Нет сообщений';
-                const time = lastMsg ? formatTime(lastMsg.date) : '';
+                const lastText = lastMsg ? (lastMsg.username || 'Собеседник') + ': ' + (lastMsg.message || lastMsg.text || '').substring(0,25) : 'Нет сообщений';
+                const time = lastMsg ? formatTime(lastMsg.date || lastMsg.createdAt) : '';
                 const isBot = chat.id === 'bot_chat';
-                const avatarIcon = isBot ? 'i' : '👤';
+                const avatarIcon = isBot ? '🤖' : '👤';
                 const avatarClass = isBot ? 'avatar-bot' : 'avatar-private';
-                const nameDisplay = chat.name + (isBot ? ' <span class="verified-badge">!</span>' : '');
-                const statusBadge = !isBot && !chat.accepted ? ' <span class="connection-status">⏳ Ожидание</span>' : '';
+                const nameDisplay = chat.name + (isBot ? ' <span class="verified-badge">✅</span>' : '');
                 
-                chatsHtml += `<div class="chat-item" data-chat-id="${chat.id}"><div class="chat-avatar ${avatarClass}">${avatarIcon}</div><div class="chat-content"><div class="chat-header-row"><span class="chat-name">${nameDisplay}${statusBadge}</span>${time?`<span class="chat-time">${time}</span>`:''}</div><div class="chat-message-row"><span class="chat-last-message">${lastText}</span></div></div></div>`;
+                chatsHtml += `<div class="chat-item" data-chat-id="${chat.id}"><div class="chat-avatar ${avatarClass}">${avatarIcon}</div><div class="chat-content"><div class="chat-header-row"><span class="chat-name">${nameDisplay}</span>${time?`<span class="chat-time">${time}</span>`:''}</div><div class="chat-message-row"><span class="chat-last-message">${lastText}</span></div></div></div>`;
             });
             
             chatsList.innerHTML = chatsHtml;
@@ -1406,7 +1254,7 @@
             });
         }
         
-        function openChat(chatId) {
+        async function openChat(chatId) {
             currentChat = chatId;
             chatsScreen.classList.add('hidden');
             settingsScreen.classList.add('hidden');
@@ -1433,8 +1281,12 @@
                     chatHeaderName.innerHTML = priv.name + (isBot ? ' <span class="verified-badge">✅</span>' : '');
                     chatHeaderAvatar.textContent = isBot ? '🤖' : '👤';
                     chatHeaderAvatar.className = `chat-header-avatar ${isBot ? 'avatar-bot' : 'avatar-private'}`;
-                    chatHeaderStatus.textContent = isBot ? 'официальный бот' : (priv.accepted ? '🟢 Онлайн' : '⏳ Ожидание подтверждения');
+                    chatHeaderStatus.textContent = isBot ? 'официальный бот' : `BIN: ${priv.binId?.substring(0, 8) || 'неизвестно'}`;
                     nameRow.style.display = isBot ? 'none' : 'flex';
+                    
+                    // Загружаем сообщения с сервера
+                    messagesListEl.innerHTML = '<div class="empty-chat">Загрузка сообщений...<span class="loading-indicator"></span></div>';
+                    await loadPrivateMessagesFromServer(priv);
                     renderPrivateMessages(priv);
                 }
             }
@@ -1444,7 +1296,7 @@
         async function loadMainMessages() {
             messagesListEl.innerHTML = '<div class="empty-chat">Загрузка...</div>';
             try {
-                const resp = await fetch(API_URL);
+                const resp = await fetch(MAIN_API_URL);
                 if (!resp.ok) throw new Error();
                 let msgs = await resp.json();
                 msgs.sort((a,b) => new Date(a.date) - new Date(b.date));
@@ -1472,12 +1324,17 @@
         }
         
         function renderPrivateMessages(chat) {
-            if (!chat.messages.length) { messagesListEl.innerHTML = '<div class="empty-chat">💬 Начните переписку</div>'; return; }
+            if (!chat.messages.length) { 
+                messagesListEl.innerHTML = '<div class="empty-chat">💬 Начните переписку</div>'; 
+                return; 
+            }
             let html = '';
             chat.messages.forEach(m => {
-                const isOwn = m.senderIP === myIP;
-                const name = escapeHtml(m.senderName) || (isOwn ? 'Вы' : 'Собеседник');
-                html += `<div class="message-row ${isOwn?'own':'other'}"><div class="bubble"><div class="bubble-header"><span class="name">${name}</span><span class="time">${formatTime(m.date)}</span></div><div class="text-content">${escapeHtml(m.text).replace(/\n/g,'<br>')}</div></div></div>`;
+                const isOwn = m.fromBin === myBinId || m.user_id === currentUser;
+                const name = escapeHtml(m.username) || (isOwn ? 'Вы' : 'Собеседник');
+                const text = m.message || m.text || '';
+                const date = m.date || m.createdAt;
+                html += `<div class="message-row ${isOwn?'own':'other'}"><div class="bubble"><div class="bubble-header"><span class="name">${name}</span><span class="time">${formatTime(date)}</span></div><div class="text-content">${escapeHtml(text).replace(/\n/g,'<br>')}</div></div></div>`;
             });
             messagesListEl.innerHTML = html;
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
@@ -1491,62 +1348,93 @@
             if (currentChat === 'main') {
                 const username = savedUsername || 'Аноним';
                 try {
-                    const resp = await fetch(API_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ username, message: msg, date: new Date().toLocaleString('ru-RU'), user_id: currentUser }) });
+                    const resp = await fetch(MAIN_API_URL, { 
+                        method:'POST', 
+                        headers:{'Content-Type':'application/json'}, 
+                        body: JSON.stringify({ 
+                            username, 
+                            message: msg, 
+                            date: new Date().toLocaleString('ru-RU'), 
+                            user_id: currentUser 
+                        }) 
+                    });
                     if (resp.ok) {
-                        messageField.value = ''; autoResize(messageField);
-                        await loadMainMessages(); showInfo('Отправлено');
+                        messageField.value = ''; 
+                        autoResize(messageField);
+                        await loadMainMessages(); 
+                        showInfo('Отправлено');
                     } else showError('Ошибка');
                 } catch(e) { showError('Сеть'); }
             } else if (currentChat === 'favorites') {
-                favoritesMessages.push({ id: 'fav_'+Date.now(), message: msg, date: new Date().toLocaleString('ru-RU') });
-                saveFavorites(); messageField.value = ''; autoResize(messageField); renderFavoritesMessages(); showInfo('Добавлено');
+                favoritesMessages.push({ 
+                    id: 'fav_'+Date.now(), 
+                    message: msg, 
+                    date: new Date().toLocaleString('ru-RU') 
+                });
+                saveFavorites(); 
+                messageField.value = ''; 
+                autoResize(messageField); 
+                renderFavoritesMessages(); 
+                showInfo('Добавлено');
             } else {
                 const priv = privateChats.find(c => c.id === currentChat);
                 if (priv) {
-                    const senderName = savedUsername || 'Вы';
-                    const messageObj = {
-                        id: 'p_'+Date.now(),
-                        text: msg,
-                        date: new Date().toLocaleString('ru-RU'),
-                        senderIP: myIP,
-                        senderName: senderName
-                    };
+                    const username = savedUsername || 'Вы';
                     
-                    priv.messages.push(messageObj);
-                    
-                    // Отправляем через WebSocket если чат принят
-                    if (priv.accepted) {
-                        sendWSMessage({
-                            type: 'message',
-                            to: priv.ip,
-                            from: myIP,
-                            text: msg,
-                            date: messageObj.date,
-                            username: senderName
-                        });
-                    }
-                    
-                    // Автоответ бота
-                    if (priv.id === 'bot_chat') {
-                        setTimeout(() => {
-                            const botReply = {
-                                id: 'bot_'+Date.now(),
-                                text: '🤖 Ваш IP: ' + myIP + '. Поделитесь им с друзьями!',
+                    try {
+                        // Отправляем сообщение на сервер
+                        const resp = await fetch(PRIVATE_API_URL, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                chatId: priv.id,
+                                fromBin: myBinId,
+                                toBin: priv.binId,
+                                username: username,
+                                message: msg,
                                 date: new Date().toLocaleString('ru-RU'),
-                                senderIP: 'bot.official',
-                                senderName: BOT_NAME
-                            };
-                            priv.messages.push(botReply);
+                                user_id: currentUser
+                            })
+                        });
+                        
+                        if (resp.ok) {
+                            const newMsg = await resp.json();
+                            priv.messages.push(newMsg);
+                            
+                            // Автоответ бота
+                            if (priv.id === 'bot_chat') {
+                                setTimeout(async () => {
+                                    const botResp = await fetch(PRIVATE_API_URL, {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({
+                                            chatId: priv.id,
+                                            fromBin: 'bot.official',
+                                            toBin: myBinId,
+                                            username: BOT_NAME,
+                                            message: '🤖 Ваш BIN ID: ' + myBinId + '. Поделитесь им с друзьями!',
+                                            date: new Date().toLocaleString('ru-RU')
+                                        })
+                                    });
+                                    if (botResp.ok) {
+                                        const botMsg = await botResp.json();
+                                        priv.messages.push(botMsg);
+                                        savePrivateChats();
+                                        if (currentChat === priv.id) renderPrivateMessages(priv);
+                                        renderChatsList();
+                                    }
+                                }, 500);
+                            }
+                            
                             savePrivateChats();
-                            if (currentChat === priv.id) renderPrivateMessages(priv);
-                            renderChatsList();
-                        }, 500);
+                            messageField.value = '';
+                            autoResize(messageField);
+                            renderPrivateMessages(priv);
+                            showInfo('Отправлено');
+                        }
+                    } catch(e) {
+                        showError('Ошибка отправки');
                     }
-                    
-                    savePrivateChats();
-                    messageField.value = ''; autoResize(messageField);
-                    renderPrivateMessages(priv);
-                    showInfo(priv.accepted ? 'Отправлено' : 'Сообщение сохранено (ожидает подтверждения)');
                 }
             }
             sendBtn.disabled = false;
@@ -1555,17 +1443,38 @@
         
         window.delMsg = async function(id) {
             if (!confirm('Удалить?')) return;
-            await fetch(`${API_URL}/${id}`, { method:'DELETE' });
-            await loadMainMessages(); renderChatsList(); showInfo('Удалено');
+            await fetch(`${MAIN_API_URL}/${id}`, { method:'DELETE' });
+            await loadMainMessages(); 
+            renderChatsList(); 
+            showInfo('Удалено');
         };
+        
         window.delFav = function(id) {
             const idx = favoritesMessages.findIndex(m => m.id === id);
-            if (idx!==-1) { favoritesMessages.splice(idx,1); saveFavorites(); renderFavoritesMessages(); renderChatsList(); showInfo('Удалено'); }
+            if (idx!==-1) { 
+                favoritesMessages.splice(idx,1); 
+                saveFavorites(); 
+                renderFavoritesMessages(); 
+                renderChatsList(); 
+                showInfo('Удалено'); 
+            }
         };
         
         sendBtn?.addEventListener('click', sendMessage);
-        messageField?.addEventListener('keydown', e => { if (e.key==='Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
-        backToChatsBtn?.addEventListener('click', () => { chatScreen.classList.add('hidden'); chatsScreen.classList.remove('hidden'); settingsScreen.classList.add('hidden'); renderChatsList(); });
+        messageField?.addEventListener('keydown', e => { 
+            if (e.key==='Enter' && !e.shiftKey) { 
+                e.preventDefault(); 
+                sendMessage(); 
+            } 
+        });
+        
+        backToChatsBtn?.addEventListener('click', () => { 
+            chatScreen.classList.add('hidden'); 
+            chatsScreen.classList.remove('hidden'); 
+            settingsScreen.classList.add('hidden'); 
+            renderChatsList(); 
+        });
+        
         searchInput?.addEventListener('input', e => {
             const q = e.target.value.toLowerCase();
             document.querySelectorAll('.chat-item').forEach(item => {
@@ -1577,17 +1486,30 @@
         document.getElementById('chatMenuBtn')?.addEventListener('click', () => {
             if (currentChat === 'main') {
                 if (confirm('Очистить общий чат?')) {
-                    fetch(API_URL).then(r=>r.json()).then(async msgs => { for(const m of msgs) await fetch(`${API_URL}/${m.id}`,{method:'DELETE'}); loadMainMessages(); renderChatsList(); showInfo('Очищено'); });
+                    fetch(MAIN_API_URL).then(r=>r.json()).then(async msgs => { 
+                        for(const m of msgs) await fetch(`${MAIN_API_URL}/${m.id}`,{method:'DELETE'}); 
+                        loadMainMessages(); 
+                        renderChatsList(); 
+                        showInfo('Очищено'); 
+                    });
                 }
             } else if (currentChat === 'favorites') {
-                if (confirm('Очистить избранное?')) { favoritesMessages = []; saveFavorites(); renderFavoritesMessages(); renderChatsList(); showInfo('Очищено'); }
+                if (confirm('Очистить избранное?')) { 
+                    favoritesMessages = []; 
+                    saveFavorites(); 
+                    renderFavoritesMessages(); 
+                    renderChatsList(); 
+                    showInfo('Очищено'); 
+                }
             } else {
                 const priv = privateChats.find(c => c.id === currentChat);
                 if (priv && confirm('Удалить чат?')) {
                     privateChats = privateChats.filter(c => c.id !== currentChat);
                     savePrivateChats();
-                    chatScreen.classList.add('hidden'); chatsScreen.classList.remove('hidden');
-                    renderChatsList(); showInfo('Чат удалён');
+                    chatScreen.classList.add('hidden'); 
+                    chatsScreen.classList.remove('hidden');
+                    renderChatsList(); 
+                    showInfo('Чат удалён');
                 }
             }
         });
@@ -1596,81 +1518,119 @@
             document.querySelectorAll('.bottom-tab').forEach(t => t.classList.remove('active'));
             tab.classList.add('active');
             const tabName = tab.dataset.tab;
-            if (tabName === 'chats') { chatsScreen.classList.remove('hidden'); settingsScreen.classList.add('hidden'); chatScreen.classList.add('hidden'); }
-            else { chatsScreen.classList.add('hidden'); settingsScreen.classList.remove('hidden'); chatScreen.classList.add('hidden'); }
+            if (tabName === 'chats') { 
+                chatsScreen.classList.remove('hidden'); 
+                settingsScreen.classList.add('hidden'); 
+                chatScreen.classList.add('hidden'); 
+            } else { 
+                chatsScreen.classList.add('hidden'); 
+                settingsScreen.classList.remove('hidden'); 
+                chatScreen.classList.add('hidden'); 
+            }
         }));
-        document.getElementById('backFromSettingsBtn')?.addEventListener('click', () => { settingsScreen.classList.add('hidden'); chatsScreen.classList.remove('hidden'); });
+        
+        document.getElementById('backFromSettingsBtn')?.addEventListener('click', () => { 
+            settingsScreen.classList.add('hidden'); 
+            chatsScreen.classList.remove('hidden'); 
+        });
         
         // Настройки
         notificationsSwitch?.addEventListener('click', async () => {
             if (!notificationsEnabled) {
                 const granted = await requestNotificationPermission();
-                if (granted) { notificationsEnabled = true; notificationsSwitch.classList.add('active'); notificationsStatus.textContent = 'Включены'; localStorage.setItem('mios_notifications','true'); showInfo('Уведомления включены'); }
-                else showError('Разрешите уведомления');
+                if (granted) { 
+                    notificationsEnabled = true; 
+                    notificationsSwitch.classList.add('active'); 
+                    notificationsStatus.textContent = 'Включены'; 
+                    localStorage.setItem('mios_notifications','true'); 
+                    showInfo('Уведомления включены'); 
+                } else showError('Разрешите уведомления');
             } else {
-                notificationsEnabled = false; notificationsSwitch.classList.remove('active'); notificationsStatus.textContent = 'Отключены'; localStorage.setItem('mios_notifications','false'); showInfo('Отключены');
+                notificationsEnabled = false; 
+                notificationsSwitch.classList.remove('active'); 
+                notificationsStatus.textContent = 'Отключены'; 
+                localStorage.setItem('mios_notifications','false'); 
+                showInfo('Отключены');
             }
         });
         
         document.getElementById('themeToggle')?.addEventListener('click', () => {
-            if (currentTheme === 'dark') { currentTheme = 'light'; document.body.classList.add('light-theme'); themeDescription.textContent = 'Светлая'; themeIcon.textContent = '☀️'; localStorage.setItem('mios_theme','light'); }
-            else { currentTheme = 'dark'; document.body.classList.remove('light-theme'); themeDescription.textContent = 'Тёмная'; themeIcon.textContent = '🌙'; localStorage.setItem('mios_theme','dark'); }
+            if (currentTheme === 'dark') { 
+                currentTheme = 'light'; 
+                document.body.classList.add('light-theme'); 
+                themeDescription.textContent = 'Светлая'; 
+                themeIcon.textContent = '☀️'; 
+                localStorage.setItem('mios_theme','light'); 
+            } else { 
+                currentTheme = 'dark'; 
+                document.body.classList.remove('light-theme'); 
+                themeDescription.textContent = 'Тёмная'; 
+                themeIcon.textContent = '🌙'; 
+                localStorage.setItem('mios_theme','dark'); 
+            }
             showInfo('Тема изменена');
         });
         
-        document.getElementById('changeIpBtn')?.addEventListener('click', () => {
-            navigator.clipboard?.writeText(myIP);
-            showInfo('IP скопирован: ' + myIP);
+        document.getElementById('showMyBinBtn')?.addEventListener('click', () => {
+            navigator.clipboard?.writeText(myBinId);
+            showInfo('BIN ID скопирован: ' + myBinId);
         });
         
         // Добавление чата (+)
         document.getElementById('addChatBtn')?.addEventListener('click', () => {
-            const overlay = document.createElement('div'); overlay.className = 'modal-overlay';
-            overlay.innerHTML = `<div class="modal"><h3>➕ Новый чат по IP</h3><input type="text" id="ipInput" placeholder="IP адрес собеседника"><div class="modal-hint">Ваш IP: ${myIP} (в настройках)</div><div class="modal-actions"><button class="modal-btn cancel">Отмена</button><button class="modal-btn" id="confirmAddChat">Отправить запрос</button></div></div>`;
+            const overlay = document.createElement('div'); 
+            overlay.className = 'modal-overlay';
+            overlay.innerHTML = `
+                <div class="modal">
+                    <h3>➕ Новый чат по BIN ID</h3>
+                    <input type="text" id="binInput" placeholder="BIN ID собеседника">
+                    <div class="modal-hint">
+                        Ваш BIN ID: ${myBinId}<br>
+                        Посмотреть можно в Настройках
+                    </div>
+                    <div class="modal-actions">
+                        <button class="modal-btn cancel">Отмена</button>
+                        <button class="modal-btn" id="confirmAddChat">Создать чат</button>
+                    </div>
+                </div>
+            `;
             document.body.appendChild(overlay);
-            const input = overlay.querySelector('#ipInput');
+            const input = overlay.querySelector('#binInput');
             overlay.querySelector('.cancel').onclick = () => overlay.remove();
             overlay.querySelector('#confirmAddChat').onclick = async () => {
-                let targetIP = input.value.trim();
-                if (!targetIP) { showError('Введите IP адрес'); overlay.remove(); return; }
-                
-                // Проверка формата IP
-                if (!/^(\d{1,3}\.){3}\d{1,3}$/.test(targetIP) && targetIP !== 'bot.official') {
-                    showError('Некорректный IP адрес');
-                    return;
+                let targetBin = input.value.trim();
+                if (!targetBin) { 
+                    showError('Введите BIN ID'); 
+                    overlay.remove(); 
+                    return; 
                 }
                 
-                if (targetIP === myIP) {
+                if (targetBin === myBinId) {
                     showError('Нельзя создать чат с самим собой');
                     overlay.remove();
                     return;
                 }
                 
-                const exists = privateChats.some(c => c.ip === targetIP);
-                if (exists) { showError('Чат с этим IP уже существует'); overlay.remove(); return; }
+                const exists = privateChats.some(c => c.binId === targetBin);
+                if (exists) { 
+                    showError('Чат с этим BIN ID уже существует'); 
+                    overlay.remove(); 
+                    return; 
+                }
                 
                 const chatId = 'priv_' + Date.now();
                 const newChat = {
                     id: chatId,
-                    ip: targetIP,
-                    name: `Чат с ${targetIP}`,
-                    messages: [],
-                    accepted: false
+                    binId: targetBin,
+                    name: `Чат с ${targetBin.substring(0, 8)}`,
+                    messages: []
                 };
                 privateChats.push(newChat);
                 savePrivateChats();
                 
-                // Отправляем запрос
-                sendWSMessage({
-                    type: 'chat_request',
-                    to: targetIP,
-                    from: myIP,
-                    username: savedUsername || 'Пользователь'
-                });
-                
                 renderChatsList();
                 overlay.remove();
-                showInfo('📤 Запрос отправлен! Ждите подтверждения.');
+                showInfo('✅ Чат создан!');
                 openChat(chatId);
             };
             overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
@@ -1678,15 +1638,39 @@
         
         // Инициализация
         (async () => {
-            await getMyIP();
-            connectWebSocket();
+            await getOrCreateBinId();
+            
+            // Добавляем приветственное сообщение бота если нужно
+            const botChat = privateChats.find(c => c.id === 'bot_chat');
+            if (botChat && botChat.messages.length === 0) {
+                botChat.messages.push({
+                    id: 'bot_welcome_' + Date.now(),
+                    message: '👋 Добро пожаловать в MiS-MaS!\n\n📱 Ваш BIN ID: ' + myBinId + '\n🔗 Поделитесь им с друзьями для создания чата!\n\nНажмите "+" и введите BIN ID друга.',
+                    date: new Date().toLocaleString('ru-RU'),
+                    username: BOT_NAME,
+                    fromBin: 'bot.official'
+                });
+                savePrivateChats();
+            }
+            
             if (notificationsEnabled) requestNotificationPermission();
             renderChatsList();
         })();
         
-        setInterval(() => {
-            if (currentChat === 'main' && !chatScreen.classList.contains('hidden')) loadMainMessages();
-            if (!chatsScreen.classList.contains('hidden')) renderChatsList();
+        // Автообновление
+        setInterval(async () => {
+            if (currentChat === 'main' && !chatScreen.classList.contains('hidden')) {
+                loadMainMessages();
+            } else if (currentChat && currentChat !== 'main' && currentChat !== 'favorites' && !chatScreen.classList.contains('hidden')) {
+                const priv = privateChats.find(c => c.id === currentChat);
+                if (priv) {
+                    await loadPrivateMessagesFromServer(priv);
+                    renderPrivateMessages(priv);
+                }
+            }
+            if (!chatsScreen.classList.contains('hidden')) {
+                renderChatsList();
+            }
         }, 5000);
         
     })();
