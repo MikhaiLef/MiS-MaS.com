@@ -38,8 +38,7 @@
         body.light-theme .chat-header,
         body.light-theme .settings-header,
         body.light-theme .input-panel,
-        body.light-theme .bottom-tabs,
-        body.light-theme .name-row {
+        body.light-theme .bottom-tabs {
             background: #ffffff;
             border-color: #e5e5ea;
         }
@@ -54,15 +53,13 @@
         body.light-theme .chat-last-message,
         body.light-theme .chat-time,
         body.light-theme .chat-header-status,
-        body.light-theme .setting-description,
-        body.light-theme .name-label {
+        body.light-theme .setting-description {
             color: #8e8e93;
         }
 
         body.light-theme .search-bar,
         body.light-theme .input-wrapper,
-        body.light-theme .setting-item,
-        body.light-theme .name-input-wrapper {
+        body.light-theme .setting-item {
             background: #f2f2f7;
         }
 
@@ -79,10 +76,6 @@
         body.light-theme .header-menu,
         body.light-theme .header-icon {
             color: #007aff;
-        }
-
-        body.light-theme .name-input-compact {
-            color: #000000;
         }
 
         .app {
@@ -215,10 +208,6 @@
             cursor: not-allowed;
         }
 
-        .register-btn:active {
-            opacity: 0.8;
-        }
-
         /* ----- ЭКРАН СПИСКА ЧАТОВ ----- */
         .chats-screen {
             flex: 1;
@@ -247,7 +236,6 @@
             font-size: 34px;
             font-weight: 700;
             color: #ffffff;
-            letter-spacing: -0.5px;
         }
 
         .header-actions {
@@ -372,7 +360,6 @@
         .verified-badge {
             color: #3390ec;
             font-size: 14px;
-            margin-left: 2px;
         }
 
         .chat-time {
@@ -538,11 +525,6 @@
         .message-row {
             display: flex;
             margin-bottom: 2px;
-        }
-
-        /* Анимация только для новых сообщений */
-        .message-row.new-message {
-            animation: fadeIn 0.3s ease;
         }
 
         .message-row.own {
@@ -771,7 +753,6 @@
             margin-right: 8px;
         }
 
-        /* Переключатель */
         .toggle-switch {
             width: 51px;
             height: 31px;
@@ -803,7 +784,6 @@
             left: 22px;
         }
 
-        /* Уведомления */
         .toast {
             position: fixed;
             top: 70px;
@@ -829,17 +809,11 @@
             display: flex;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(3px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
         button {
             -webkit-appearance: none;
             appearance: none;
         }
         
-        /* Модалка */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -861,7 +835,6 @@
         body.light-theme .modal {
             background: #ffffff;
             color: #000;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
         }
         .modal h3 {
             margin-bottom: 16px;
@@ -906,22 +879,6 @@
             background: transparent;
             color: #8e8e93;
         }
-        
-        /* Индикатор загрузки */
-        .loading-indicator {
-            display: inline-block;
-            width: 12px;
-            height: 12px;
-            border: 2px solid #8e8e93;
-            border-top-color: #3390ec;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin-left: 8px;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
     </style>
 </head>
 <body>
@@ -935,7 +892,7 @@
             <span>👤</span>
             <input type="text" id="registerNameInput" class="register-input" placeholder="Введите ваше имя" maxlength="40" autocomplete="off">
         </div>
-        <p class="register-hint">Имя будет отображаться в чатах. Вы сможете изменить его позже в настройках.</p>
+        <p class="register-hint">Имя будет отображаться в чатах</p>
         <button class="register-btn" id="registerBtn" disabled>Продолжить</button>
     </div>
 </div>
@@ -1058,26 +1015,19 @@
     (function(){
         "use strict";
 
-        // API
         const MAIN_API_URL = 'https://69da27d226585bd92dd3a309.mockapi.io/messages';
         const PRIVATE_API_URL = 'https://69da27d226585bd92dd3a309.mockapi.io/mi';
         
-        // Состояние
         let currentChat = 'main';
         let favoritesMessages = [];
         let privateChats = [];
         let notificationsEnabled = true;
         let currentTheme = 'dark';
         let myBinId = null;
-        let isRegistered = false;
         
-        // Кэш сообщений
         let cachedMainMessages = [];
         let cachedPrivateMessages = {};
-        let lastMainMessageId = null;
-        let lastPrivateMessageIds = {};
         
-        // Пользователь
         let currentUser = localStorage.getItem('mios_user_id');
         if (!currentUser) {
             currentUser = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 8);
@@ -1085,11 +1035,10 @@
         }
         
         let savedUsername = localStorage.getItem('mios_username') || '';
-        isRegistered = localStorage.getItem('mios_registered') === 'true';
+        let isRegistered = localStorage.getItem('mios_registered') === 'true';
         
         const BOT_NAME = 'MiS-MaS Bot';
         
-        // DOM элементы
         const registerScreen = document.getElementById('registerScreen');
         const registerNameInput = document.getElementById('registerNameInput');
         const registerBtn = document.getElementById('registerBtn');
@@ -1109,7 +1058,6 @@
         const errorToast = document.getElementById('errorToast');
         const searchInput = document.getElementById('searchInput');
         
-        // Настройки
         const notificationsSwitch = document.getElementById('notificationsSwitch');
         const notificationsStatus = document.getElementById('notificationsStatus');
         const themeDescription = document.getElementById('themeDescription');
@@ -1117,10 +1065,6 @@
         const currentBinDisplay = document.getElementById('currentBinDisplay');
         const currentNameDisplay = document.getElementById('currentNameDisplay');
         
-        // Флаг обновления
-        let isUpdating = false;
-        
-        // Обновление отображения имени
         function updateNameDisplay() {
             if (currentNameDisplay) {
                 currentNameDisplay.textContent = savedUsername || 'Не задано';
@@ -1128,7 +1072,6 @@
         }
         updateNameDisplay();
         
-        // Проверка регистрации
         function checkRegistration() {
             if (isRegistered && savedUsername) {
                 registerScreen.classList.add('hidden');
@@ -1138,7 +1081,6 @@
             return false;
         }
         
-        // Регистрация
         if (registerNameInput) {
             registerNameInput.addEventListener('input', function() {
                 registerBtn.disabled = this.value.trim().length === 0;
@@ -1168,10 +1110,9 @@
             registerScreen.classList.add('hidden');
             showInfo('Добро пожаловать, ' + savedUsername + '!');
             
-            window.afterRegistration();
+            initApp();
         }
         
-        // Загрузка настроек
         notificationsEnabled = localStorage.getItem('mios_notifications') !== 'false';
         currentTheme = localStorage.getItem('mios_theme') || 'dark';
         if (currentTheme === 'light') {
@@ -1184,7 +1125,6 @@
             if (notificationsStatus) notificationsStatus.textContent = 'Отключены';
         }
         
-        // BIN ID
         async function getOrCreateBinId() {
             let binId = localStorage.getItem('mios_bin_id');
             if (binId) {
@@ -1218,7 +1158,6 @@
             }
         }
         
-        // Личные чаты
         function loadPrivateChats() {
             try {
                 const stored = localStorage.getItem('mios_private_chats');
@@ -1231,7 +1170,6 @@
         }
         loadPrivateChats();
         
-        // Бот
         const hasSeenWelcome = localStorage.getItem('mios_welcome_bot');
         if (!hasSeenWelcome) {
             localStorage.setItem('mios_welcome_bot', 'true');
@@ -1248,7 +1186,6 @@
             savePrivateChats();
         }
         
-        // Избранное
         function loadFavorites() {
             try {
                 const stored = localStorage.getItem('mios_fav');
@@ -1258,7 +1195,6 @@
         function saveFavorites() { localStorage.setItem('mios_fav', JSON.stringify(favoritesMessages)); }
         loadFavorites();
         
-        // Уведомления
         let toastTimeout;
         function showInfo(text) {
             infoToast.textContent = '✅ ' + text;
@@ -1273,16 +1209,6 @@
             toastTimeout = setTimeout(() => errorToast.classList.remove('show'), 3000);
         }
         
-        async function requestNotificationPermission() {
-            if (!('Notification' in window)) return false;
-            if (Notification.permission === 'granted') return true;
-            if (Notification.permission !== 'denied') {
-                const permission = await Notification.requestPermission();
-                return permission === 'granted';
-            }
-            return false;
-        }
-        
         function escapeHtml(text) { return String(text).replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[m]); }
         function formatTime(dateStr) {
             try { const d = new Date(dateStr); if (!isNaN(d)) return d.toLocaleTimeString('ru-RU', { hour:'2-digit', minute:'2-digit' }); } catch(e){}
@@ -1291,13 +1217,42 @@
         function autoResize(ta) { if(ta) { ta.style.height = 'auto'; ta.style.height = Math.min(ta.scrollHeight, 120) + 'px'; } }
         if (messageField) messageField.addEventListener('input', () => autoResize(messageField));
         
-        // Сравнение массивов сообщений
-        function getMessageIds(messages) {
-            return messages.map(m => m.id).sort().join(',');
+        async function loadMainMessages() {
+            try {
+                const resp = await fetch(MAIN_API_URL);
+                if (!resp.ok) throw new Error();
+                let msgs = await resp.json();
+                msgs.sort((a,b) => new Date(a.date) - new Date(b.date));
+                cachedMainMessages = msgs;
+                
+                if (currentChat === 'main' && !chatScreen.classList.contains('hidden')) {
+                    renderMainMessages();
+                }
+            } catch(e) {
+                if (currentChat === 'main') messagesListEl.innerHTML = '<div class="empty-chat">❌ Ошибка загрузки</div>';
+            }
         }
         
-        // Загрузка личных сообщений
-        async function loadPrivateMessagesFromServer(chat, silent = false) {
+        function renderMainMessages() {
+            if (!cachedMainMessages.length) {
+                messagesListEl.innerHTML = '<div class="empty-chat">✨ Пока нет сообщений</div>';
+                return;
+            }
+            let html = '';
+            cachedMainMessages.forEach(msg => {
+                const isOwn = msg.user_id === currentUser;
+                const name = escapeHtml(msg.username) || 'Аноним';
+                html += `<div class="message-row ${isOwn?'own':'other'}"><div class="bubble"><div class="bubble-header"><span class="name">${name}</span><span class="time">${formatTime(msg.date)}</span></div><div class="text-content">${escapeHtml(msg.message).replace(/\n/g,'<br>')}</div>${isOwn?`<button class="delete-btn" onclick="window.delMsg('${msg.id}')">🗑️</button>`:''}</div></div>`;
+            });
+            
+            const wasAtBottom = (messagesContainer.scrollHeight - messagesContainer.scrollTop - messagesContainer.clientHeight) < 100;
+            messagesListEl.innerHTML = html;
+            if (wasAtBottom) {
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+        }
+        
+        async function loadPrivateMessages(chat) {
             try {
                 const resp = await fetch(PRIVATE_API_URL);
                 const allData = await resp.json();
@@ -1308,68 +1263,20 @@
                     (item.toBin === chat.binId && item.fromBin === myBinId)
                 );
                 
-                const newMessages = chatMessages.sort((a, b) => 
+                chat.messages = chatMessages.sort((a, b) => 
                     new Date(a.date || a.createdAt) - new Date(b.date || b.createdAt)
                 );
+                cachedPrivateMessages[chat.id] = [...chat.messages];
+                savePrivateChats();
                 
-                const newIds = getMessageIds(newMessages);
-                const oldIds = lastPrivateMessageIds[chat.id] || '';
-                
-                if (newIds !== oldIds) {
-                    const oldCount = chat.messages.length;
-                    chat.messages = newMessages;
-                    cachedPrivateMessages[chat.id] = [...newMessages];
-                    lastPrivateMessageIds[chat.id] = newIds;
-                    savePrivateChats();
-                    
-                    if (!silent && currentChat === chat.id) {
-                        // Плавное обновление только новых сообщений
-                        updatePrivateMessagesIncremental(chat, oldCount);
-                    }
+                if (currentChat === chat.id && !chatScreen.classList.contains('hidden')) {
+                    renderPrivateMessages(chat);
                 }
-                
-                return chat.messages;
             } catch(e) {
                 console.error('Ошибка загрузки:', e);
-                return chat.messages;
             }
         }
         
-        // Инкрементальное обновление приватных сообщений
-        function updatePrivateMessagesIncremental(chat, oldCount) {
-            if (!chat.messages.length) {
-                messagesListEl.innerHTML = '<div class="empty-chat">💬 Начните переписку</div>';
-                return;
-            }
-            
-            const newMessages = chat.messages.slice(oldCount);
-            
-            if (newMessages.length === 0) return;
-            
-            const wasAtBottom = (messagesContainer.scrollHeight - messagesContainer.scrollTop - messagesContainer.clientHeight) < 100;
-            
-            // Добавляем только новые сообщения
-            let newHtml = '';
-            newMessages.forEach(m => {
-                const isOwn = m.fromBin === myBinId || m.user_id === currentUser;
-                const name = escapeHtml(m.username) || (isOwn ? 'Вы' : 'Собеседник');
-                const text = m.message || m.text || '';
-                const date = m.date || m.createdAt;
-                newHtml += `<div class="message-row ${isOwn ? 'own' : 'other'} new-message"><div class="bubble"><div class="bubble-header"><span class="name">${name}</span><span class="time">${formatTime(date)}</span></div><div class="text-content">${escapeHtml(text).replace(/\n/g, '<br>')}</div></div></div>`;
-            });
-            
-            // Убираем пустое сообщение если есть
-            const emptyDiv = messagesListEl.querySelector('.empty-chat');
-            if (emptyDiv) emptyDiv.remove();
-            
-            messagesListEl.insertAdjacentHTML('beforeend', newHtml);
-            
-            if (wasAtBottom) {
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            }
-        }
-        
-        // Рендер списка чатов (без мигания)
         async function renderChatsList() {
             let mainLastMsg = 'Нет сообщений', mainTime = '', mainUnread = 0;
             try {
@@ -1405,11 +1312,7 @@
                 chatsHtml += `<div class="chat-item" data-chat-id="${chat.id}"><div class="chat-avatar ${avatarClass}">${avatarIcon}</div><div class="chat-content"><div class="chat-header-row"><span class="chat-name">${nameDisplay}</span>${time?`<span class="chat-time">${time}</span>`:''}</div><div class="chat-message-row"><span class="chat-last-message">${lastText}</span></div></div></div>`;
             });
             
-            // Плавное обновление списка чатов
-            const currentScroll = chatsList.scrollTop;
             chatsList.innerHTML = chatsHtml;
-            chatsList.scrollTop = currentScroll;
-            
             document.querySelectorAll('.chat-item').forEach(item => {
                 item.addEventListener('click', () => openChat(item.dataset.chatId));
             });
@@ -1426,7 +1329,13 @@
                 chatHeaderAvatar.textContent = '💬'; 
                 chatHeaderAvatar.className = 'chat-header-avatar avatar-main';
                 chatHeaderStatus.textContent = 'онлайн';
-                await loadMainMessages(false);
+                
+                if (cachedMainMessages.length) {
+                    renderMainMessages();
+                } else {
+                    messagesListEl.innerHTML = '<div class="empty-chat">Загрузка...</div>';
+                    await loadMainMessages();
+                }
             } else if (chatId === 'favorites') {
                 chatHeaderName.innerHTML = 'Избранное';
                 chatHeaderAvatar.textContent = '⭐'; 
@@ -1446,87 +1355,12 @@
                         priv.messages = [...cachedPrivateMessages[chatId]];
                         renderPrivateMessages(priv);
                     } else {
-                        messagesListEl.innerHTML = '<div class="empty-chat">Загрузка сообщений...<span class="loading-indicator"></span></div>';
+                        messagesListEl.innerHTML = '<div class="empty-chat">Загрузка...</div>';
+                        await loadPrivateMessages(priv);
                     }
-                    
-                    await loadPrivateMessagesFromServer(priv, false);
                 }
             }
             setTimeout(() => { if(messagesContainer) messagesContainer.scrollTop = messagesContainer.scrollHeight; }, 100);
-        }
-        
-        async function loadMainMessages(forceRender = false) {
-            try {
-                const resp = await fetch(MAIN_API_URL);
-                if (!resp.ok) throw new Error();
-                let msgs = await resp.json();
-                msgs.sort((a,b) => new Date(a.date) - new Date(b.date));
-                
-                const newIds = getMessageIds(msgs);
-                const hasChanges = lastMainMessageId !== newIds;
-                
-                if (hasChanges) {
-                    const oldCount = cachedMainMessages.length;
-                    cachedMainMessages = msgs;
-                    lastMainMessageId = newIds;
-                    
-                    if (currentChat === 'main' && !chatScreen.classList.contains('hidden')) {
-                        if (oldCount === 0 || forceRender) {
-                            renderMainMessagesFull();
-                        } else {
-                            updateMainMessagesIncremental(oldCount);
-                        }
-                    }
-                }
-                
-                if (!msgs.length && currentChat === 'main') { 
-                    messagesListEl.innerHTML = '<div class="empty-chat">✨ Пока нет сообщений</div>'; 
-                }
-            } catch(e) { 
-                if (currentChat === 'main') messagesListEl.innerHTML = '<div class="empty-chat">❌ Ошибка загрузки</div>'; 
-            }
-        }
-        
-        function renderMainMessagesFull() {
-            if (!cachedMainMessages.length) {
-                messagesListEl.innerHTML = '<div class="empty-chat">✨ Пока нет сообщений</div>';
-                return;
-            }
-            let html = '';
-            cachedMainMessages.forEach(msg => {
-                const isOwn = msg.user_id === currentUser;
-                const name = escapeHtml(msg.username) || 'Аноним';
-                html += `<div class="message-row ${isOwn?'own':'other'}"><div class="bubble"><div class="bubble-header"><span class="name">${name}</span><span class="time">${formatTime(msg.date)}</span></div><div class="text-content">${escapeHtml(msg.message).replace(/\n/g,'<br>')}</div>${isOwn?`<button class="delete-btn" onclick="window.delMsg('${msg.id}')">🗑️</button>`:''}</div></div>`;
-            });
-            
-            const wasAtBottom = (messagesContainer.scrollHeight - messagesContainer.scrollTop - messagesContainer.clientHeight) < 100;
-            messagesListEl.innerHTML = html;
-            if (wasAtBottom) {
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            }
-        }
-        
-        function updateMainMessagesIncremental(oldCount) {
-            const newMessages = cachedMainMessages.slice(oldCount);
-            if (newMessages.length === 0) return;
-            
-            const wasAtBottom = (messagesContainer.scrollHeight - messagesContainer.scrollTop - messagesContainer.clientHeight) < 100;
-            
-            let newHtml = '';
-            newMessages.forEach(msg => {
-                const isOwn = msg.user_id === currentUser;
-                const name = escapeHtml(msg.username) || 'Аноним';
-                newHtml += `<div class="message-row ${isOwn ? 'own' : 'other'} new-message"><div class="bubble"><div class="bubble-header"><span class="name">${name}</span><span class="time">${formatTime(msg.date)}</span></div><div class="text-content">${escapeHtml(msg.message).replace(/\n/g, '<br>')}</div>${isOwn ? `<button class="delete-btn" onclick="window.delMsg('${msg.id}')">🗑️</button>` : ''}</div></div>`;
-            });
-            
-            const emptyDiv = messagesListEl.querySelector('.empty-chat');
-            if (emptyDiv) emptyDiv.remove();
-            
-            messagesListEl.insertAdjacentHTML('beforeend', newHtml);
-            
-            if (wasAtBottom) {
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            }
         }
         
         function renderFavoritesMessages() {
@@ -1558,8 +1392,11 @@
                 html += `<div class="message-row ${isOwn?'own':'other'}"><div class="bubble"><div class="bubble-header"><span class="name">${name}</span><span class="time">${formatTime(date)}</span></div><div class="text-content">${escapeHtml(text).replace(/\n/g,'<br>')}</div></div></div>`;
             });
             
+            const wasAtBottom = (messagesContainer.scrollHeight - messagesContainer.scrollTop - messagesContainer.clientHeight) < 100;
             messagesListEl.innerHTML = html;
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            if (wasAtBottom) {
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
         }
         
         async function sendMessage() {
@@ -1584,7 +1421,8 @@
                     if (resp.ok) {
                         messageField.value = ''; 
                         autoResize(messageField);
-                        await loadMainMessages(false);
+                        await loadMainMessages();
+                        renderChatsList();
                         showInfo('Отправлено');
                     } else showError('Ошибка');
                 } catch(e) { showError('Сеть'); }
@@ -1598,6 +1436,7 @@
                 messageField.value = ''; 
                 autoResize(messageField); 
                 renderFavoritesMessages(); 
+                renderChatsList();
                 showInfo('Добавлено');
             } else {
                 const priv = privateChats.find(c => c.id === currentChat);
@@ -1621,7 +1460,6 @@
                             const newMsg = await resp.json();
                             priv.messages.push(newMsg);
                             cachedPrivateMessages[priv.id] = [...priv.messages];
-                            lastPrivateMessageIds[priv.id] = getMessageIds(priv.messages);
                             
                             if (priv.id === 'bot_chat') {
                                 setTimeout(async () => {
@@ -1641,10 +1479,9 @@
                                         const botMsg = await botResp.json();
                                         priv.messages.push(botMsg);
                                         cachedPrivateMessages[priv.id] = [...priv.messages];
-                                        lastPrivateMessageIds[priv.id] = getMessageIds(priv.messages);
                                         savePrivateChats();
                                         if (currentChat === priv.id) {
-                                            updatePrivateMessagesIncremental(priv, priv.messages.length - 1);
+                                            renderPrivateMessages(priv);
                                         }
                                         renderChatsList();
                                     }
@@ -1654,9 +1491,8 @@
                             savePrivateChats();
                             messageField.value = '';
                             autoResize(messageField);
-                            if (currentChat === priv.id) {
-                                updatePrivateMessagesIncremental(priv, priv.messages.length - 1);
-                            }
+                            renderPrivateMessages(priv);
+                            renderChatsList();
                             showInfo('Отправлено');
                         }
                     } catch(e) {
@@ -1665,13 +1501,12 @@
                 }
             }
             sendBtn.disabled = false;
-            renderChatsList();
         }
         
         window.delMsg = async function(id) {
             if (!confirm('Удалить?')) return;
             await fetch(`${MAIN_API_URL}/${id}`, { method:'DELETE' });
-            await loadMainMessages(true);
+            await loadMainMessages();
             renderChatsList(); 
             showInfo('Удалено');
         };
@@ -1687,7 +1522,6 @@
             }
         };
         
-        // Обработчики событий
         sendBtn?.addEventListener('click', sendMessage);
         messageField?.addEventListener('keydown', e => { 
             if (e.key==='Enter' && !e.shiftKey) { 
@@ -1716,7 +1550,7 @@
                 if (confirm('Очистить общий чат?')) {
                     fetch(MAIN_API_URL).then(r=>r.json()).then(async msgs => { 
                         for(const m of msgs) await fetch(`${MAIN_API_URL}/${m.id}`,{method:'DELETE'}); 
-                        await loadMainMessages(true);
+                        await loadMainMessages();
                         renderChatsList(); 
                         showInfo('Очищено'); 
                     });
@@ -1763,7 +1597,6 @@
             chatsScreen.classList.remove('hidden'); 
         });
         
-        // Изменение имени
         document.getElementById('changeNameBtn')?.addEventListener('click', () => {
             const overlay = document.createElement('div'); 
             overlay.className = 'modal-overlay';
@@ -1811,22 +1644,17 @@
             overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
         });
         
-        // Настройки
-        notificationsSwitch?.addEventListener('click', async () => {
-            if (!notificationsEnabled) {
-                const granted = await requestNotificationPermission();
-                if (granted) { 
-                    notificationsEnabled = true; 
-                    notificationsSwitch.classList.add('active'); 
-                    notificationsStatus.textContent = 'Включены'; 
-                    localStorage.setItem('mios_notifications','true'); 
-                    showInfo('Уведомления включены'); 
-                } else showError('Разрешите уведомления');
+        notificationsSwitch?.addEventListener('click', () => {
+            notificationsEnabled = !notificationsEnabled;
+            if (notificationsEnabled) {
+                notificationsSwitch.classList.add('active');
+                notificationsStatus.textContent = 'Включены';
+                localStorage.setItem('mios_notifications','true');
+                showInfo('Уведомления включены');
             } else {
-                notificationsEnabled = false; 
-                notificationsSwitch.classList.remove('active'); 
-                notificationsStatus.textContent = 'Отключены'; 
-                localStorage.setItem('mios_notifications','false'); 
+                notificationsSwitch.classList.remove('active');
+                notificationsStatus.textContent = 'Отключены';
+                localStorage.setItem('mios_notifications','false');
                 showInfo('Отключены');
             }
         });
@@ -1853,7 +1681,6 @@
             showInfo('BIN ID скопирован: ' + myBinId);
         });
         
-        // Добавление чата
         document.getElementById('addChatBtn')?.addEventListener('click', () => {
             const overlay = document.createElement('div'); 
             overlay.className = 'modal-overlay';
@@ -1913,91 +1740,24 @@
             overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
         });
         
-        // Фоновое обновление (незаметное)
         async function backgroundUpdate() {
-            if (isUpdating) return;
-            isUpdating = true;
+            if (!chatsScreen.classList.contains('hidden')) {
+                renderChatsList();
+            }
             
-            try {
-                // Обновляем данные главного чата
-                const resp = await fetch(MAIN_API_URL);
-                if (resp.ok) {
-                    const msgs = await resp.json();
-                    if (Array.isArray(msgs)) {
-                        msgs.sort((a,b) => new Date(a.date) - new Date(b.date));
-                        const newIds = getMessageIds(msgs);
-                        
-                        if (lastMainMessageId !== newIds) {
-                            const oldCount = cachedMainMessages.length;
-                            cachedMainMessages = msgs;
-                            lastMainMessageId = newIds;
-                            
-                            // Обновляем список чатов если нужно
-                            if (!chatsScreen.classList.contains('hidden')) {
-                                renderChatsList();
-                            }
-                            
-                            // Обновляем сообщения если чат открыт
-                            if (currentChat === 'main' && !chatScreen.classList.contains('hidden')) {
-                                if (oldCount === 0) {
-                                    renderMainMessagesFull();
-                                } else {
-                                    updateMainMessagesIncremental(oldCount);
-                                }
-                            }
-                        }
-                    }
+            if (currentChat === 'main' && !chatScreen.classList.contains('hidden')) {
+                await loadMainMessages();
+            } else if (currentChat && currentChat !== 'main' && currentChat !== 'favorites' && !chatScreen.classList.contains('hidden')) {
+                const priv = privateChats.find(c => c.id === currentChat);
+                if (priv) {
+                    await loadPrivateMessages(priv);
                 }
-                
-                // Обновляем приватные чаты
-                for (const chat of privateChats) {
-                    try {
-                        const privResp = await fetch(PRIVATE_API_URL);
-                        const allData = await privResp.json();
-                        
-                        const chatMessages = allData.filter(item => 
-                            item.chatId === chat.id || 
-                            (item.fromBin === chat.binId && item.toBin === myBinId) ||
-                            (item.toBin === chat.binId && item.fromBin === myBinId)
-                        );
-                        
-                        const newMessages = chatMessages.sort((a, b) => 
-                            new Date(a.date || a.createdAt) - new Date(b.date || b.createdAt)
-                        );
-                        
-                        const newIds = getMessageIds(newMessages);
-                        const oldIds = lastPrivateMessageIds[chat.id] || '';
-                        
-                        if (newIds !== oldIds) {
-                            const oldCount = chat.messages.length;
-                            chat.messages = newMessages;
-                            cachedPrivateMessages[chat.id] = [...newMessages];
-                            lastPrivateMessageIds[chat.id] = newIds;
-                            savePrivateChats();
-                            
-                            if (currentChat === chat.id && !chatScreen.classList.contains('hidden')) {
-                                updatePrivateMessagesIncremental(chat, oldCount);
-                            }
-                            
-                            if (!chatsScreen.classList.contains('hidden')) {
-                                renderChatsList();
-                            }
-                        }
-                    } catch(e) {}
-                }
-            } catch(e) {}
-            
-            isUpdating = false;
+            }
         }
         
-        // Инициализация
-        (async () => {
+        async function initApp() {
             await getOrCreateBinId();
             
-            if (!checkRegistration()) {
-                return;
-            }
-            
             const botChat = privateChats.find(c => c.id === 'bot_chat');
             if (botChat && botChat.messages.length === 0) {
                 botChat.messages.push({
@@ -2008,44 +1768,10 @@
                     fromBin: 'bot.official'
                 });
                 cachedPrivateMessages['bot_chat'] = [...botChat.messages];
-                lastPrivateMessageIds['bot_chat'] = getMessageIds(botChat.messages);
                 savePrivateChats();
             }
             
-            if (notificationsEnabled) requestNotificationPermission();
-            
-            // Начальная загрузка
-            try {
-                const resp = await fetch(MAIN_API_URL);
-                if (resp.ok) {
-                    const msgs = await resp.json();
-                    if (Array.isArray(msgs)) {
-                        cachedMainMessages = msgs.sort((a,b) => new Date(a.date) - new Date(b.date));
-                        lastMainMessageId = getMessageIds(cachedMainMessages);
-                    }
-                }
-            } catch(e) {}
-            
-            renderChatsList();
-        })();
-        
-        // Экспорт для регистрации
-        window.afterRegistration = async function() {
-            const botChat = privateChats.find(c => c.id === 'bot_chat');
-            if (botChat && botChat.messages.length === 0) {
-                botChat.messages.push({
-                    id: 'bot_welcome_' + Date.now(),
-                    message: '👋 Добро пожаловать в MiS-MaS, ' + savedUsername + '!\n\n📱 Ваш BIN ID: ' + myBinId + '\n🔗 Поделитесь им с друзьями для создания чата!\n\nНажмите "+" и введите BIN ID друга.',
-                    date: new Date().toLocaleString('ru-RU'),
-                    username: BOT_NAME,
-                    fromBin: 'bot.official'
-                });
-                cachedPrivateMessages['bot_chat'] = [...botChat.messages];
-                lastPrivateMessageIds['bot_chat'] = getMessageIds(botChat.messages);
-                savePrivateChats();
-            }
-            
-            if (notificationsEnabled) requestNotificationPermission();
+            await renderChatsList();
             
             try {
                 const resp = await fetch(MAIN_API_URL);
@@ -2053,15 +1779,15 @@
                     const msgs = await resp.json();
                     if (Array.isArray(msgs)) {
                         cachedMainMessages = msgs.sort((a,b) => new Date(a.date) - new Date(b.date));
-                        lastMainMessageId = getMessageIds(cachedMainMessages);
                     }
                 }
             } catch(e) {}
-            
-            renderChatsList();
-        };
+        }
         
-        // Запускаем автообновление каждые 5 секунд
+        if (checkRegistration()) {
+            initApp();
+        }
+        
         setInterval(backgroundUpdate, 5000);
         
     })();
