@@ -247,9 +247,10 @@
             background: none;
             border: none;
             color: #3390ec;
-            font-size: 24px;
+            font-size: 28px;
             cursor: pointer;
             padding: 4px;
+            font-weight: 600;
         }
 
         .search-container {
@@ -326,6 +327,7 @@
         .avatar-fav { background: #ff9f0a; }
         .avatar-bot { background: #af52de; }
         .avatar-private { background: #30b0c0; }
+        .avatar-file { background: #5e5ce0; }
 
         .chat-content {
             flex: 1;
@@ -532,7 +534,7 @@
         }
 
         .bubble {
-            max-width: 80%;
+            max-width: 85%;
             padding: 8px 12px;
             border-radius: 18px;
             position: relative;
@@ -557,7 +559,7 @@
             display: flex;
             align-items: baseline;
             gap: 8px;
-            margin-bottom: 2px;
+            margin-bottom: 4px;
             font-size: 12px;
         }
 
@@ -567,12 +569,12 @@
         }
 
         .message-row.own .bubble-header .name {
-            color: #a8d4ff;
+            color: #e0f0ff;
             font-weight: 600;
         }
 
         .time {
-            font-size: 11px;
+            font-size: 10px;
             opacity: 0.7;
             margin-left: auto;
         }
@@ -592,8 +594,41 @@
             display: block;
         }
 
-        .message-image.loading {
-            opacity: 0.6;
+        /* Стили для файлов */
+        .file-attachment {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 12px;
+            padding: 10px 12px;
+            margin-top: 6px;
+            text-decoration: none;
+            color: inherit;
+        }
+        .message-row.own .file-attachment {
+            background: rgba(255,255,255,0.15);
+        }
+        .file-icon {
+            font-size: 32px;
+        }
+        .file-info {
+            flex: 1;
+            overflow: hidden;
+        }
+        .file-name {
+            font-weight: 500;
+            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .file-size {
+            font-size: 11px;
+            opacity: 0.7;
+        }
+        .download-badge {
+            font-size: 20px;
         }
 
         .image-caption {
@@ -693,32 +728,24 @@
             opacity: 0.5;
         }
 
-        /* Превью изображения перед отправкой */
-        .image-preview-container {
+        /* Превью файла */
+        .file-preview-container {
             padding: 8px 12px;
             background: #000000;
             border-top: 0.5px solid #1c1c1e;
         }
-
-        body.light-theme .image-preview-container {
+        body.light-theme .file-preview-container {
             background: #ffffff;
-            border-color: #e5e5ea;
         }
-
-        .image-preview {
+        .file-preview-card {
+            background: #1c1c1e;
+            border-radius: 14px;
+            padding: 10px 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
             position: relative;
-            display: inline-block;
-            max-width: 150px;
         }
-
-        .image-preview img {
-            width: 100%;
-            height: auto;
-            border-radius: 12px;
-            max-height: 100px;
-            object-fit: cover;
-        }
-
         .remove-preview-btn {
             position: absolute;
             top: -8px;
@@ -727,8 +754,8 @@
             color: white;
             border: none;
             border-radius: 50%;
-            width: 24px;
-            height: 24px;
+            width: 26px;
+            height: 26px;
             font-size: 14px;
             cursor: pointer;
             display: flex;
@@ -750,13 +777,11 @@
             justify-content: center;
             cursor: pointer;
         }
-
         .image-viewer-overlay img {
             max-width: 95%;
             max-height: 95%;
             object-fit: contain;
         }
-
         .close-viewer {
             position: absolute;
             top: 20px;
@@ -769,18 +794,14 @@
             padding: 10px;
         }
 
-        /* ----- ЭКРАН НАСТРОЕК ----- */
+        /* ----- НАСТРОЙКИ ----- */
         .settings-screen {
             flex: 1;
             display: flex;
             flex-direction: column;
             background: #000000;
         }
-
-        .settings-screen.hidden {
-            display: none;
-        }
-
+        .settings-screen.hidden { display: none; }
         .settings-header {
             background: #000000;
             padding: 12px 16px;
@@ -789,31 +810,10 @@
             align-items: center;
             gap: 16px;
         }
-
-        .settings-header h1 {
-            font-size: 22px;
-            font-weight: 600;
-            color: #ffffff;
-        }
-
-        .settings-content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 16px;
-        }
-
-        .settings-section {
-            margin-bottom: 24px;
-        }
-
-        .settings-section-title {
-            font-size: 13px;
-            color: #8e8e93;
-            text-transform: uppercase;
-            margin-bottom: 8px;
-            padding-left: 8px;
-        }
-
+        .settings-header h1 { font-size: 22px; font-weight: 600; color: #ffffff; }
+        .settings-content { flex: 1; overflow-y: auto; padding: 16px; }
+        .settings-section { margin-bottom: 24px; }
+        .settings-section-title { font-size: 13px; color: #8e8e93; text-transform: uppercase; margin-bottom: 8px; padding-left: 8px; }
         .setting-item {
             background: #1c1c1e;
             border-radius: 10px;
@@ -824,339 +824,97 @@
             margin-bottom: 1px;
             cursor: pointer;
         }
-
-        body.light-theme .setting-item {
-            background: #f2f2f7;
-        }
-
-        .setting-item:active {
-            opacity: 0.8;
-        }
-
-        .setting-info {
-            flex: 1;
-        }
-
-        .setting-label {
-            font-size: 16px;
-            color: #ffffff;
-            margin-bottom: 2px;
-        }
-
-        .setting-description {
-            font-size: 13px;
-            color: #8e8e93;
-        }
-
-        .setting-value {
-            color: #8e8e93;
-            font-size: 14px;
-            margin-right: 8px;
-        }
-
+        body.light-theme .setting-item { background: #f2f2f7; }
+        .setting-item:active { opacity: 0.8; }
+        .setting-info { flex: 1; }
+        .setting-label { font-size: 16px; color: #ffffff; margin-bottom: 2px; }
+        .setting-description { font-size: 13px; color: #8e8e93; }
+        .setting-value { color: #8e8e93; font-size: 14px; margin-right: 8px; }
         .toggle-switch {
-            width: 51px;
-            height: 31px;
-            background: #3a3a3c;
-            border-radius: 31px;
-            position: relative;
-            cursor: pointer;
-            transition: background 0.2s;
+            width: 51px; height: 31px; background: #3a3a3c; border-radius: 31px;
+            position: relative; cursor: pointer; transition: background 0.2s;
         }
-
-        .toggle-switch.active {
-            background: #34c759;
-        }
-
+        .toggle-switch.active { background: #34c759; }
         .toggle-switch::after {
-            content: '';
-            position: absolute;
-            width: 27px;
-            height: 27px;
-            background: white;
-            border-radius: 50%;
-            top: 2px;
-            left: 2px;
-            transition: left 0.2s;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            content: ''; position: absolute; width: 27px; height: 27px;
+            background: white; border-radius: 50%; top: 2px; left: 2px;
+            transition: left 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.3);
         }
-
-        .toggle-switch.active::after {
-            left: 22px;
-        }
-
+        .toggle-switch.active::after { left: 22px; }
         .toast {
-            position: fixed;
-            top: 70px;
-            left: 16px;
-            right: 16px;
-            background: #1c1c1e;
-            color: white;
-            padding: 12px 16px;
-            border-radius: 10px;
-            font-size: 14px;
-            z-index: 100;
-            display: none;
-            align-items: center;
-            gap: 8px;
+            position: fixed; top: 70px; left: 16px; right: 16px;
+            background: #1c1c1e; color: white; padding: 12px 16px;
+            border-radius: 10px; font-size: 14px; z-index: 100;
+            display: none; align-items: center; gap: 8px;
             border-left: 4px solid #3390ec;
         }
-
-        .toast.error {
-            border-left-color: #ff5e5e;
-        }
-
-        .toast.show {
-            display: flex;
-        }
-
-        button {
-            -webkit-appearance: none;
-            appearance: none;
-        }
-        
+        .toast.error { border-left-color: #ff5e5e; }
+        .toast.show { display: flex; }
         .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.7);
-            backdrop-filter: blur(4px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            position: fixed; top:0; left:0; right:0; bottom:0;
+            background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+            display: flex; align-items: center; justify-content: center;
             z-index: 1000;
         }
         .modal {
-            background: #1c1c1e;
-            width: 90%;
-            max-width: 340px;
-            border-radius: 16px;
-            padding: 20px;
-            color: white;
+            background: #1c1c1e; width: 90%; max-width: 340px;
+            border-radius: 16px; padding: 20px; color: white;
         }
-        body.light-theme .modal {
-            background: #ffffff;
-            color: #000;
-        }
-        .modal h3 {
-            margin-bottom: 16px;
-            font-size: 18px;
-            font-weight: 600;
-        }
+        body.light-theme .modal { background: #ffffff; color: #000; }
+        .modal h3 { margin-bottom: 16px; font-size: 18px; font-weight: 600; }
         .modal input {
-            width: 100%;
-            padding: 12px 14px;
-            background: #2c2c2e;
-            border: none;
-            border-radius: 12px;
-            color: white;
-            font-size: 16px;
-            margin-bottom: 8px;
-            outline: none;
+            width: 100%; padding: 12px 14px; background: #2c2c2e;
+            border: none; border-radius: 12px; color: white;
+            font-size: 16px; margin-bottom: 8px; outline: none;
         }
-        body.light-theme .modal input {
-            background: #f2f2f7;
-            color: black;
-        }
-        .modal-hint {
-            font-size: 12px;
-            color: #8e8e93;
-            margin-bottom: 20px;
-        }
-        .modal-actions {
-            display: flex;
-            gap: 8px;
-            justify-content: flex-end;
-        }
-        .modal-btn {
-            padding: 10px 18px;
-            border-radius: 12px;
-            border: none;
-            font-weight: 600;
-            cursor: pointer;
-            background: #3390ec;
-            color: white;
-        }
-        .modal-btn.cancel {
-            background: transparent;
-            color: #8e8e93;
-        }
-
-        /* Скрытый input для файлов */
-        #imageInput {
-            display: none;
-        }
+        body.light-theme .modal input { background: #f2f2f7; color: black; }
+        .modal-hint { font-size: 12px; color: #8e8e93; margin-bottom: 20px; }
+        .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+        .modal-btn { padding: 10px 18px; border-radius: 12px; border: none; font-weight: 600; cursor: pointer; background: #3390ec; color: white; }
+        .modal-btn.cancel { background: transparent; color: #8e8e93; }
+        #fileInput { display: none; }
     </style>
 </head>
 <body>
-<!-- ЭКРАН РЕГИСТРАЦИИ -->
 <div id="registerScreen" class="register-screen">
-    <div class="register-card">
-        <div class="register-logo">💬</div>
-        <h2 class="register-title">MiS-MaS</h2>
-        <p class="register-subtitle">Добро пожаловать в мессенджер</p>
-        <div class="register-input-wrapper">
-            <span>👤</span>
-            <input type="text" id="registerNameInput" class="register-input" placeholder="Введите ваше имя" maxlength="40" autocomplete="off">
-        </div>
-        <p class="register-hint">Имя будет отображаться в чатах</p>
-        <button class="register-btn" id="registerBtn" disabled>Продолжить</button>
+    <div class="register-card"><div class="register-logo">📁</div><h2 class="register-title">MiS-MaS</h2><p class="register-subtitle">Файлы до 1 ГБ</p>
+        <div class="register-input-wrapper"><span>👤</span><input type="text" id="registerNameInput" class="register-input" placeholder="Ваше имя"></div>
+        <p class="register-hint">Имя будет видно в чатах</p><button class="register-btn" id="registerBtn" disabled>Продолжить</button>
     </div>
 </div>
-
 <div class="app">
-    <!-- ЭКРАН СПИСКА ЧАТОВ -->
     <div id="chatsScreen" class="chats-screen">
-        <div class="chats-header">
-            <h1>Чаты</h1>
-            <div class="header-actions">
-                <button class="header-icon" id="addChatBtn" title="Новый чат">+</button>
-            </div>
-        </div>
-
-        <div class="search-container">
-            <div class="search-bar">
-                <span>🔍</span>
-                <input type="text" placeholder="Поиск" id="searchInput">
-            </div>
-        </div>
-
+        <div class="chats-header"><h1>Чаты</h1><div class="header-actions"><button class="header-icon" id="addChatBtn">+</button></div></div>
+        <div class="search-container"><div class="search-bar"><span>🔍</span><input type="text" placeholder="Поиск" id="searchInput"></div></div>
         <div class="chats-list" id="chatsList"></div>
-
-        <div class="bottom-tabs">
-            <button class="bottom-tab active" data-tab="chats">
-                <span class="bottom-tab-icon">💬</span>
-                <span>Чаты</span>
-            </button>
-            <button class="bottom-tab" data-tab="settings">
-                <span class="bottom-tab-icon">⚙️</span>
-                <span>Настройки</span>
-            </button>
-        </div>
+        <div class="bottom-tabs"><button class="bottom-tab active" data-tab="chats"><span class="bottom-tab-icon">💬</span><span>Чаты</span></button><button class="bottom-tab" data-tab="settings"><span class="bottom-tab-icon">⚙️</span><span>Настройки</span></button></div>
     </div>
-
-    <!-- ЭКРАН ЧАТА -->
     <div id="chatScreen" class="chat-screen hidden">
-        <div class="chat-header">
-            <button class="back-button" id="backToChatsBtn">←</button>
-            <div class="chat-header-info">
-                <div class="chat-header-avatar" id="chatHeaderAvatar">💬</div>
-                <div class="chat-header-text">
-                    <div class="chat-header-name" id="chatHeaderName">Чат</div>
-                    <div class="chat-header-status" id="chatHeaderStatus">онлайн</div>
-                </div>
-            </div>
-            <button class="header-menu" id="chatMenuBtn">⋯</button>
-        </div>
-
-        <div class="messages-container" id="messagesContainer">
-            <div class="messages-list" id="messagesList">
-                <div class="empty-chat">Загрузка...</div>
-            </div>
-        </div>
-
-        <!-- Превью изображения -->
-        <div class="image-preview-container" id="imagePreviewContainer" style="display: none;">
-            <div class="image-preview" id="imagePreview">
-                <img id="previewImg" src="" alt="Preview">
-                <button class="remove-preview-btn" id="removePreviewBtn">✕</button>
-            </div>
-        </div>
-
-        <div class="input-panel">
-            <button class="attach-btn" id="attachBtn">📎</button>
-            <div class="input-wrapper">
-                <textarea id="messageField" placeholder="Сообщение" rows="1"></textarea>
-            </div>
-            <button class="send-btn" id="sendBtn">➤</button>
-        </div>
+        <div class="chat-header"><button class="back-button" id="backToChatsBtn">←</button><div class="chat-header-info"><div class="chat-header-avatar" id="chatHeaderAvatar">💬</div><div class="chat-header-text"><div class="chat-header-name" id="chatHeaderName">Чат</div><div class="chat-header-status" id="chatHeaderStatus"></div></div></div><button class="header-menu" id="chatMenuBtn">⋯</button></div>
+        <div class="messages-container" id="messagesContainer"><div class="messages-list" id="messagesList"></div></div>
+        <div class="file-preview-container" id="filePreviewContainer" style="display: none;"><div class="file-preview-card" id="filePreviewCard"><span class="file-icon" id="previewFileIcon">📎</span><div class="file-info"><div class="file-name" id="previewFileName"></div><div class="file-size" id="previewFileSize"></div></div><button class="remove-preview-btn" id="removeFilePreviewBtn">✕</button></div></div>
+        <div class="input-panel"><button class="attach-btn" id="attachBtn">📎</button><div class="input-wrapper"><textarea id="messageField" placeholder="Сообщение или описание файла" rows="1"></textarea></div><button class="send-btn" id="sendBtn">➤</button></div>
     </div>
-
-    <!-- ЭКРАН НАСТРОЕК -->
-    <div id="settingsScreen" class="settings-screen hidden">
-        <div class="settings-header">
-            <button class="back-button" id="backFromSettingsBtn">←</button>
-            <h1>Настройки</h1>
-        </div>
-
-        <div class="settings-content">
-            <div class="settings-section">
-                <div class="settings-section-title">Профиль</div>
-                <div class="setting-item" id="changeNameBtn">
-                    <div class="setting-info">
-                        <div class="setting-label">Имя пользователя</div>
-                        <div class="setting-description" id="currentNameDisplay">Не задано</div>
-                    </div>
-                    <span class="setting-value">✏️</span>
-                </div>
-            </div>
-
-            <div class="settings-section">
-                <div class="settings-section-title">Основные</div>
-                <div class="setting-item" id="showMyBinBtn">
-                    <div class="setting-info">
-                        <div class="setting-label">Мой BIN ID</div>
-                        <div class="setting-description" id="currentBinDisplay">Загрузка...</div>
-                    </div>
-                    <span class="setting-value">📋</span>
-                </div>
-                <div class="setting-item" id="themeToggle">
-                    <div class="setting-info">
-                        <div class="setting-label">Тема</div>
-                        <div class="setting-description" id="themeDescription">Тёмная</div>
-                    </div>
-                    <span class="setting-value" id="themeIcon">🌙</span>
-                </div>
-            </div>
-
-            <div class="settings-section">
-                <div class="settings-section-title">Уведомления</div>
-                <div class="setting-item" id="notificationsToggle">
-                    <div class="setting-info">
-                        <div class="setting-label">Уведомления</div>
-                        <div class="setting-description" id="notificationsStatus">Включены</div>
-                    </div>
-                    <div class="toggle-switch active" id="notificationsSwitch"></div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <div id="settingsScreen" class="settings-screen hidden"><div class="settings-header"><button class="back-button" id="backFromSettingsBtn">←</button><h1>Настройки</h1></div><div class="settings-content"><div class="settings-section"><div class="settings-section-title">Профиль</div><div class="setting-item" id="changeNameBtn"><div class="setting-info"><div class="setting-label">Имя пользователя</div><div class="setting-description" id="currentNameDisplay"></div></div><span class="setting-value">✏️</span></div></div><div class="settings-section"><div class="settings-section-title">Основные</div><div class="setting-item" id="showMyBinBtn"><div class="setting-info"><div class="setting-label">Мой BIN ID</div><div class="setting-description" id="currentBinDisplay">Загрузка...</div></div><span class="setting-value">📋</span></div><div class="setting-item" id="themeToggle"><div class="setting-info"><div class="setting-label">Тема</div><div class="setting-description" id="themeDescription">Тёмная</div></div><span class="setting-value" id="themeIcon">🌙</span></div></div><div class="settings-section"><div class="settings-section-title">Уведомления</div><div class="setting-item" id="notificationsToggle"><div class="setting-info"><div class="setting-label">Уведомления</div><div class="setting-description" id="notificationsStatus">Включены</div></div><div class="toggle-switch active" id="notificationsSwitch"></div></div></div></div></div>
 </div>
-
-<!-- Скрытый input для выбора изображений -->
-<input type="file" id="imageInput" accept="image/*">
-
-<div id="infoToast" class="toast">✅ Готово</div>
-<div id="errorToast" class="toast error">⚠️ Ошибка</div>
-
+<input type="file" id="fileInput">
+<div id="infoToast" class="toast">✅</div><div id="errorToast" class="toast error">⚠️</div>
 <script>
     (function(){
-        "use strict";
-
-        const PRIVATE_API_URL = 'https://69da27d226585bd92dd3a309.mockapi.io/mi';
-        
-        let currentChat = null; // Будет установлен при открытии
-        let favoritesMessages = [];
-        let privateChats = [];
-        let notificationsEnabled = true;
-        let currentTheme = 'dark';
-        let myBinId = null;
-        
-        let cachedPrivateMessages = {};
-        
-        // Изображение для отправки
-        let pendingImage = null;
-        
-        let currentUser = localStorage.getItem('mios_user_id');
-        if (!currentUser) {
-            currentUser = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 8);
-            localStorage.setItem('mios_user_id', currentUser);
-        }
-        
+        const API_URL = 'https://69da27d226585bd92dd3a309.mockapi.io/mi';
+        let currentUser = localStorage.getItem('mios_user_id') || ('user_'+Date.now()+'_'+Math.random().toString(36).substr(2,8));
+        localStorage.setItem('mios_user_id', currentUser);
         let savedUsername = localStorage.getItem('mios_username') || '';
         let isRegistered = localStorage.getItem('mios_registered') === 'true';
+        let myBinId = null;
+        let privateChats = [];
+        let favoritesMessages = [];
+        let currentChat = null;
+        let pendingFile = null;   // { dataUrl, name, size, type }
+        let notificationsEnabled = localStorage.getItem('mios_notifications') !== 'false';
+        let currentTheme = localStorage.getItem('mios_theme') || 'dark';
         
-        const BOT_NAME = 'MiS-MaS Bot';
-        
+        // DOM
         const registerScreen = document.getElementById('registerScreen');
         const registerNameInput = document.getElementById('registerNameInput');
         const registerBtn = document.getElementById('registerBtn');
@@ -1171,787 +929,190 @@
         const chatHeaderStatus = document.getElementById('chatHeaderStatus');
         const messageField = document.getElementById('messageField');
         const sendBtn = document.getElementById('sendBtn');
-        const backToChatsBtn = document.getElementById('backToChatsBtn');
-        const infoToast = document.getElementById('infoToast');
-        const errorToast = document.getElementById('errorToast');
-        const searchInput = document.getElementById('searchInput');
         const attachBtn = document.getElementById('attachBtn');
-        const imageInput = document.getElementById('imageInput');
-        const imagePreviewContainer = document.getElementById('imagePreviewContainer');
-        const previewImg = document.getElementById('previewImg');
-        const removePreviewBtn = document.getElementById('removePreviewBtn');
+        const fileInput = document.getElementById('fileInput');
+        const filePreviewContainer = document.getElementById('filePreviewContainer');
+        const previewFileName = document.getElementById('previewFileName');
+        const previewFileSize = document.getElementById('previewFileSize');
+        const removeFilePreviewBtn = document.getElementById('removeFilePreviewBtn');
+        const showInfo = (t)=>{ let toast=document.getElementById('infoToast'); toast.textContent='✅ '+t; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),2500);};
+        const showError = (t)=>{ let toast=document.getElementById('errorToast'); toast.textContent='⚠️ '+t; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),3000);};
         
-        const notificationsSwitch = document.getElementById('notificationsSwitch');
-        const notificationsStatus = document.getElementById('notificationsStatus');
-        const themeDescription = document.getElementById('themeDescription');
-        const themeIcon = document.getElementById('themeIcon');
-        const currentBinDisplay = document.getElementById('currentBinDisplay');
-        const currentNameDisplay = document.getElementById('currentNameDisplay');
+        function formatSize(bytes){ if(bytes<1024) return bytes+' Б'; if(bytes<1048576) return (bytes/1024).toFixed(1)+' КБ'; return (bytes/1048576).toFixed(1)+' МБ'; }
+        function escapeHtml(s){ return String(s).replace(/[&<>]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
+        function formatTime(d){ try{ let t=new Date(d); if(!isNaN(t)) return t.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'}); }catch(e){} return ''; }
         
-        // Сжатие изображения
-        function compressImage(file, maxWidth = 1200, maxHeight = 1200, quality = 0.7) {
-            return new Promise((resolve) => {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const img = new Image();
-                    img.onload = () => {
-                        let width = img.width;
-                        let height = img.height;
-                        
-                        if (width > maxWidth || height > maxHeight) {
-                            if (width > height) {
-                                height = (height / width) * maxWidth;
-                                width = maxWidth;
-                            } else {
-                                width = (width / height) * maxHeight;
-                                height = maxHeight;
-                            }
-                        }
-                        
-                        const canvas = document.createElement('canvas');
-                        canvas.width = width;
-                        canvas.height = height;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, width, height);
-                        
-                        canvas.toBlob((blob) => {
-                            const reader2 = new FileReader();
-                            reader2.onloadend = () => resolve(reader2.result);
-                            reader2.readAsDataURL(blob);
-                        }, 'image/jpeg', quality);
-                    };
-                    img.src = e.target.result;
-                };
-                reader.readAsDataURL(file);
-            });
-        }
-        
-        function updateNameDisplay() {
-            if (currentNameDisplay) {
-                currentNameDisplay.textContent = savedUsername || 'Не задано';
-            }
-        }
-        updateNameDisplay();
-        
-        function checkRegistration() {
-            if (isRegistered && savedUsername) {
-                registerScreen.classList.add('hidden');
-                return true;
-            }
-            registerScreen.classList.remove('hidden');
-            return false;
-        }
-        
-        if (registerNameInput) {
-            registerNameInput.addEventListener('input', function() {
-                registerBtn.disabled = this.value.trim().length === 0;
-            });
-            
-            registerNameInput.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter' && this.value.trim()) {
-                    completeRegistration();
-                }
-            });
-        }
-        
-        if (registerBtn) {
-            registerBtn.addEventListener('click', completeRegistration);
-        }
-        
-        function completeRegistration() {
-            const name = registerNameInput.value.trim();
-            if (!name) return;
-            
-            savedUsername = name;
-            localStorage.setItem('mios_username', savedUsername);
-            localStorage.setItem('mios_registered', 'true');
-            isRegistered = true;
-            
-            updateNameDisplay();
-            registerScreen.classList.add('hidden');
-            showInfo('Добро пожаловать, ' + savedUsername + '!');
-            
-            initApp();
-        }
-        
-        notificationsEnabled = localStorage.getItem('mios_notifications') !== 'false';
-        currentTheme = localStorage.getItem('mios_theme') || 'dark';
-        if (currentTheme === 'light') {
-            document.body.classList.add('light-theme');
-            if (themeDescription) themeDescription.textContent = 'Светлая';
-            if (themeIcon) themeIcon.textContent = '☀️';
-        }
-        if (!notificationsEnabled && notificationsSwitch) {
-            notificationsSwitch.classList.remove('active');
-            if (notificationsStatus) notificationsStatus.textContent = 'Отключены';
-        }
-        
-        async function getOrCreateBinId() {
-            let binId = localStorage.getItem('mios_bin_id');
-            if (binId) {
-                myBinId = binId;
-                if (currentBinDisplay) currentBinDisplay.textContent = binId;
-                return binId;
-            }
-            
-            try {
-                const resp = await fetch(PRIVATE_API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        binId: 'bin_' + Date.now() + '_' + Math.random().toString(36),
-                        username: savedUsername || 'Пользователь',
-                        createdAt: new Date().toISOString()
-                    })
-                });
-                const data = await resp.json();
-                binId = data.id || data.binId;
-                localStorage.setItem('mios_bin_id', binId);
-                myBinId = binId;
-                if (currentBinDisplay) currentBinDisplay.textContent = binId;
-                return binId;
-            } catch(e) {
-                binId = 'bin_' + Date.now();
-                localStorage.setItem('mios_bin_id', binId);
-                myBinId = binId;
-                if (currentBinDisplay) currentBinDisplay.textContent = binId;
-                return binId;
-            }
-        }
-        
-        function loadPrivateChats() {
-            try {
-                const stored = localStorage.getItem('mios_private_chats');
-                privateChats = stored ? JSON.parse(stored) : [];
-                privateChats.forEach(c => { if (!c.messages) c.messages = []; });
-            } catch(e) { privateChats = []; }
-        }
-        function savePrivateChats() {
-            localStorage.setItem('mios_private_chats', JSON.stringify(privateChats));
-        }
+        function loadPrivateChats(){ try{ privateChats = JSON.parse(localStorage.getItem('mios_private_chats')||'[]'); privateChats.forEach(c=>{if(!c.messages)c.messages=[];}); }catch(e){ privateChats=[]; } }
+        function savePrivateChats(){ localStorage.setItem('mios_private_chats',JSON.stringify(privateChats)); }
         loadPrivateChats();
-        
-        const hasSeenWelcome = localStorage.getItem('mios_welcome_bot');
-        if (!hasSeenWelcome) {
-            localStorage.setItem('mios_welcome_bot', 'true');
-            let botChat = privateChats.find(c => c.id === 'bot_chat');
-            if (!botChat) {
-                botChat = {
-                    id: 'bot_chat',
-                    name: BOT_NAME,
-                    binId: 'bot.official',
-                    messages: []
-                };
-                privateChats.push(botChat);
-            }
-            savePrivateChats();
-        }
-        
-        function loadFavorites() {
-            try {
-                const stored = localStorage.getItem('mios_fav');
-                favoritesMessages = stored ? JSON.parse(stored) : [];
-            } catch(e) { favoritesMessages = []; }
-        }
-        function saveFavorites() { localStorage.setItem('mios_fav', JSON.stringify(favoritesMessages)); }
+        function loadFavorites(){ try{ favoritesMessages=JSON.parse(localStorage.getItem('mios_fav')||'[]'); }catch(e){ favoritesMessages=[]; } }
+        function saveFavorites(){ localStorage.setItem('mios_fav',JSON.stringify(favoritesMessages)); }
         loadFavorites();
         
-        let toastTimeout;
-        function showInfo(text) {
-            infoToast.textContent = '✅ ' + text;
-            infoToast.classList.add('show');
-            clearTimeout(toastTimeout);
-            toastTimeout = setTimeout(() => infoToast.classList.remove('show'), 2500);
-        }
-        function showError(text) {
-            errorToast.textContent = '⚠️ ' + text;
-            errorToast.classList.add('show');
-            clearTimeout(toastTimeout);
-            toastTimeout = setTimeout(() => errorToast.classList.remove('show'), 3000);
-        }
+        async function getOrCreateBinId(){ let bid=localStorage.getItem('mios_bin_id'); if(bid){ myBinId=bid; document.getElementById('currentBinDisplay').innerText=bid; return bid; } try{ let resp=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({binId:'bin_'+Date.now(),username:savedUsername})}); let d=await resp.json(); bid=d.id||d.binId; localStorage.setItem('mios_bin_id',bid); myBinId=bid; document.getElementById('currentBinDisplay').innerText=bid; return bid; }catch(e){ bid='bin_'+Date.now(); localStorage.setItem('mios_bin_id',bid); myBinId=bid; document.getElementById('currentBinDisplay').innerText=bid; return bid; } }
         
-        function escapeHtml(text) { return String(text).replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[m]); }
-        function formatTime(dateStr) {
-            try { const d = new Date(dateStr); if (!isNaN(d)) return d.toLocaleTimeString('ru-RU', { hour:'2-digit', minute:'2-digit' }); } catch(e){}
-            return '';
-        }
-        function autoResize(ta) { if(ta) { ta.style.height = 'auto'; ta.style.height = Math.min(ta.scrollHeight, 120) + 'px'; } }
-        if (messageField) messageField.addEventListener('input', () => autoResize(messageField));
+        function updateNameDisplay(){ document.getElementById('currentNameDisplay').innerText=savedUsername||'Не задано'; }
+        function checkRegistration(){ if(isRegistered && savedUsername){ registerScreen.classList.add('hidden'); return true; } registerScreen.classList.remove('hidden'); return false; }
+        registerNameInput?.addEventListener('input',()=>{ registerBtn.disabled=!registerNameInput.value.trim(); });
+        function completeRegistration(){ let name=registerNameInput.value.trim(); if(!name) return; savedUsername=name; localStorage.setItem('mios_username',savedUsername); localStorage.setItem('mios_registered','true'); isRegistered=true; updateNameDisplay(); registerScreen.classList.add('hidden'); showInfo('Добро пожаловать!'); initApp(); }
+        registerBtn?.addEventListener('click',completeRegistration);
         
-        // Открытие просмотра изображения
-        function openImageViewer(imageSrc) {
-            const overlay = document.createElement('div');
-            overlay.className = 'image-viewer-overlay';
-            overlay.innerHTML = `
-                <button class="close-viewer">✕</button>
-                <img src="${imageSrc}" alt="Просмотр изображения">
-            `;
-            document.body.appendChild(overlay);
-            
-            overlay.addEventListener('click', (e) => {
-                if (e.target === overlay || e.target.classList.contains('close-viewer')) {
-                    overlay.remove();
+        async function renderChatsList(){
+            let favLast=favoritesMessages.length? '📌 '+favoritesMessages[favoritesMessages.length-1].message.substring(0,30):'Нет заметок';
+            let favTime=favoritesMessages.length? formatTime(favoritesMessages[favoritesMessages.length-1].date):'';
+            let html=`<div class="chat-item" data-chat-id="favorites"><div class="chat-avatar avatar-fav">⭐</div><div class="chat-content"><div class="chat-header-row"><span class="chat-name">Избранное</span>${favTime?`<span class="chat-time">${favTime}</span>`:''}</div><div class="chat-message-row"><span class="chat-last-message">${favLast}</span></div></div></div>`;
+            for(let chat of privateChats){
+                let last=chat.messages[chat.messages.length-1];
+                let lastText='Нет сообщений';
+                if(last){
+                    if(last.type==='file') lastText=(last.username||'Собеседник')+': 📎 '+ (last.fileName||'Файл');
+                    else if(last.type==='image') lastText=(last.username||'Собеседник')+': 📷 Фото';
+                    else lastText=(last.username||'Собеседник')+': '+(last.message||'').substring(0,25);
                 }
-            });
+                let time=last?formatTime(last.date):'';
+                let isBot=chat.id==='bot_chat';
+                let avatarIcon=isBot?'🤖':'👤';
+                let avatarClass=isBot?'avatar-bot':'avatar-private';
+                html+=`<div class="chat-item" data-chat-id="${chat.id}"><div class="chat-avatar ${avatarClass}">${avatarIcon}</div><div class="chat-content"><div class="chat-header-row"><span class="chat-name">${escapeHtml(chat.name)}${isBot?' <span class="verified-badge">✅</span>':''}</span>${time?`<span class="chat-time">${time}</span>`:''}</div><div class="chat-message-row"><span class="chat-last-message">${escapeHtml(lastText)}</span></div></div></div>`;
+            }
+            chatsList.innerHTML=html;
+            document.querySelectorAll('.chat-item').forEach(el=>el.addEventListener('click',()=>openChat(el.dataset.chatId)));
         }
         
-        // Выбор изображения
-        attachBtn?.addEventListener('click', () => {
-            imageInput.click();
-        });
+        async function loadPrivateMessages(chat){ try{ let resp=await fetch(API_URL); let all=await resp.json(); let msgs=all.filter(i=> i.chatId===chat.id || (i.fromBin===chat.binId && i.toBin===myBinId) || (i.toBin===chat.binId && i.fromBin===myBinId)); chat.messages=msgs.sort((a,b)=>new Date(a.date)-new Date(b.date)); savePrivateChats(); if(currentChat===chat.id && !chatScreen.classList.contains('hidden')) renderPrivateMessages(chat); }catch(e){} }
         
-        imageInput?.addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            
-            if (!file.type.startsWith('image/')) {
-                showError('Выберите изображение');
-                return;
-            }
-            
-            if (file.size > 5 * 1024 * 1024) {
-                showError('Изображение слишком большое (макс. 5MB)');
-                return;
-            }
-            
-            try {
-                showInfo('Сжатие изображения...');
-                pendingImage = await compressImage(file);
-                previewImg.src = pendingImage;
-                imagePreviewContainer.style.display = 'block';
-                showInfo('Изображение готово к отправке');
-            } catch (err) {
-                showError('Ошибка загрузки изображения');
-            }
-            
-            imageInput.value = '';
-        });
-        
-        removePreviewBtn?.addEventListener('click', () => {
-            pendingImage = null;
-            previewImg.src = '';
-            imagePreviewContainer.style.display = 'none';
-        });
-        
-        async function loadPrivateMessages(chat) {
-            try {
-                const resp = await fetch(PRIVATE_API_URL);
-                const allData = await resp.json();
-                
-                const chatMessages = allData.filter(item => 
-                    item.chatId === chat.id || 
-                    (item.fromBin === chat.binId && item.toBin === myBinId) ||
-                    (item.toBin === chat.binId && item.fromBin === myBinId)
-                );
-                
-                chat.messages = chatMessages.sort((a, b) => 
-                    new Date(a.date || a.createdAt) - new Date(b.date || b.createdAt)
-                );
-                cachedPrivateMessages[chat.id] = [...chat.messages];
-                savePrivateChats();
-                
-                if (currentChat === chat.id && !chatScreen.classList.contains('hidden')) {
-                    renderPrivateMessages(chat);
-                }
-                return chat.messages;
-            } catch(e) {
-                console.error('Ошибка загрузки:', e);
-                return [];
-            }
-        }
-        
-        async function renderChatsList() {
-            const favLast = favoritesMessages.length ? 'Вы: ' + favoritesMessages[favoritesMessages.length-1].message.substring(0,30) : 'Нет сообщений';
-            const favTime = favoritesMessages.length ? formatTime(favoritesMessages[favoritesMessages.length-1].date) : '';
-            
-            let chatsHtml = '';
-            // Добавляем Избранное первым
-            chatsHtml += `<div class="chat-item" data-chat-id="favorites"><div class="chat-avatar avatar-fav">⭐</div><div class="chat-content"><div class="chat-header-row"><span class="chat-name">Избранное</span>${favTime?`<span class="chat-time">${favTime}</span>`:''}</div><div class="chat-message-row"><span class="chat-last-message">${favLast}</span></div></div></div>`;
-            
-            privateChats.forEach(chat => {
-                const lastMsg = chat.messages.length ? chat.messages[chat.messages.length-1] : null;
-                let lastText = 'Нет сообщений';
-                if (lastMsg) {
-                    if (lastMsg.type === 'image') {
-                        lastText = (lastMsg.username || 'Собеседник') + ': 📷 Фото';
-                    } else {
-                        lastText = (lastMsg.username || 'Собеседник') + ': ' + (lastMsg.message || lastMsg.text || '').substring(0,25);
-                    }
-                }
-                const time = lastMsg ? formatTime(lastMsg.date || lastMsg.createdAt) : '';
-                const isBot = chat.id === 'bot_chat';
-                const avatarIcon = isBot ? '🤖' : '👤';
-                const avatarClass = isBot ? 'avatar-bot' : 'avatar-private';
-                const nameDisplay = chat.name + (isBot ? ' <span class="verified-badge">✅</span>' : '');
-                
-                chatsHtml += `<div class="chat-item" data-chat-id="${chat.id}"><div class="chat-avatar ${avatarClass}">${avatarIcon}</div><div class="chat-content"><div class="chat-header-row"><span class="chat-name">${nameDisplay}</span>${time?`<span class="chat-time">${time}</span>`:''}</div><div class="chat-message-row"><span class="chat-last-message">${lastText}</span></div></div></div>`;
-            });
-            
-            chatsList.innerHTML = chatsHtml;
-            document.querySelectorAll('.chat-item').forEach(item => {
-                item.addEventListener('click', () => openChat(item.dataset.chatId));
-            });
-        }
-        
-        async function openChat(chatId) {
-            currentChat = chatId;
-            chatsScreen.classList.add('hidden');
-            settingsScreen.classList.add('hidden');
-            chatScreen.classList.remove('hidden');
-            
-            // Очищаем превью
-            pendingImage = null;
-            previewImg.src = '';
-            imagePreviewContainer.style.display = 'none';
-            
-            if (chatId === 'favorites') {
-                chatHeaderName.innerHTML = 'Избранное';
-                chatHeaderAvatar.textContent = '⭐'; 
-                chatHeaderAvatar.className = 'chat-header-avatar avatar-fav';
-                chatHeaderStatus.textContent = 'личные заметки';
-                renderFavoritesMessages();
-            } else {
-                const priv = privateChats.find(c => c.id === chatId);
-                if (priv) {
-                    const isBot = priv.id === 'bot_chat';
-                    chatHeaderName.innerHTML = priv.name + (isBot ? ' <span class="verified-badge">✅</span>' : '');
-                    chatHeaderAvatar.textContent = isBot ? '🤖' : '👤';
-                    chatHeaderAvatar.className = `chat-header-avatar ${isBot ? 'avatar-bot' : 'avatar-private'}`;
-                    chatHeaderStatus.textContent = isBot ? 'официальный бот' : `BIN: ${priv.binId?.substring(0, 8) || 'неизвестно'}`;
-                    
-                    messagesListEl.innerHTML = '<div class="empty-chat">Загрузка...</div>';
-                    await loadPrivateMessages(priv);
-                }
-            }
-        }
-        
-        function renderFavoritesMessages() {
-            if (!favoritesMessages.length) { 
-                messagesListEl.innerHTML = '<div class="empty-chat">⭐ Здесь будут ваши заметки</div>'; 
-                return; 
-            }
-            const sorted = [...favoritesMessages].sort((a,b) => new Date(a.date) - new Date(b.date));
-            let html = '';
-            sorted.forEach(msg => {
-                html += `<div class="message-row own"><div class="bubble"><div class="bubble-header"><span class="name">Вы</span><span class="time">${formatTime(msg.date)}</span></div><div class="text-content">${escapeHtml(msg.message).replace(/\n/g,'<br>')}</div><button class="delete-btn" onclick="window.delFav('${msg.id}')">🗑️</button></div></div>`;
-            });
-            messagesListEl.innerHTML = html;
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }
-        
-        function renderPrivateMessages(chat) {
-            if (!chat.messages.length) {
-                messagesListEl.innerHTML = '<div class="empty-chat">✨ Пока нет сообщений</div>';
-                return;
-            }
-            
-            let html = '';
-            chat.messages.forEach(m => {
-                const isOwn = m.fromBin === myBinId || m.user_id === currentUser;
-                const name = escapeHtml(m.username) || (isOwn ? 'Вы' : 'Собеседник');
-                const date = m.date || m.createdAt;
-                
-                if (m.type === 'image' && m.image) {
-                    html += `<div class="message-row ${isOwn?'own':'other'}"><div class="bubble"><div class="bubble-header"><span class="name">${name}</span><span class="time">${formatTime(date)}</span></div><img src="${m.image}" class="message-image" onclick="window.openImageViewer('${m.image}')" alt="Изображение">${m.message ? `<div class="image-caption">${escapeHtml(m.message)}</div>` : ''}</div></div>`;
+        function renderPrivateMessages(chat){
+            if(!chat.messages.length){ messagesListEl.innerHTML='<div class="empty-chat">✨ Нет сообщений</div>'; return; }
+            let html='';
+            for(let m of chat.messages){
+                let isOwn = (m.fromBin===myBinId || m.user_id===currentUser);
+                let name=escapeHtml(m.username)||(isOwn?'Вы':'Собеседник');
+                let date=m.date;
+                if(m.type==='image' && m.image){
+                    html+=`<div class="message-row ${isOwn?'own':'other'}"><div class="bubble"><div class="bubble-header"><span class="name">${name}</span><span class="time">${formatTime(date)}</span></div><img src="${m.image}" class="message-image" onclick="window.openImageViewer('${m.image}')"><div class="image-caption">${escapeHtml(m.message||'')}</div></div></div>`;
+                } else if(m.type==='file' && m.fileData && m.fileName){
+                    let fileIcon=m.fileType?.startsWith('image/')?'🖼️':'📁';
+                    html+=`<div class="message-row ${isOwn?'own':'other'}"><div class="bubble"><div class="bubble-header"><span class="name">${name}</span><span class="time">${formatTime(date)}</span></div><div class="text-content">${escapeHtml(m.message||'')}</div><a class="file-attachment" href="${m.fileData}" download="${escapeHtml(m.fileName)}"><span class="file-icon">${fileIcon}</span><div class="file-info"><div class="file-name">${escapeHtml(m.fileName)}</div><div class="file-size">${formatSize(m.fileSize||0)}</div></div><span class="download-badge">⬇️</span></a></div></div>`;
                 } else {
-                    const text = m.message || m.text || '';
-                    html += `<div class="message-row ${isOwn?'own':'other'}"><div class="bubble"><div class="bubble-header"><span class="name">${name}</span><span class="time">${formatTime(date)}</span></div><div class="text-content">${escapeHtml(text).replace(/\n/g,'<br>')}</div></div></div>`;
+                    html+=`<div class="message-row ${isOwn?'own':'other'}"><div class="bubble"><div class="bubble-header"><span class="name">${name}</span><span class="time">${formatTime(date)}</span></div><div class="text-content">${escapeHtml(m.message||m.text||'').replace(/\n/g,'<br>')}</div></div></div>`;
                 }
-            });
-            
-            const wasAtBottom = messagesContainer.scrollHeight - messagesContainer.scrollTop - messagesContainer.clientHeight < 100;
-            messagesListEl.innerHTML = html;
-            if (wasAtBottom) {
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
             }
+            let wasBottom=messagesContainer.scrollHeight-messagesContainer.scrollTop-messagesContainer.clientHeight<100;
+            messagesListEl.innerHTML=html;
+            if(wasBottom) messagesContainer.scrollTop=messagesContainer.scrollHeight;
         }
         
-        async function sendMessage() {
-            const msg = messageField.value.trim();
-            const hasImage = !!pendingImage;
-            
-            if (!msg && !hasImage) return showError('Введите сообщение или выберите изображение');
-            sendBtn.disabled = true;
-            
-            const displayName = savedUsername || 'Аноним';
-            
-            if (currentChat === 'favorites') {
-                favoritesMessages.push({ 
-                    id: 'fav_'+Date.now(), 
-                    message: msg, 
-                    date: new Date().toLocaleString('ru-RU') 
-                });
-                saveFavorites(); 
-                messageField.value = ''; 
-                autoResize(messageField); 
-                pendingImage = null;
-                previewImg.src = '';
-                imagePreviewContainer.style.display = 'none';
-                renderFavoritesMessages(); 
-                renderChatsList();
-                showInfo('Добавлено');
+        window.openImageViewer = function(src){ let ov=document.createElement('div'); ov.className='image-viewer-overlay'; ov.innerHTML=`<button class="close-viewer">✕</button><img src="${src}">`; document.body.appendChild(ov); ov.addEventListener('click',(e)=>{ if(e.target===ov||e.target.classList.contains('close-viewer')) ov.remove(); }); };
+        
+        async function sendMessage(){
+            let text=messageField.value.trim();
+            let hasFile=!!pendingFile;
+            if(!text && !hasFile) return showError('Введите текст или прикрепите файл');
+            sendBtn.disabled=true;
+            let displayName=savedUsername||'Аноним';
+            if(currentChat==='favorites'){
+                favoritesMessages.push({id:'fav_'+Date.now(),message:text||'📎 Файл',date:new Date().toLocaleString('ru-RU')});
+                saveFavorites(); messageField.value=''; autoResize(messageField); pendingFile=null; filePreviewContainer.style.display='none'; renderFavoritesMessages(); renderChatsList(); showInfo('Добавлено');
             } else {
-                const priv = privateChats.find(c => c.id === currentChat);
-                if (priv) {
-                    try {
-                        const messageData = {
-                            chatId: priv.id,
-                            fromBin: myBinId,
-                            toBin: priv.binId,
-                            username: displayName,
-                            message: msg,
-                            date: new Date().toLocaleString('ru-RU'),
-                            user_id: currentUser
-                        };
-                        
-                        if (hasImage) {
-                            messageData.type = 'image';
-                            messageData.image = pendingImage;
+                let priv=privateChats.find(c=>c.id===currentChat);
+                if(priv){
+                    try{
+                        let payload={chatId:priv.id,fromBin:myBinId,toBin:priv.binId,username:displayName,message:text||'',date:new Date().toLocaleString('ru-RU'),user_id:currentUser};
+                        if(hasFile){
+                            payload.type='file';
+                            payload.fileData=pendingFile.dataUrl;
+                            payload.fileName=pendingFile.name;
+                            payload.fileSize=pendingFile.size;
+                            payload.fileType=pendingFile.type;
                         }
-                        
-                        const resp = await fetch(PRIVATE_API_URL, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(messageData)
-                        });
-                        
-                        if (resp.ok) {
-                            const newMsg = await resp.json();
+                        let resp=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+                        if(resp.ok){
+                            let newMsg=await resp.json();
                             priv.messages.push(newMsg);
-                            cachedPrivateMessages[priv.id] = [...priv.messages];
                             savePrivateChats();
-                            
-                            if (priv.id === 'bot_chat') {
-                                setTimeout(async () => {
-                                    const botResp = await fetch(PRIVATE_API_URL, {
-                                        method: 'POST',
-                                        headers: { 'Content-Type': 'application/json' },
-                                        body: JSON.stringify({
-                                            chatId: priv.id,
-                                            fromBin: 'bot.official',
-                                            toBin: myBinId,
-                                            username: BOT_NAME,
-                                            message: hasImage ? '📷 Отличное фото! Ваш BIN ID: ' + myBinId : '🤖 Ваш BIN ID: ' + myBinId + '. Поделитесь им с друзьями!',
-                                            date: new Date().toLocaleString('ru-RU')
-                                        })
-                                    });
-                                    if (botResp.ok) {
-                                        const botMsg = await botResp.json();
-                                        priv.messages.push(botMsg);
-                                        cachedPrivateMessages[priv.id] = [...priv.messages];
-                                        savePrivateChats();
-                                        if (currentChat === priv.id) {
-                                            renderPrivateMessages(priv);
-                                        }
-                                        renderChatsList();
-                                    }
-                                }, 500);
-                            }
-                            
-                            messageField.value = '';
-                            autoResize(messageField);
-                            pendingImage = null;
-                            previewImg.src = '';
-                            imagePreviewContainer.style.display = 'none';
+                            messageField.value=''; autoResize(messageField); pendingFile=null; filePreviewContainer.style.display='none';
                             renderPrivateMessages(priv);
                             renderChatsList();
                             showInfo('Отправлено');
+                            if(priv.id==='bot_chat'){
+                                setTimeout(async()=>{
+                                    let botResp=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chatId:priv.id,fromBin:'bot.official',toBin:myBinId,username:'MiS-MaS Bot',message:'✅ Файл получен! Ваш BIN ID: '+myBinId,date:new Date().toLocaleString('ru-RU')})});
+                                    if(botResp.ok){ let botMsg=await botResp.json(); priv.messages.push(botMsg); savePrivateChats(); if(currentChat===priv.id) renderPrivateMessages(priv); renderChatsList(); }
+                                },300);
+                            }
                         }
-                    } catch(e) {
-                        showError('Ошибка отправки');
-                    }
+                    } catch(e){ showError('Ошибка'); }
                 }
             }
-            sendBtn.disabled = false;
+            sendBtn.disabled=false;
         }
         
-        window.openImageViewer = function(imageSrc) {
-            const overlay = document.createElement('div');
-            overlay.className = 'image-viewer-overlay';
-            overlay.innerHTML = `
-                <button class="close-viewer">✕</button>
-                <img src="${imageSrc}" alt="Просмотр изображения">
-            `;
-            document.body.appendChild(overlay);
-            
-            overlay.addEventListener('click', (e) => {
-                if (e.target === overlay || e.target.classList.contains('close-viewer')) {
-                    overlay.remove();
-                }
-            });
-        };
+        function autoResize(ta){ if(ta){ ta.style.height='auto'; ta.style.height=Math.min(ta.scrollHeight,120)+'px'; } }
+        messageField?.addEventListener('input',()=>autoResize(messageField));
+        sendBtn?.addEventListener('click',sendMessage);
+        messageField?.addEventListener('keydown',e=>{ if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendMessage(); } });
         
-        window.delFav = function(id) {
-            const idx = favoritesMessages.findIndex(m => m.id === id);
-            if (idx!==-1) { 
-                favoritesMessages.splice(idx,1); 
-                saveFavorites(); 
-                renderFavoritesMessages(); 
-                renderChatsList(); 
-                showInfo('Удалено'); 
-            }
-        };
-        
-        sendBtn?.addEventListener('click', sendMessage);
-        messageField?.addEventListener('keydown', e => { 
-            if (e.key==='Enter' && !e.shiftKey) { 
-                e.preventDefault(); 
-                sendMessage(); 
-            } 
-        });
-        
-        backToChatsBtn?.addEventListener('click', () => { 
-            chatScreen.classList.add('hidden'); 
-            chatsScreen.classList.remove('hidden'); 
-            settingsScreen.classList.add('hidden');
-            pendingImage = null;
-            previewImg.src = '';
-            imagePreviewContainer.style.display = 'none';
-            renderChatsList(); 
-        });
-        
-        searchInput?.addEventListener('input', e => {
-            const q = e.target.value.toLowerCase();
-            document.querySelectorAll('.chat-item').forEach(item => {
-                const name = item.querySelector('.chat-name')?.textContent.toLowerCase() || '';
-                item.style.display = name.includes(q) ? 'flex' : 'none';
-            });
-        });
-        
-        document.getElementById('chatMenuBtn')?.addEventListener('click', () => {
-            if (currentChat === 'favorites') {
-                if (confirm('Очистить избранное?')) { 
-                    favoritesMessages = []; 
-                    saveFavorites(); 
-                    renderFavoritesMessages(); 
-                    renderChatsList(); 
-                    showInfo('Очищено'); 
-                }
-            } else {
-                const priv = privateChats.find(c => c.id === currentChat);
-                if (priv && confirm('Удалить чат?')) {
-                    privateChats = privateChats.filter(c => c.id !== currentChat);
-                    savePrivateChats();
-                    chatScreen.classList.add('hidden'); 
-                    chatsScreen.classList.remove('hidden');
-                    renderChatsList(); 
-                    showInfo('Чат удалён');
-                }
-            }
-        });
-        
-        document.querySelectorAll('.bottom-tab').forEach(tab => tab.addEventListener('click', () => {
-            document.querySelectorAll('.bottom-tab').forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
-            const tabName = tab.dataset.tab;
-            if (tabName === 'chats') { 
-                chatsScreen.classList.remove('hidden'); 
-                settingsScreen.classList.add('hidden'); 
-                chatScreen.classList.add('hidden'); 
-                renderChatsList();
-            } else { 
-                chatsScreen.classList.add('hidden'); 
-                settingsScreen.classList.remove('hidden'); 
-                chatScreen.classList.add('hidden'); 
-                updateNameDisplay();
-            }
-        }));
-        
-        document.getElementById('backFromSettingsBtn')?.addEventListener('click', () => { 
-            settingsScreen.classList.add('hidden'); 
-            chatsScreen.classList.remove('hidden'); 
-            renderChatsList();
-        });
-        
-        document.getElementById('changeNameBtn')?.addEventListener('click', () => {
-            const overlay = document.createElement('div'); 
-            overlay.className = 'modal-overlay';
-            overlay.innerHTML = `
-                <div class="modal">
-                    <h3>✏️ Изменить имя</h3>
-                    <input type="text" id="newNameInput" placeholder="Введите новое имя" value="${escapeHtml(savedUsername)}" maxlength="40">
-                    <div class="modal-hint">Имя будет отображаться во всех чатах</div>
-                    <div class="modal-actions">
-                        <button class="modal-btn cancel">Отмена</button>
-                        <button class="modal-btn" id="confirmChangeName">Сохранить</button>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(overlay);
-            const input = overlay.querySelector('#newNameInput');
-            input.focus();
-            input.select();
-            
-            overlay.querySelector('.cancel').onclick = () => overlay.remove();
-            
-            const saveName = () => {
-                const newName = input.value.trim();
-                if (newName) {
-                    savedUsername = newName;
-                    localStorage.setItem('mios_username', savedUsername);
-                    updateNameDisplay();
-                    showInfo('Имя изменено на: ' + savedUsername);
-                }
-                overlay.remove();
+        attachBtn?.addEventListener('click',()=>fileInput.click());
+        fileInput?.addEventListener('change',async(e)=>{
+            let file=e.target.files[0];
+            if(!file) return;
+            if(file.size>1024*1024*1024){ showError('Файл не должен превышать 1 ГБ'); return; }
+            showInfo('Чтение файла...');
+            let reader=new FileReader();
+            reader.onload=function(ev){
+                pendingFile={ dataUrl:ev.target.result, name:file.name, size:file.size, type:file.type };
+                previewFileName.innerText=file.name;
+                previewFileSize.innerText=formatSize(file.size);
+                document.getElementById('previewFileIcon').innerText=file.type.startsWith('image/')?'🖼️':'📎';
+                filePreviewContainer.style.display='block';
+                showInfo('Файл готов к отправке');
             };
-            
-            overlay.querySelector('#confirmChangeName').onclick = saveName;
-            
-            input.addEventListener('keydown', e => {
-                if (e.key === 'Enter') {
-                    saveName();
-                }
-            });
-            
-            overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+            reader.readAsDataURL(file);
+            fileInput.value='';
         });
+        removeFilePreviewBtn?.addEventListener('click',()=>{ pendingFile=null; filePreviewContainer.style.display='none'; });
         
-        notificationsSwitch?.addEventListener('click', () => {
-            notificationsEnabled = !notificationsEnabled;
-            if (notificationsEnabled) {
-                notificationsSwitch.classList.add('active');
-                notificationsStatus.textContent = 'Включены';
-                localStorage.setItem('mios_notifications','true');
-                showInfo('Уведомления включены');
+        async function openChat(chatId){
+            currentChat=chatId;
+            chatsScreen.classList.add('hidden'); settingsScreen.classList.add('hidden'); chatScreen.classList.remove('hidden');
+            pendingFile=null; filePreviewContainer.style.display='none';
+            if(chatId==='favorites'){
+                chatHeaderName.innerHTML='Избранное'; chatHeaderAvatar.textContent='⭐'; chatHeaderAvatar.className='chat-header-avatar avatar-fav'; chatHeaderStatus.textContent='заметки';
+                renderFavoritesMessages();
             } else {
-                notificationsSwitch.classList.remove('active');
-                notificationsStatus.textContent = 'Отключены';
-                localStorage.setItem('mios_notifications','false');
-                showInfo('Отключены');
-            }
-        });
-        
-        document.getElementById('themeToggle')?.addEventListener('click', () => {
-            if (currentTheme === 'dark') { 
-                currentTheme = 'light'; 
-                document.body.classList.add('light-theme'); 
-                themeDescription.textContent = 'Светлая'; 
-                themeIcon.textContent = '☀️'; 
-                localStorage.setItem('mios_theme','light'); 
-            } else { 
-                currentTheme = 'dark'; 
-                document.body.classList.remove('light-theme'); 
-                themeDescription.textContent = 'Тёмная'; 
-                themeIcon.textContent = '🌙'; 
-                localStorage.setItem('mios_theme','dark'); 
-            }
-            showInfo('Тема изменена');
-        });
-        
-        document.getElementById('showMyBinBtn')?.addEventListener('click', () => {
-            navigator.clipboard?.writeText(myBinId);
-            showInfo('BIN ID скопирован: ' + myBinId);
-        });
-        
-        document.getElementById('addChatBtn')?.addEventListener('click', () => {
-            const overlay = document.createElement('div'); 
-            overlay.className = 'modal-overlay';
-            overlay.innerHTML = `
-                <div class="modal">
-                    <h3>➕ Новый чат по BIN ID</h3>
-                    <input type="text" id="binInput" placeholder="BIN ID собеседника">
-                    <div class="modal-hint">
-                        Ваш BIN ID: ${myBinId}<br>
-                        Посмотреть можно в Настройках
-                    </div>
-                    <div class="modal-actions">
-                        <button class="modal-btn cancel">Отмена</button>
-                        <button class="modal-btn" id="confirmAddChat">Создать чат</button>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(overlay);
-            const input = overlay.querySelector('#binInput');
-            input.focus();
-            
-            overlay.querySelector('.cancel').onclick = () => overlay.remove();
-            
-            const createChat = async () => {
-                let targetBin = input.value.trim();
-                if (!targetBin) { 
-                    showError('Введите BIN ID'); 
-                    overlay.remove(); 
-                    return; 
-                }
-                
-                if (targetBin === myBinId) {
-                    showError('Нельзя создать чат с самим собой');
-                    overlay.remove();
-                    return;
-                }
-                
-                const exists = privateChats.some(c => c.binId === targetBin);
-                if (exists) { 
-                    showError('Чат с этим BIN ID уже существует'); 
-                    overlay.remove(); 
-                    return; 
-                }
-                
-                const chatId = 'priv_' + Date.now();
-                const newChat = {
-                    id: chatId,
-                    binId: targetBin,
-                    name: `Чат с ${targetBin.substring(0, 8)}`,
-                    messages: []
-                };
-                privateChats.push(newChat);
-                savePrivateChats();
-                
-                renderChatsList();
-                overlay.remove();
-                showInfo('✅ Чат создан!');
-                openChat(chatId);
-            };
-            
-            overlay.querySelector('#confirmAddChat').onclick = createChat;
-            
-            input.addEventListener('keydown', e => {
-                if (e.key === 'Enter') {
-                    createChat();
-                }
-            });
-            
-            overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
-        });
-        
-        async function backgroundUpdate() {
-            if (!chatsScreen.classList.contains('hidden')) {
-                await renderChatsList();
-            }
-            
-            if (currentChat && currentChat !== 'favorites' && !chatScreen.classList.contains('hidden')) {
-                const priv = privateChats.find(c => c.id === currentChat);
-                if (priv) {
+                let priv=privateChats.find(c=>c.id===chatId);
+                if(priv){
+                    let isBot=priv.id==='bot_chat';
+                    chatHeaderName.innerHTML=priv.name+(isBot?' <span class="verified-badge">✅</span>':'');
+                    chatHeaderAvatar.textContent=isBot?'🤖':'👤';
+                    chatHeaderAvatar.className=`chat-header-avatar ${isBot?'avatar-bot':'avatar-private'}`;
+                    chatHeaderStatus.textContent=isBot?'бот • BIN ID':'BIN: '+(priv.binId?.substring(0,10)||'???');
+                    messagesListEl.innerHTML='<div class="empty-chat">Загрузка...</div>';
                     await loadPrivateMessages(priv);
                 }
             }
         }
-        
-        async function initApp() {
-            await getOrCreateBinId();
-            
-            const botChat = privateChats.find(c => c.id === 'bot_chat');
-            if (botChat && botChat.messages.length === 0) {
-                botChat.messages.push({
-                    id: 'bot_welcome_' + Date.now(),
-                    message: '👋 Добро пожаловать в MiS-MaS, ' + savedUsername + '!\n\n📱 Ваш BIN ID: ' + myBinId + '\n🔗 Поделитесь им с друзьями для создания чата!\n\nНажмите "+" и введите BIN ID друга.',
-                    date: new Date().toLocaleString('ru-RU'),
-                    username: BOT_NAME,
-                    fromBin: 'bot.official'
-                });
-                cachedPrivateMessages['bot_chat'] = [...botChat.messages];
-                savePrivateChats();
-            }
-            
-            await renderChatsList();
+        function renderFavoritesMessages(){
+            if(!favoritesMessages.length){ messagesListEl.innerHTML='<div class="empty-chat">⭐ Заметки</div>'; return; }
+            let html='';
+            [...favoritesMessages].sort((a,b)=>new Date(a.date)-new Date(b.date)).forEach(m=>{ html+=`<div class="message-row own"><div class="bubble"><div class="bubble-header"><span class="name">Вы</span><span class="time">${formatTime(m.date)}</span></div><div class="text-content">${escapeHtml(m.message)}</div><button class="delete-btn" onclick="window.delFav('${m.id}')">🗑️</button></div></div>`; });
+            messagesListEl.innerHTML=html; messagesContainer.scrollTop=messagesContainer.scrollHeight;
         }
+        window.delFav=function(id){ let idx=favoritesMessages.findIndex(m=>m.id===id); if(idx!==-1){ favoritesMessages.splice(idx,1); saveFavorites(); renderFavoritesMessages(); renderChatsList(); showInfo('Удалено'); } };
+        backToChatsBtn?.addEventListener('click',()=>{ chatScreen.classList.add('hidden'); chatsScreen.classList.remove('hidden'); pendingFile=null; filePreviewContainer.style.display='none'; renderChatsList(); });
+        document.getElementById('backFromSettingsBtn')?.addEventListener('click',()=>{ settingsScreen.classList.add('hidden'); chatsScreen.classList.remove('hidden'); renderChatsList(); });
+        document.querySelectorAll('.bottom-tab').forEach(t=>t.addEventListener('click',()=>{ document.querySelectorAll('.bottom-tab').forEach(bt=>bt.classList.remove('active')); t.classList.add('active'); if(t.dataset.tab==='chats'){ chatsScreen.classList.remove('hidden'); settingsScreen.classList.add('hidden'); chatScreen.classList.add('hidden'); renderChatsList(); } else { chatsScreen.classList.add('hidden'); settingsScreen.classList.remove('hidden'); chatScreen.classList.add('hidden'); updateNameDisplay(); } }));
+        document.getElementById('chatMenuBtn')?.addEventListener('click',()=>{ if(currentChat==='favorites'){ if(confirm('Очистить избранное?')){ favoritesMessages=[]; saveFavorites(); renderFavoritesMessages(); renderChatsList(); showInfo('Очищено'); } } else { let priv=privateChats.find(c=>c.id===currentChat); if(priv && confirm('Удалить чат?')){ privateChats=privateChats.filter(c=>c.id!==currentChat); savePrivateChats(); chatScreen.classList.add('hidden'); chatsScreen.classList.remove('hidden'); renderChatsList(); showInfo('Чат удалён'); } } });
+        document.getElementById('addChatBtn')?.addEventListener('click',()=>{ let ov=document.createElement('div'); ov.className='modal-overlay'; ov.innerHTML=`<div class="modal"><h3>➕ Новый чат по BIN ID</h3><input id="binInput" placeholder="BIN ID собеседника"><div class="modal-hint">Ваш ID: ${myBinId}</div><div class="modal-actions"><button class="modal-btn cancel">Отмена</button><button class="modal-btn" id="confirmAddChat">Создать</button></div></div>`; document.body.appendChild(ov); let inp=ov.querySelector('#binInput'); let create=()=>{ let target=inp.value.trim(); if(!target) return showError('Введите BIN ID'); if(target===myBinId) return showError('Нельзя чат с собой'); if(privateChats.some(c=>c.binId===target)) return showError('Чат уже есть'); let chatId='priv_'+Date.now(); privateChats.push({id:chatId,binId:target,name:`Чат ${target.substring(0,8)}`,messages:[]}); savePrivateChats(); renderChatsList(); ov.remove(); showInfo('Чат создан'); openChat(chatId); }; ov.querySelector('#confirmAddChat').onclick=create; ov.querySelector('.cancel').onclick=()=>ov.remove(); inp.addEventListener('keydown',e=>{if(e.key==='Enter')create();}); ov.addEventListener('click',e=>{if(e.target===ov)ov.remove();}); });
+        document.getElementById('changeNameBtn')?.addEventListener('click',()=>{ let ov=document.createElement('div'); ov.className='modal-overlay'; ov.innerHTML=`<div class="modal"><h3>✏️ Имя</h3><input id="newNameInput" value="${escapeHtml(savedUsername)}"><div class="modal-actions"><button class="modal-btn cancel">Отмена</button><button class="modal-btn" id="confirmChangeName">Сохранить</button></div></div>`; document.body.appendChild(ov); let inp=ov.querySelector('#newNameInput'); let save=()=>{ let n=inp.value.trim(); if(n){ savedUsername=n; localStorage.setItem('mios_username',savedUsername); updateNameDisplay(); showInfo('Имя изменено'); } ov.remove(); }; ov.querySelector('#confirmChangeName').onclick=save; ov.querySelector('.cancel').onclick=()=>ov.remove(); inp.addEventListener('keydown',e=>{if(e.key==='Enter')save();}); });
+        document.getElementById('showMyBinBtn')?.addEventListener('click',()=>{ navigator.clipboard?.writeText(myBinId); showInfo('BIN ID скопирован: '+myBinId); });
+        document.getElementById('themeToggle')?.addEventListener('click',()=>{ if(currentTheme==='dark'){ currentTheme='light'; document.body.classList.add('light-theme'); document.getElementById('themeDescription').innerText='Светлая'; document.getElementById('themeIcon').innerText='☀️'; localStorage.setItem('mios_theme','light'); } else { currentTheme='dark'; document.body.classList.remove('light-theme'); document.getElementById('themeDescription').innerText='Тёмная'; document.getElementById('themeIcon').innerText='🌙'; localStorage.setItem('mios_theme','dark'); } showInfo('Тема изменена'); });
+        document.getElementById('notificationsSwitch')?.addEventListener('click',()=>{ notificationsEnabled=!notificationsEnabled; let sw=document.getElementById('notificationsSwitch'); let st=document.getElementById('notificationsStatus'); if(notificationsEnabled){ sw.classList.add('active'); st.innerText='Включены'; localStorage.setItem('mios_notifications','true'); } else { sw.classList.remove('active'); st.innerText='Отключены'; localStorage.setItem('mios_notifications','false'); } showInfo(notificationsEnabled?'Уведомления вкл':'Отключены'); });
         
-        if (checkRegistration()) {
-            initApp();
-        }
-        
-        setInterval(backgroundUpdate, 5000);
-        
+        async function initApp(){ await getOrCreateBinId(); let botChat=privateChats.find(c=>c.id==='bot_chat'); if(!botChat){ privateChats.push({id:'bot_chat',name:'MiS-MaS Bot',binId:'bot.official',messages:[]}); savePrivateChats(); } await renderChatsList(); }
+        if(currentTheme==='light'){ document.body.classList.add('light-theme'); document.getElementById('themeDescription').innerText='Светлая'; document.getElementById('themeIcon').innerText='☀️'; } else { document.body.classList.remove('light-theme'); }
+        if(checkRegistration()) initApp();
+        setInterval(async()=>{ if(!chatsScreen.classList.contains('hidden')) await renderChatsList(); if(currentChat && currentChat!=='favorites' && !chatScreen.classList.contains('hidden')){ let priv=privateChats.find(c=>c.id===currentChat); if(priv) await loadPrivateMessages(priv); } },5000);
     })();
 </script>
 </body>
