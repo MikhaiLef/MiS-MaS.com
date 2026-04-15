@@ -1612,11 +1612,6 @@
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
         
-        function renderPrivateMessages(chat) {
-            if (!chat.messages.length) { 
-                messagesListEl.innerHTML = '<div class="empty-chat">💬 Начните переписку</div>'; 
-                return; 
-            }
             
             let html = '';
             chat.messages.forEach(m => {
