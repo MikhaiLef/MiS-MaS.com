@@ -17,23 +17,26 @@
         }
         body.light-theme { background: #ffffff; color: #000000; }
         body.light-theme .chats-screen, body.light-theme .chat-screen, body.light-theme .chats-list,
-        body.light-theme .messages-container, body.light-theme .settings-screen, body.light-theme .channel-screen {
+        body.light-theme .messages-container, body.light-theme .settings-screen, body.light-theme .channel-screen,
+        body.light-theme .my-channels-screen {
             background: #ffffff;
         }
         body.light-theme .chats-header, body.light-theme .chat-header, body.light-theme .settings-header,
-        body.light-theme .input-panel, body.light-theme .bottom-tabs, body.light-theme .channel-header {
+        body.light-theme .input-panel, body.light-theme .bottom-tabs, body.light-theme .channel-header,
+        body.light-theme .my-channels-header {
             background: #ffffff;
             border-color: #e5e5ea;
         }
         body.light-theme .chat-name, body.light-theme .chat-header-name, body.light-theme .settings-header h1,
-        body.light-theme .setting-label, body.light-theme .channel-name {
+        body.light-theme .setting-label, body.light-theme .channel-name, body.light-theme .my-channels-header h1 {
             color: #000000;
         }
         body.light-theme .chat-last-message, body.light-theme .chat-time, body.light-theme .chat-header-status,
         body.light-theme .setting-description, body.light-theme .channel-description {
             color: #8e8e93;
         }
-        body.light-theme .search-bar, body.light-theme .input-wrapper, body.light-theme .setting-item {
+        body.light-theme .search-bar, body.light-theme .input-wrapper, body.light-theme .setting-item,
+        body.light-theme .my-channel-item {
             background: #f2f2f7;
         }
         body.light-theme .message-row.other .bubble {
@@ -88,14 +91,16 @@
             cursor: pointer; transition: opacity 0.2s;
         }
         .register-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .chats-screen { flex: 1; display: flex; flex-direction: column; background: #000000; }
-        .chats-screen.hidden { display: none; }
-        .chats-header {
+        
+        /* Экраны */
+        .chats-screen, .my-channels-screen { flex: 1; display: flex; flex-direction: column; background: #000000; }
+        .chats-screen.hidden, .my-channels-screen.hidden { display: none; }
+        .chats-header, .my-channels-header {
             background: #000000; padding: 12px 16px; border-bottom: 0.5px solid #1c1c1e;
             display: flex; align-items: center; justify-content: space-between;
             position: sticky; top: 0; z-index: 10;
         }
-        .chats-header h1 { font-size: 34px; font-weight: 700; color: #ffffff; }
+        .chats-header h1, .my-channels-header h1 { font-size: 34px; font-weight: 700; color: #ffffff; }
         .header-actions { display: flex; gap: 12px; }
         .header-icon {
             background: none; border: none; color: #3390ec; font-size: 28px;
@@ -113,32 +118,32 @@
         }
         body.light-theme .search-bar input { color: #000000; }
         .search-bar input::placeholder { color: #8e8e93; }
-        .chats-list { flex: 1; overflow-y: auto; background: #000000; }
-        .chat-item {
+        .chats-list, .my-channels-list { flex: 1; overflow-y: auto; background: #000000; }
+        .chat-item, .my-channel-item {
             display: flex; align-items: center; padding: 10px 16px;
             cursor: pointer; transition: background 0.15s; gap: 12px;
         }
-        .chat-item:active { background: #1c1c1e; }
-        body.light-theme .chat-item:active { background: #e5e5ea; }
-        .chat-avatar {
+        .chat-item:active, .my-channel-item:active { background: #1c1c1e; }
+        body.light-theme .chat-item:active, body.light-theme .my-channel-item:active { background: #e5e5ea; }
+        .chat-avatar, .my-channel-avatar {
             width: 54px; height: 54px; border-radius: 50%; display: flex;
             align-items: center; justify-content: center; flex-shrink: 0; font-size: 24px;
         }
-        .avatar-main { background: #3390ec; }
         .avatar-fav { background: #ff9f0a; }
         .avatar-bot { background: #af52de; }
         .avatar-private { background: #30b0c0; }
         .avatar-channel { background: #ff375f; }
-        .chat-content {
+        .chat-content, .my-channel-content {
             flex: 1; min-width: 0; padding: 8px 0;
             border-bottom: 0.5px solid #1c1c1e;
         }
-        .chat-item:last-child .chat-content { border-bottom: none; }
-        .chat-header-row {
+        .chat-item:last-child .chat-content,
+        .my-channel-item:last-child .my-channel-content { border-bottom: none; }
+        .chat-header-row, .my-channel-header-row {
             display: flex; align-items: baseline; justify-content: space-between;
             margin-bottom: 4px;
         }
-        .chat-name {
+        .chat-name, .my-channel-name {
             font-size: 16px; font-weight: 600; color: #ffffff;
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
             display: flex; align-items: center; gap: 4px;
@@ -152,12 +157,20 @@
             font-size: 12px; color: #8e8e93; display: flex; align-items: center; gap: 3px;
         }
         .chat-time { font-size: 13px; color: #8e8e93; flex-shrink: 0; margin-left: 8px; }
-        .chat-message-row {
+        .chat-message-row, .my-channel-message-row {
             display: flex; align-items: center; justify-content: space-between; gap: 8px;
         }
-        .chat-last-message {
+        .chat-last-message, .my-channel-description {
             font-size: 14px; color: #8e8e93; white-space: nowrap;
             overflow: hidden; text-overflow: ellipsis; flex: 1;
+        }
+        .channel-id {
+            font-size: 11px; color: #636366; font-family: monospace;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .copy-id-btn {
+            background: none; border: none; color: #3390ec; font-size: 18px;
+            cursor: pointer; padding: 4px 8px;
         }
         .bottom-tabs {
             background: #000000; border-top: 0.5px solid #1c1c1e;
@@ -170,10 +183,10 @@
         }
         .bottom-tab.active { color: #3390ec; }
         .bottom-tab-icon { font-size: 22px; }
-        .chat-screen { flex: 1; display: flex; flex-direction: column; background: #000000; }
-        .chat-screen.hidden { display: none; }
-        .channel-screen { flex: 1; display: flex; flex-direction: column; background: #000000; }
-        .channel-screen.hidden { display: none; }
+        
+        /* Остальные стили */
+        .chat-screen, .channel-screen { flex: 1; display: flex; flex-direction: column; background: #000000; }
+        .chat-screen.hidden, .channel-screen.hidden { display: none; }
         .chat-header, .channel-header {
             background: #000000; padding: 8px 16px; border-bottom: 0.5px solid #1c1c1e;
             display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 10;
@@ -199,11 +212,6 @@
             background: none; border: none; color: #3390ec; font-size: 22px;
             cursor: pointer; padding: 4px;
         }
-        .subscribe-btn {
-            background: #3390ec; border: none; padding: 8px 16px; border-radius: 20px;
-            color: white; font-weight: 600; cursor: pointer; font-size: 14px;
-        }
-        .subscribe-btn.subscribed { background: #8e8e93; }
         .create-post-btn {
             background: #3390ec; border: none; color: white; font-size: 28px;
             width: 56px; height: 56px; border-radius: 28px; position: fixed;
@@ -253,11 +261,6 @@
         }
         .file-size { font-size: 11px; opacity: 0.7; }
         .download-badge { font-size: 20px; }
-        .image-caption { margin-top: 4px; font-size: 12px; opacity: 0.8; }
-        .delete-btn {
-            background: none; border: none; color: #ff5e5e; font-size: 12px;
-            margin-top: 6px; padding: 2px 6px 2px 0; cursor: pointer; opacity: 0.7;
-        }
         .empty-chat {
             text-align: center; padding: 50px 20px; color: #8e8e93; font-size: 14px;
         }
@@ -267,9 +270,8 @@
         }
         .attach-btn {
             background: none; border: none; color: #8e8e93; font-size: 24px;
-            padding: 6px; cursor: pointer; transition: color 0.2s;
+            padding: 6px; cursor: pointer;
         }
-        .attach-btn:hover { color: #3390ec; }
         .input-wrapper {
             flex: 1; background: #1c1c1e; border-radius: 20px;
             padding: 6px 8px 6px 16px; display: flex; align-items: center;
@@ -277,20 +279,17 @@
         .input-wrapper textarea {
             background: transparent; border: none; padding: 6px 0; color: #fff;
             font-size: 16px; width: 100%; outline: none; resize: none;
-            max-height: 120px; font-family: inherit; line-height: 1.4;
+            max-height: 120px; font-family: inherit;
         }
         body.light-theme .input-wrapper textarea { color: #000000; }
-        .input-wrapper textarea::placeholder { color: #636366; }
         .send-btn {
             background: #3390ec; border: none; width: 40px; height: 40px;
             border-radius: 50%; display: flex; align-items: center; justify-content: center;
             cursor: pointer; color: white; font-size: 20px; flex-shrink: 0;
         }
-        .send-btn:disabled { opacity: 0.5; }
         .file-preview-container {
             padding: 8px 12px; background: #000000; border-top: 0.5px solid #1c1c1e;
         }
-        body.light-theme .file-preview-container { background: #ffffff; }
         .file-preview-card {
             background: #1c1c1e; border-radius: 14px; padding: 10px 12px;
             display: flex; align-items: center; gap: 12px; position: relative;
@@ -299,7 +298,6 @@
             position: absolute; top: -8px; right: -8px; background: #ff5e5e;
             color: white; border: none; border-radius: 50%; width: 26px;
             height: 26px; font-size: 14px; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
         }
         .image-viewer-overlay {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
@@ -429,7 +427,17 @@
         </div>
     </div>
 
-    <!-- Экран чата (личного) -->
+    <!-- Экран "Мои Каналы" -->
+    <div id="myChannelsScreen" class="my-channels-screen hidden">
+        <div class="my-channels-header">
+            <button class="back-button" id="backFromMyChannelsBtn">←</button>
+            <h1>Мои каналы</h1>
+            <div style="width: 28px;"></div>
+        </div>
+        <div class="my-channels-list" id="myChannelsList"></div>
+    </div>
+
+    <!-- Экран чата -->
     <div id="chatScreen" class="chat-screen hidden">
         <div class="chat-header">
             <button class="back-button" id="backToChatsBtn">←</button>
@@ -469,7 +477,7 @@
         <div class="channel-header">
             <button class="back-button" id="backFromChannelBtn">←</button>
             <div class="channel-header-info">
-                <div class="channel-header-avatar" id="channelHeaderAvatar">📢</div>
+                <div class="channel-header-avatar" id="channelHeaderAvatar">k</div>
                 <div class="channel-header-text">
                     <div class="channel-header-name" id="channelHeaderName">Канал</div>
                     <div class="channel-header-status" id="channelHeaderStatus"></div>
@@ -488,7 +496,7 @@
     <div class="channel-menu" id="channelMenu">
         <div class="channel-menu-item" id="copyChannelIdBtn"> Скопировать ID канала</div>
         <div class="channel-menu-item" id="subscribeChannelBtn"> Отписаться</div>
-        <div class="channel-menu-item delete" id="deleteChannelBtn">Удалить канал</div>
+        <div class="channel-menu-item delete" id="deleteChannelBtn"> Удалить канал</div>
         <div class="channel-menu-cancel" id="cancelChannelMenu">Отмена</div>
     </div>
 
@@ -516,7 +524,14 @@
                         <div class="setting-label">Мой BIN ID</div>
                         <div class="setting-description" id="currentBinDisplay">Загрузка...</div>
                     </div>
-                    <span class="setting-value"></span>
+                    <span class="setting-value">📋</span>
+                </div>
+                <div class="setting-item" id="myChannelsBtn">
+                    <div class="setting-info">
+                        <div class="setting-label">Мои Каналы</div>
+                        <div class="setting-description">Управление вашими каналами</div>
+                    </div>
+                    <span class="setting-value">k</span>
                 </div>
                 <div class="setting-item" id="findChannelBtn">
                     <div class="setting-info">
@@ -560,7 +575,7 @@
     let myBinId = null;
     let privateChats = [];
     let favoritesMessages = [];
-    let myChannels = []; // Каналы, на которые подписан пользователь (локальное хранилище)
+    let myChannels = [];
     let currentChat = null;
     let currentChannel = null;
     let pendingFile = null;
@@ -568,10 +583,12 @@
     
     const registerScreen = document.getElementById('registerScreen');
     const chatsScreen = document.getElementById('chatsScreen');
+    const myChannelsScreen = document.getElementById('myChannelsScreen');
     const chatScreen = document.getElementById('chatScreen');
     const channelScreen = document.getElementById('channelScreen');
     const settingsScreen = document.getElementById('settingsScreen');
     const chatsList = document.getElementById('chatsList');
+    const myChannelsList = document.getElementById('myChannelsList');
     const channelMenu = document.getElementById('channelMenu');
     const channelMenuOverlay = document.getElementById('channelMenuOverlay');
     const showInfo = (t)=>{ let toast=document.getElementById('infoToast'); toast.textContent='✅ '+t; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),2500);};
@@ -617,7 +634,6 @@
         if (!channel) return false;
         
         try {
-            // Удаляем из API если мы владелец
             if (channel.ownerBinId === myBinId) {
                 await fetch(CHANNEL_API_URL + '/' + channel.id, { method: 'DELETE' });
                 let resp = await fetch(CHANNEL_API_URL);
@@ -627,7 +643,6 @@
                     await fetch(CHANNEL_API_URL + '/' + post.id, { method: 'DELETE' });
                 }
             } else {
-                // Если не владелец - просто отписываемся
                 let fullChannel = await getChannelInfo(channelId);
                 if (fullChannel) {
                     fullChannel.subscribers = fullChannel.subscribers.filter(id => id !== myBinId);
@@ -651,11 +666,9 @@
         let channelInfo = await getChannelInfo(channelId);
         if (!channelInfo) return null;
         
-        // Проверяем, подписан ли уже
         let existing = myChannels.find(c => c.channelId === channelId);
         if (existing) return existing;
         
-        // Добавляем подписчика в API если еще нет
         if (!channelInfo.subscribers.includes(myBinId)) {
             channelInfo.subscribers.push(myBinId);
             await fetch(CHANNEL_API_URL + '/' + channelInfo.id, {
@@ -665,7 +678,6 @@
             });
         }
         
-        // Добавляем в локальный список
         let channel = {
             id: channelInfo.id,
             channelId: channelInfo.channelId,
@@ -733,6 +745,47 @@
         } 
     }
     
+    function renderMyChannelsList() {
+        let myOwnChannels = myChannels.filter(c => c.ownerBinId === myBinId);
+        
+        if (myOwnChannels.length === 0) {
+            myChannelsList.innerHTML = '<div class="empty-chat">У вас нет созданных каналов</div>';
+            return;
+        }
+        
+        let html = '';
+        for (let channel of myOwnChannels) {
+            let subscriberCount = channel.subscribers?.length || 0;
+            html += `<div class="my-channel-item">
+                <div class="my-channel-avatar avatar-channel">📢</div>
+                <div class="my-channel-content">
+                    <div class="my-channel-header-row">
+                        <span class="my-channel-name">${escapeHtml(channel.name)}</span>
+                        <span class="subscriber-count">👥 ${subscriberCount}</span>
+                    </div>
+                    <div class="my-channel-message-row">
+                        <span class="my-channel-description">${escapeHtml(channel.description || 'Нет описания')}</span>
+                    </div>
+                    <div class="channel-id" style="display: flex; align-items: center; justify-content: space-between; margin-top: 4px;">
+                        <span style="font-family: monospace;">${channel.channelId}</span>
+                        <button class="copy-id-btn" data-channel-id="${channel.channelId}" style="background: none; border: none; color: #3390ec; cursor: pointer; font-size: 16px;">📋</button>
+                    </div>
+                </div>
+            </div>`;
+        }
+        
+        myChannelsList.innerHTML = html;
+        
+        document.querySelectorAll('.copy-id-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                let id = btn.dataset.channelId;
+                navigator.clipboard?.writeText(id);
+                showInfo('ID скопирован: ' + id);
+            });
+        });
+    }
+    
     async function renderChatsList(){
         let searchTerm = document.getElementById('searchInput')?.value.toLowerCase() || '';
         let html = '';
@@ -752,7 +805,6 @@
             </div>
         </div>`;
         
-        // Показываем только каналы, на которые подписан пользователь
         for(let channel of myChannels) {
             if (searchTerm && !channel.name.toLowerCase().includes(searchTerm)) continue;
             let subscriberCount = channel.subscribers?.length || 0;
@@ -835,7 +887,6 @@
             return;
         }
         
-        // Обновляем информацию о канале
         let updated = await getChannelInfo(channelId);
         if (updated) {
             currentChannel.name = updated.name;
@@ -857,9 +908,6 @@
         
         let isOwner = currentChannel.ownerBinId === myBinId;
         document.getElementById('createPostBtn').style.display = isOwner ? 'block' : 'none';
-        
-        // Обновляем текст в меню
-        document.getElementById('subscribeChannelBtn').textContent = '👥 Отписаться';
         
         await renderChannelPosts(channelId);
     }
@@ -1096,6 +1144,7 @@
             settingsScreen.classList.add('hidden');
             chatScreen.classList.add('hidden');
             channelScreen.classList.add('hidden');
+            myChannelsScreen.classList.add('hidden');
             
             if(tabName === 'chats'){
                 chatsScreen.classList.remove('hidden');
@@ -1128,9 +1177,22 @@
         renderChatsList();
     });
     
+    document.getElementById('backFromMyChannelsBtn')?.addEventListener('click', () => {
+        myChannelsScreen.classList.add('hidden');
+        settingsScreen.classList.remove('hidden');
+    });
+    
     document.getElementById('searchInput')?.addEventListener('input', () => renderChatsList());
     
-    // Кнопка + для добавления чата по BIN ID
+    // Кнопка "Мои Каналы" в настройках
+    document.getElementById('myChannelsBtn')?.addEventListener('click', async () => {
+        await refreshMyChannels();
+        renderMyChannelsList();
+        settingsScreen.classList.add('hidden');
+        myChannelsScreen.classList.remove('hidden');
+    });
+    
+    // Кнопка + для добавления чата
     document.getElementById('addChatBtn')?.addEventListener('click', () => {
         let ov = document.createElement('div');
         ov.className = 'modal-overlay';
@@ -1166,7 +1228,7 @@
         inp.addEventListener('keydown', e => { if(e.key === 'Enter') create(); });
     });
     
-    // Найти канал по ID (в настройках)
+    // Найти канал по ID
     document.getElementById('findChannelBtn')?.addEventListener('click', async () => {
         let ov = document.createElement('div');
         ov.className = 'modal-overlay';
