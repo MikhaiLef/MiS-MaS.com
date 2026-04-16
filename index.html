@@ -403,7 +403,7 @@
     <div class="register-card">
         <div class="register-logo"></div>
         <h2 class="register-title">MiS-MaS</h2>
-        <p class="register-subtitle">Добро пожаловать!</p>
+        <p class="register-subtitle">Привет!</p>
         <div class="register-input-wrapper"><span>👤</span><input type="text" id="registerNameInput" class="register-input" placeholder="Ваше имя"></div>
         <p class="register-hint">Имя будет видно в чатах и каналах</p>
         <button class="register-btn" id="registerBtn" disabled>Продолжить</button>
@@ -486,9 +486,9 @@
     <!-- Меню канала -->
     <div class="channel-menu-overlay" id="channelMenuOverlay"></div>
     <div class="channel-menu" id="channelMenu">
-        <div class="channel-menu-item" id="copyChannelIdBtn">📋 Скопировать ID канала</div>
-        <div class="channel-menu-item" id="subscribeChannelBtn">👥 Подписаться/Отписаться</div>
-        <div class="channel-menu-item delete" id="deleteChannelBtn">🗑️ Удалить канал</div>
+        <div class="channel-menu-item" id="copyChannelIdBtn"> Скопировать ID канала</div>
+        <div class="channel-menu-item" id="subscribeChannelBtn"> Отписаться</div>
+        <div class="channel-menu-item delete" id="deleteChannelBtn">Удалить канал</div>
         <div class="channel-menu-cancel" id="cancelChannelMenu">Отмена</div>
     </div>
 
@@ -506,7 +506,7 @@
                         <div class="setting-label">Имя пользователя</div>
                         <div class="setting-description" id="currentNameDisplay"></div>
                     </div>
-                    <span class="setting-value">✏️</span>
+                    <span class="setting-value"></span>
                 </div>
             </div>
             <div class="settings-section">
@@ -516,7 +516,7 @@
                         <div class="setting-label">Мой BIN ID</div>
                         <div class="setting-description" id="currentBinDisplay">Загрузка...</div>
                     </div>
-                    <span class="setting-value">📋</span>
+                    <span class="setting-value"></span>
                 </div>
                 <div class="setting-item" id="findChannelBtn">
                     <div class="setting-info">
@@ -560,7 +560,7 @@
     let myBinId = null;
     let privateChats = [];
     let favoritesMessages = [];
-    let channels = [];
+    let myChannels = []; // Каналы, на которые подписан пользователь (локальное хранилище)
     let currentChat = null;
     let currentChannel = null;
     let pendingFile = null;
@@ -585,68 +585,132 @@
     function savePrivateChats(){ localStorage.setItem('mios_private_chats',JSON.stringify(privateChats)); }
     function loadFavorites(){ try{ favoritesMessages=JSON.parse(localStorage.getItem('mios_fav')||'[]'); }catch(e){ favoritesMessages=[]; } }
     function saveFavorites(){ localStorage.setItem('mios_fav',JSON.stringify(favoritesMessages)); }
+    function loadMyChannels(){ try{ myChannels = JSON.parse(localStorage.getItem('mios_my_channels')||'[]'); }catch(e){ myChannels=[]; } }
+    function saveMyChannels(){ localStorage.setItem('mios_my_channels', JSON.stringify(myChannels)); }
     
     loadPrivateChats();
     loadFavorites();
+    loadMyChannels();
     
-    async function loadChannels() {
+    async function getChannelInfo(channelId) {
         try {
             let resp = await fetch(CHANNEL_API_URL);
             let all = await resp.json();
-            channels = all.filter(m => m.type === 'channel').map(c => ({
-                id: c.id,
-                channelId: c.channelId,
-                name: c.name,
-                description: c.description,
-                ownerBinId: c.ownerBinId,
-                subscribers: c.subscribers || [],
-                createdAt: c.createdAt
-            }));
-            localStorage.setItem('mios_channels', JSON.stringify(channels));
-        } catch(e) {
-            channels = JSON.parse(localStorage.getItem('mios_channels') || '[]');
-        }
+            let channel = all.find(m => m.type === 'channel' && m.channelId === channelId);
+            if (channel) {
+                return {
+                    id: channel.id,
+                    channelId: channel.channelId,
+                    name: channel.name,
+                    description: channel.description,
+                    ownerBinId: channel.ownerBinId,
+                    subscribers: channel.subscribers || [],
+                    createdAt: channel.createdAt
+                };
+            }
+        } catch(e) {}
+        return null;
     }
     
     async function deleteChannel(channelId) {
-        let channel = channels.find(c => c.channelId === channelId);
+        let channel = myChannels.find(c => c.channelId === channelId);
         if (!channel) return false;
         
         try {
-            await fetch(CHANNEL_API_URL + '/' + channel.id, { method: 'DELETE' });
-            let resp = await fetch(CHANNEL_API_URL);
-            let all = await resp.json();
-            let posts = all.filter(m => m.type === 'post' && m.channelId === channelId);
-            for (let post of posts) {
-                await fetch(CHANNEL_API_URL + '/' + post.id, { method: 'DELETE' });
+            // Удаляем из API если мы владелец
+            if (channel.ownerBinId === myBinId) {
+                await fetch(CHANNEL_API_URL + '/' + channel.id, { method: 'DELETE' });
+                let resp = await fetch(CHANNEL_API_URL);
+                let all = await resp.json();
+                let posts = all.filter(m => m.type === 'post' && m.channelId === channelId);
+                for (let post of posts) {
+                    await fetch(CHANNEL_API_URL + '/' + post.id, { method: 'DELETE' });
+                }
+            } else {
+                // Если не владелец - просто отписываемся
+                let fullChannel = await getChannelInfo(channelId);
+                if (fullChannel) {
+                    fullChannel.subscribers = fullChannel.subscribers.filter(id => id !== myBinId);
+                    await fetch(CHANNEL_API_URL + '/' + fullChannel.id, {
+                        method: 'PUT',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(fullChannel)
+                    });
+                }
             }
-            channels = channels.filter(c => c.channelId !== channelId);
-            localStorage.setItem('mios_channels', JSON.stringify(channels));
+            
+            myChannels = myChannels.filter(c => c.channelId !== channelId);
+            saveMyChannels();
             return true;
         } catch(e) {
             return false;
         }
     }
     
-    async function subscribeToChannel(channel) {
-        if (!channel.subscribers) channel.subscribers = [];
-        let isSubscribed = channel.subscribers.includes(myBinId);
-        if (isSubscribed) {
-            channel.subscribers = channel.subscribers.filter(id => id !== myBinId);
-        } else {
-            channel.subscribers.push(myBinId);
-        }
-        try {
-            await fetch(CHANNEL_API_URL + '/' + channel.id, {
+    async function subscribeToChannelById(channelId) {
+        let channelInfo = await getChannelInfo(channelId);
+        if (!channelInfo) return null;
+        
+        // Проверяем, подписан ли уже
+        let existing = myChannels.find(c => c.channelId === channelId);
+        if (existing) return existing;
+        
+        // Добавляем подписчика в API если еще нет
+        if (!channelInfo.subscribers.includes(myBinId)) {
+            channelInfo.subscribers.push(myBinId);
+            await fetch(CHANNEL_API_URL + '/' + channelInfo.id, {
                 method: 'PUT',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(channel)
+                body: JSON.stringify(channelInfo)
             });
-            localStorage.setItem('mios_channels', JSON.stringify(channels));
-            return !isSubscribed;
-        } catch(e) {
-            return false;
         }
+        
+        // Добавляем в локальный список
+        let channel = {
+            id: channelInfo.id,
+            channelId: channelInfo.channelId,
+            name: channelInfo.name,
+            description: channelInfo.description,
+            ownerBinId: channelInfo.ownerBinId,
+            subscribers: channelInfo.subscribers,
+            createdAt: channelInfo.createdAt
+        };
+        
+        myChannels.push(channel);
+        saveMyChannels();
+        return channel;
+    }
+    
+    async function unsubscribeFromChannel(channelId) {
+        let channel = myChannels.find(c => c.channelId === channelId);
+        if (!channel) return false;
+        
+        let fullChannel = await getChannelInfo(channelId);
+        if (fullChannel) {
+            fullChannel.subscribers = fullChannel.subscribers.filter(id => id !== myBinId);
+            await fetch(CHANNEL_API_URL + '/' + fullChannel.id, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(fullChannel)
+            });
+        }
+        
+        myChannels = myChannels.filter(c => c.channelId !== channelId);
+        saveMyChannels();
+        return true;
+    }
+    
+    async function refreshMyChannels() {
+        for (let channel of myChannels) {
+            let updated = await getChannelInfo(channel.channelId);
+            if (updated) {
+                channel.name = updated.name;
+                channel.description = updated.description;
+                channel.subscribers = updated.subscribers;
+                channel.ownerBinId = updated.ownerBinId;
+            }
+        }
+        saveMyChannels();
     }
     
     async function getOrCreateBinId(){ 
@@ -688,11 +752,11 @@
             </div>
         </div>`;
         
-        for(let channel of channels) {
+        // Показываем только каналы, на которые подписан пользователь
+        for(let channel of myChannels) {
             if (searchTerm && !channel.name.toLowerCase().includes(searchTerm)) continue;
             let subscriberCount = channel.subscribers?.length || 0;
             let isOwner = channel.ownerBinId === myBinId;
-            let isSubscribed = channel.subscribers?.includes(myBinId);
             html += `<div class="chat-item" data-type="channel" data-id="${channel.channelId}">
                 <div class="chat-avatar avatar-channel">📢</div>
                 <div class="chat-content">
@@ -701,7 +765,6 @@
                             ${escapeHtml(channel.name)}
                             <span class="channel-badge">канал</span>
                             ${isOwner ? '<span class="verified-badge">✓</span>' : ''}
-                            ${isSubscribed ? '<span style="color: #3390ec; font-size: 12px;">✓ подписаны</span>' : ''}
                         </span>
                     </div>
                     <div class="chat-message-row">
@@ -766,11 +829,20 @@
     }
     
     async function openChannel(channelId) {
-        await loadChannels();
-        currentChannel = channels.find(c => c.channelId === channelId);
+        currentChannel = myChannels.find(c => c.channelId === channelId);
         if (!currentChannel) {
             showError('Канал не найден');
             return;
+        }
+        
+        // Обновляем информацию о канале
+        let updated = await getChannelInfo(channelId);
+        if (updated) {
+            currentChannel.name = updated.name;
+            currentChannel.description = updated.description;
+            currentChannel.subscribers = updated.subscribers;
+            currentChannel.ownerBinId = updated.ownerBinId;
+            saveMyChannels();
         }
         
         chatsScreen.classList.add('hidden');
@@ -781,11 +853,13 @@
         document.getElementById('channelHeaderAvatar').className = 'chat-header-avatar avatar-channel';
         
         let subscriberCount = currentChannel.subscribers?.length || 0;
-        let isSubscribed = currentChannel.subscribers?.includes(myBinId);
-        document.getElementById('channelHeaderStatus').textContent = `👥 ${subscriberCount} подписчиков` + (isSubscribed ? ' • вы подписаны' : '');
+        document.getElementById('channelHeaderStatus').textContent = `👥 ${subscriberCount} подписчиков`;
         
         let isOwner = currentChannel.ownerBinId === myBinId;
         document.getElementById('createPostBtn').style.display = isOwner ? 'block' : 'none';
+        
+        // Обновляем текст в меню
+        document.getElementById('subscribeChannelBtn').textContent = '👥 Отписаться';
         
         await renderChannelPosts(channelId);
     }
@@ -1025,6 +1099,7 @@
             
             if(tabName === 'chats'){
                 chatsScreen.classList.remove('hidden');
+                await refreshMyChannels();
                 await renderChatsList();
             } else if(tabName === 'settings'){
                 settingsScreen.classList.remove('hidden');
@@ -1093,8 +1168,6 @@
     
     // Найти канал по ID (в настройках)
     document.getElementById('findChannelBtn')?.addEventListener('click', async () => {
-        await loadChannels();
-        
         let ov = document.createElement('div');
         ov.className = 'modal-overlay';
         ov.innerHTML = `<div class="modal">
@@ -1103,7 +1176,7 @@
             <div class="modal-hint">ID канала начинается с "ch_"</div>
             <div class="modal-actions">
                 <button class="modal-btn cancel">Отмена</button>
-                <button class="modal-btn" id="confirmFindChannel">Найти</button>
+                <button class="modal-btn" id="confirmFindChannel">Подписаться</button>
             </div>
         </div>`;
         document.body.appendChild(ov);
@@ -1112,23 +1185,19 @@
         let find = async () => {
             let id = inp.value.trim();
             if(!id) return showError('Введите ID канала');
+            if (!id.startsWith('ch_')) return showError('Неверный формат ID канала');
             
-            let channel = channels.find(c => c.channelId === id);
+            let channel = await subscribeToChannelById(id);
             if (!channel) {
                 showError('Канал с таким ID не найден');
                 return;
             }
             
+            showInfo('Вы подписались на канал: ' + channel.name);
             ov.remove();
             settingsScreen.classList.add('hidden');
-            chatsScreen.classList.add('hidden');
-            
-            // Подписываем автоматически
-            if (!channel.subscribers.includes(myBinId)) {
-                await subscribeToChannel(channel);
-            }
-            
-            openChannel(id);
+            chatsScreen.classList.remove('hidden');
+            await renderChatsList();
         };
         
         ov.querySelector('#confirmFindChannel').onclick = find;
@@ -1174,8 +1243,17 @@
                 });
                 if(resp.ok){
                     let newChannel = await resp.json();
-                    channels.push(newChannel);
-                    localStorage.setItem('mios_channels', JSON.stringify(channels));
+                    let channel = {
+                        id: newChannel.id,
+                        channelId: newChannel.channelId,
+                        name: newChannel.name,
+                        description: newChannel.description,
+                        ownerBinId: newChannel.ownerBinId,
+                        subscribers: newChannel.subscribers,
+                        createdAt: newChannel.createdAt
+                    };
+                    myChannels.push(channel);
+                    saveMyChannels();
                     showInfo('Канал создан! ID: ' + channelId);
                     ov.remove();
                     await renderChatsList();
@@ -1220,12 +1298,11 @@
     
     document.getElementById('subscribeChannelBtn')?.addEventListener('click', async () => {
         if (!currentChannel) return;
-        let success = await subscribeToChannel(currentChannel);
-        if (success !== false) {
-            showInfo(success ? 'Вы подписались на канал' : 'Вы отписались от канала');
-            await renderChatsList();
-            await openChannel(currentChannel.channelId);
-        }
+        await unsubscribeFromChannel(currentChannel.channelId);
+        showInfo('Вы отписались от канала');
+        channelScreen.classList.add('hidden');
+        chatsScreen.classList.remove('hidden');
+        await renderChatsList();
         channelMenuOverlay.classList.remove('show');
         channelMenu.classList.remove('show');
     });
@@ -1411,7 +1488,7 @@
     
     async function initApp(){
         await getOrCreateBinId();
-        await loadChannels();
+        await refreshMyChannels();
         
         let botChat = privateChats.find(c => c.id === 'bot_chat');
         if(!botChat){
@@ -1431,19 +1508,25 @@
     if(checkRegistration()) initApp();
     
     setInterval(async () => {
-        if(!chatsScreen.classList.contains('hidden')) await renderChatsList();
+        if(!chatsScreen.classList.contains('hidden')) {
+            await refreshMyChannels();
+            await renderChatsList();
+        }
         if(currentChat && currentChat !== 'favorites' && !chatScreen.classList.contains('hidden')){
             let priv = privateChats.find(c => c.id === currentChat);
             if(priv) await loadPrivateMessages(priv);
         }
         if(currentChannel && !channelScreen.classList.contains('hidden')){
-            await loadChannels();
-            let updated = channels.find(c => c.channelId === currentChannel.channelId);
+            let updated = await getChannelInfo(currentChannel.channelId);
             if (updated) {
-                currentChannel = updated;
+                currentChannel.name = updated.name;
+                currentChannel.description = updated.description;
+                currentChannel.subscribers = updated.subscribers;
+                currentChannel.ownerBinId = updated.ownerBinId;
+                saveMyChannels();
                 let subscriberCount = updated.subscribers?.length || 0;
-                let isSubscribed = updated.subscribers?.includes(myBinId);
-                document.getElementById('channelHeaderStatus').textContent = `👥 ${subscriberCount} подписчиков` + (isSubscribed ? ' • вы подписаны' : '');
+                document.getElementById('channelHeaderStatus').textContent = `👥 ${subscriberCount} подписчиков`;
+                document.getElementById('createPostBtn').style.display = (updated.ownerBinId === myBinId) ? 'block' : 'none';
             }
         }
     }, 5000);
