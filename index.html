@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>MiS-MaS — Файлы до 1 ГБ + Каналы</title>
+    <title>MiS-MaS</title>
     <style>
         * {
             margin: 0;
@@ -30,8 +30,7 @@
         body.light-theme .chat-screen,
         body.light-theme .chats-list,
         body.light-theme .messages-container,
-        body.light-theme .settings-screen,
-        body.light-theme .channel-screen {
+        body.light-theme .settings-screen {
             background: #ffffff;
         }
 
@@ -39,8 +38,7 @@
         body.light-theme .chat-header,
         body.light-theme .settings-header,
         body.light-theme .input-panel,
-        body.light-theme .bottom-tabs,
-        body.light-theme .channel-header {
+        body.light-theme .bottom-tabs {
             background: #ffffff;
             border-color: #e5e5ea;
         }
@@ -48,16 +46,14 @@
         body.light-theme .chat-name,
         body.light-theme .chat-header-name,
         body.light-theme .settings-header h1,
-        body.light-theme .setting-label,
-        body.light-theme .channel-name {
+        body.light-theme .setting-label {
             color: #000000;
         }
 
         body.light-theme .chat-last-message,
         body.light-theme .chat-time,
         body.light-theme .chat-header-status,
-        body.light-theme .setting-description,
-        body.light-theme .channel-description {
+        body.light-theme .setting-description {
             color: #8e8e93;
         }
 
@@ -257,36 +253,6 @@
             font-weight: 600;
         }
 
-        .segmented-control {
-            display: flex;
-            background: #1c1c1e;
-            border-radius: 10px;
-            padding: 2px;
-            margin: 8px 16px;
-        }
-
-        body.light-theme .segmented-control {
-            background: #f2f2f7;
-        }
-
-        .segment-btn {
-            flex: 1;
-            background: none;
-            border: none;
-            color: #8e8e93;
-            padding: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            border-radius: 8px;
-            transition: all 0.2s;
-        }
-
-        .segment-btn.active {
-            background: #3390ec;
-            color: white;
-        }
-
         .search-container {
             padding: 8px 16px;
             background: #000000;
@@ -362,7 +328,6 @@
         .avatar-bot { background: #af52de; }
         .avatar-private { background: #30b0c0; }
         .avatar-file { background: #5e5ce0; }
-        .avatar-channel { background: #ff375f; }
 
         .chat-content {
             flex: 1;
@@ -437,14 +402,6 @@
             flex-shrink: 0;
         }
 
-        .subscriber-count {
-            font-size: 12px;
-            color: #8e8e93;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
         .bottom-tabs {
             background: #000000;
             border-top: 0.5px solid #1c1c1e;
@@ -473,97 +430,6 @@
 
         .bottom-tab-icon {
             font-size: 22px;
-        }
-
-        /* ----- ЭКРАН КАНАЛА ----- */
-        .channel-screen {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            background: #000000;
-        }
-
-        .channel-screen.hidden {
-            display: none;
-        }
-
-        .channel-header {
-            background: #000000;
-            padding: 8px 16px;
-            border-bottom: 0.5px solid #1c1c1e;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-
-        .channel-header-info {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .channel-header-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            background: #ff375f;
-        }
-
-        .channel-header-text {
-            flex: 1;
-        }
-
-        .channel-header-name {
-            font-size: 16px;
-            font-weight: 600;
-            color: #ffffff;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .channel-header-status {
-            font-size: 13px;
-            color: #8e8e93;
-        }
-
-        .subscribe-btn {
-            background: #3390ec;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 20px;
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .subscribe-btn.subscribed {
-            background: #8e8e93;
-        }
-
-        .create-post-btn {
-            background: #3390ec;
-            border: none;
-            color: white;
-            font-size: 24px;
-            width: 56px;
-            height: 56px;
-            border-radius: 28px;
-            position: fixed;
-            bottom: 80px;
-            right: 20px;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            z-index: 100;
         }
 
         /* ----- ЭКРАН ЧАТА ----- */
@@ -1012,18 +878,14 @@
 </head>
 <body>
 <div id="registerScreen" class="register-screen">
-    <div class="register-card"><div class="register-logo">📁</div><h2 class="register-title">MiS-MaS</h2><p class="register-subtitle">Файлы до 1 ГБ + Каналы</p>
+    <div class="register-card"><div class="register-logo">📁</div><h2 class="register-title">MiS-MaS</h2><p class="register-subtitle">Файлы до 1 ГБ</p>
         <div class="register-input-wrapper"><span>👤</span><input type="text" id="registerNameInput" class="register-input" placeholder="Ваше имя"></div>
-        <p class="register-hint">Имя будет видно в чатах и каналах</p><button class="register-btn" id="registerBtn" disabled>Продолжить</button>
+        <p class="register-hint">Имя будет видно в чатах</p><button class="register-btn" id="registerBtn" disabled>Продолжить</button>
     </div>
 </div>
 <div class="app">
     <div id="chatsScreen" class="chats-screen">
-        <div class="chats-header"><h1>MiS-MaS</h1><div class="header-actions"><button class="header-icon" id="addChatBtn">+</button></div></div>
-        <div class="segmented-control">
-            <button class="segment-btn active" data-segment="chats">💬 Чаты</button>
-            <button class="segment-btn" data-segment="channels">📢 Каналы</button>
-        </div>
+        <div class="chats-header"><h1>Чаты</h1><div class="header-actions"><button class="header-icon" id="addChatBtn">+</button></div></div>
         <div class="search-container"><div class="search-bar"><span>🔍</span><input type="text" placeholder="Поиск" id="searchInput"></div></div>
         <div class="chats-list" id="chatsList"></div>
         <div class="bottom-tabs"><button class="bottom-tab active" data-tab="chats"><span class="bottom-tab-icon">💬</span><span>Чаты</span></button><button class="bottom-tab" data-tab="settings"><span class="bottom-tab-icon">⚙️</span><span>Настройки</span></button></div>
@@ -1034,12 +896,7 @@
         <div class="file-preview-container" id="filePreviewContainer" style="display: none;"><div class="file-preview-card" id="filePreviewCard"><span class="file-icon" id="previewFileIcon">📎</span><div class="file-info"><div class="file-name" id="previewFileName"></div><div class="file-size" id="previewFileSize"></div></div><button class="remove-preview-btn" id="removeFilePreviewBtn">✕</button></div></div>
         <div class="input-panel"><button class="attach-btn" id="attachBtn">📎</button><div class="input-wrapper"><textarea id="messageField" placeholder="Сообщение или описание файла" rows="1"></textarea></div><button class="send-btn" id="sendBtn">➤</button></div>
     </div>
-    <div id="channelScreen" class="channel-screen hidden">
-        <div class="channel-header"><button class="back-button" id="backFromChannelBtn">←</button><div class="channel-header-info"><div class="channel-header-avatar" id="channelHeaderAvatar">📢</div><div class="channel-header-text"><div class="channel-header-name" id="channelHeaderName">Канал</div><div class="channel-header-status" id="channelHeaderStatus"></div></div></div><button class="subscribe-btn" id="subscribeBtn">Подписаться</button></div>
-        <div class="messages-container" id="channelMessagesContainer"><div class="messages-list" id="channelMessagesList"></div></div>
-        <button class="create-post-btn" id="createPostBtn" style="display: none;">+</button>
-    </div>
-    <div id="settingsScreen" class="settings-screen hidden"><div class="settings-header"><button class="back-button" id="backFromSettingsBtn">←</button><h1>Настройки</h1></div><div class="settings-content"><div class="settings-section"><div class="settings-section-title">Профиль</div><div class="setting-item" id="changeNameBtn"><div class="setting-info"><div class="setting-label">Имя пользователя</div><div class="setting-description" id="currentNameDisplay"></div></div><span class="setting-value">✏️</span></div></div><div class="settings-section"><div class="settings-section-title">Основные</div><div class="setting-item" id="showMyBinBtn"><div class="setting-info"><div class="setting-label">Мой BIN ID</div><div class="setting-description" id="currentBinDisplay">Загрузка...</div></div><span class="setting-value">📋</span></div><div class="setting-item" id="createChannelBtn"><div class="setting-info"><div class="setting-label">Создать канал</div><div class="setting-description">Создайте свой канал</div></div><span class="setting-value">📢</span></div><div class="setting-item" id="themeToggle"><div class="setting-info"><div class="setting-label">Тема</div><div class="setting-description" id="themeDescription">Тёмная</div></div><span class="setting-value" id="themeIcon">🌙</span></div></div><div class="settings-section"><div class="settings-section-title">Уведомления</div><div class="setting-item" id="notificationsToggle"><div class="setting-info"><div class="setting-label">Уведомления</div><div class="setting-description" id="notificationsStatus">Включены</div></div><div class="toggle-switch active" id="notificationsSwitch"></div></div></div></div></div>
+    <div id="settingsScreen" class="settings-screen hidden"><div class="settings-header"><button class="back-button" id="backFromSettingsBtn">←</button><h1>Настройки</h1></div><div class="settings-content"><div class="settings-section"><div class="settings-section-title">Профиль</div><div class="setting-item" id="changeNameBtn"><div class="setting-info"><div class="setting-label">Имя пользователя</div><div class="setting-description" id="currentNameDisplay"></div></div><span class="setting-value">✏️</span></div></div><div class="settings-section"><div class="settings-section-title">Основные</div><div class="setting-item" id="showMyBinBtn"><div class="setting-info"><div class="setting-label">Мой BIN ID</div><div class="setting-description" id="currentBinDisplay">Загрузка...</div></div><span class="setting-value">📋</span></div><div class="setting-item" id="createChannelBtn"><div class="setting-info"><div class="setting-label">Создать канал</div><div class="setting-description">Создайте свой канал</div></div><span class="setting-value">+</span></div><div class="setting-item" id="themeToggle"><div class="setting-info"><div class="setting-label">Тема</div><div class="setting-description" id="themeDescription">Тёмная</div></div><span class="setting-value" id="themeIcon">🌙</span></div></div><div class="settings-section"><div class="settings-section-title">Уведомления</div><div class="setting-item" id="notificationsToggle"><div class="setting-info"><div class="setting-label">Уведомления</div><div class="setting-description" id="notificationsStatus">Включены</div></div><div class="toggle-switch active" id="notificationsSwitch"></div></div></div></div></div>
 </div>
 <input type="file" id="fileInput">
 <div id="infoToast" class="toast">✅</div><div id="errorToast" class="toast error">⚠️</div>
@@ -1055,9 +912,6 @@
         let privateChats = [];
         let favoritesMessages = [];
         let currentChat = null;
-        let currentChannel = null;
-        let channels = [];
-        let currentSegment = 'chats';
         let pendingFile = null;
         let notificationsEnabled = localStorage.getItem('mios_notifications') !== 'false';
         let currentTheme = localStorage.getItem('mios_theme') || 'dark';
@@ -1068,21 +922,13 @@
         const registerBtn = document.getElementById('registerBtn');
         const chatsScreen = document.getElementById('chatsScreen');
         const chatScreen = document.getElementById('chatScreen');
-        const channelScreen = document.getElementById('channelScreen');
         const settingsScreen = document.getElementById('settingsScreen');
         const chatsList = document.getElementById('chatsList');
         const messagesListEl = document.getElementById('messagesList');
-        const channelMessagesList = document.getElementById('channelMessagesList');
         const messagesContainer = document.getElementById('messagesContainer');
-        const channelMessagesContainer = document.getElementById('channelMessagesContainer');
         const chatHeaderName = document.getElementById('chatHeaderName');
         const chatHeaderAvatar = document.getElementById('chatHeaderAvatar');
         const chatHeaderStatus = document.getElementById('chatHeaderStatus');
-        const channelHeaderName = document.getElementById('channelHeaderName');
-        const channelHeaderAvatar = document.getElementById('channelHeaderAvatar');
-        const channelHeaderStatus = document.getElementById('channelHeaderStatus');
-        const subscribeBtn = document.getElementById('subscribeBtn');
-        const createPostBtn = document.getElementById('createPostBtn');
         const messageField = document.getElementById('messageField');
         const sendBtn = document.getElementById('sendBtn');
         const attachBtn = document.getElementById('attachBtn');
@@ -1092,7 +938,7 @@
         const previewFileSize = document.getElementById('previewFileSize');
         const removeFilePreviewBtn = document.getElementById('removeFilePreviewBtn');
         const showInfo = (t)=>{ let toast=document.getElementById('infoToast'); toast.textContent='✅ '+t; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),2500);};
-        const showError = (t)=>{ let toast=document.getElementById('errorToast'); toast.textContent='⚠️ '+t; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),3000);};
+        const showError = (t)=>{ let toast=document.getElementById('errorToast'); toast.textContent='⚠ '+t; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),3000);};
         
         function formatSize(bytes){ if(bytes<1024) return bytes+' Б'; if(bytes<1048576) return (bytes/1024).toFixed(1)+' КБ'; return (bytes/1048576).toFixed(1)+' МБ'; }
         function escapeHtml(s){ return String(s).replace(/[&<>]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
@@ -1113,165 +959,7 @@
         function completeRegistration(){ let name=registerNameInput.value.trim(); if(!name) return; savedUsername=name; localStorage.setItem('mios_username',savedUsername); localStorage.setItem('mios_registered','true'); isRegistered=true; updateNameDisplay(); registerScreen.classList.add('hidden'); showInfo('Добро пожаловать!'); initApp(); }
         registerBtn?.addEventListener('click',completeRegistration);
         
-        // Каналы
-        async function loadChannels(){
-            try {
-                let resp = await fetch(CHANNEL_API_URL);
-                let all = await resp.json();
-                channels = all.filter(m => m.type === 'channel_info').map(c => ({
-                    id: c.id,
-                    channelId: c.channelId,
-                    name: c.name,
-                    description: c.description,
-                    ownerBinId: c.ownerBinId,
-                    subscribers: c.subscribers || [],
-                    createdAt: c.createdAt
-                }));
-                localStorage.setItem('mios_channels', JSON.stringify(channels));
-            } catch(e) {
-                channels = JSON.parse(localStorage.getItem('mios_channels') || '[]');
-            }
-        }
-
-        async function createChannel(name, description) {
-            let channelId = 'ch_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
-            let channelData = {
-                type: 'channel_info',
-                channelId: channelId,
-                name: name,
-                description: description,
-                ownerBinId: myBinId,
-                subscribers: [myBinId],
-                createdAt: new Date().toLocaleString('ru-RU')
-            };
-            try {
-                let resp = await fetch(CHANNEL_API_URL, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(channelData)
-                });
-                if (resp.ok) {
-                    let newChannel = await resp.json();
-                    channels.push(newChannel);
-                    localStorage.setItem('mios_channels', JSON.stringify(channels));
-                    showInfo('Канал создан!');
-                    await renderChannelsList();
-                }
-            } catch(e) {
-                showError('Ошибка создания канала');
-            }
-        }
-
-        async function loadChannelPosts(channelId) {
-            try {
-                let resp = await fetch(CHANNEL_API_URL);
-                let all = await resp.json();
-                return all.filter(m => m.type === 'channel_post' && m.channelId === channelId)
-                    .sort((a, b) => new Date(a.date) - new Date(b.date));
-            } catch(e) {
-                return [];
-            }
-        }
-
-        async function subscribeToChannel(channel) {
-            if (!channel.subscribers) channel.subscribers = [];
-            if (channel.subscribers.includes(myBinId)) {
-                channel.subscribers = channel.subscribers.filter(id => id !== myBinId);
-            } else {
-                channel.subscribers.push(myBinId);
-            }
-            try {
-                await fetch(CHANNEL_API_URL + '/' + channel.id, {
-                    method: 'PUT',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(channel)
-                });
-                localStorage.setItem('mios_channels', JSON.stringify(channels));
-                updateSubscribeButton(channel);
-                await renderChannelsList();
-            } catch(e) {
-                showError('Ошибка подписки');
-            }
-        }
-
-        function updateSubscribeButton(channel) {
-            if (channel.subscribers && channel.subscribers.includes(myBinId)) {
-                subscribeBtn.textContent = 'Отписаться';
-                subscribeBtn.classList.add('subscribed');
-            } else {
-                subscribeBtn.textContent = 'Подписаться';
-                subscribeBtn.classList.remove('subscribed');
-            }
-            channelHeaderStatus.textContent = `📢 ${channel.subscribers?.length || 0} подписчиков`;
-        }
-
-        async function createChannelPost(channelId, text, fileData = null) {
-            let postData = {
-                type: 'channel_post',
-                channelId: channelId,
-                authorBinId: myBinId,
-                authorName: savedUsername,
-                text: text || '',
-                date: new Date().toLocaleString('ru-RU')
-            };
-            if (fileData) {
-                postData.fileData = fileData.dataUrl;
-                postData.fileName = fileData.name;
-                postData.fileSize = fileData.size;
-                postData.fileType = fileData.type;
-            }
-            try {
-                let resp = await fetch(CHANNEL_API_URL, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(postData)
-                });
-                if (resp.ok) {
-                    showInfo('Пост опубликован!');
-                    await renderChannelPosts(channelId);
-                }
-            } catch(e) {
-                showError('Ошибка публикации');
-            }
-        }
-
-        async function renderChannelsList() {
-            let html = '';
-            for (let channel of channels) {
-                let isOwner = channel.ownerBinId === myBinId;
-                let subscriberCount = channel.subscribers?.length || 0;
-                html += `<div class="chat-item" data-channel-id="${channel.channelId}">
-                    <div class="chat-avatar avatar-channel">📢</div>
-                    <div class="chat-content">
-                        <div class="chat-header-row">
-                            <span class="chat-name">${escapeHtml(channel.name)} ${isOwner ? '<span class="verified-badge">⭐</span>' : ''}</span>
-                            <span class="subscriber-count">👥 ${subscriberCount}</span>
-                        </div>
-                        <div class="chat-message-row">
-                            <span class="chat-last-message">${escapeHtml(channel.description || 'Канал')}</span>
-                        </div>
-                    </div>
-                </div>`;
-            }
-            if (channels.length === 0) {
-                html = '<div class="empty-chat">📢 Нет каналов. Создайте свой канал в настройках!</div>';
-            }
-            chatsList.innerHTML = html;
-            
-            if (currentSegment === 'channels') {
-                document.querySelectorAll('[data-channel-id]').forEach(el => {
-                    el.addEventListener('click', () => openChannel(el.dataset.channelId));
-                });
-            } else {
-                await renderChatsList();
-            }
-        }
-
         async function renderChatsList(){
-            if (currentSegment === 'channels') {
-                await renderChannelsList();
-                return;
-            }
             let favLast=favoritesMessages.length? '📌 '+favoritesMessages[favoritesMessages.length-1].message.substring(0,30):'Нет заметок';
             let favTime=favoritesMessages.length? formatTime(favoritesMessages[favoritesMessages.length-1].date):'';
             let html=`<div class="chat-item" data-chat-id="favorites"><div class="chat-avatar avatar-fav">⭐</div><div class="chat-content"><div class="chat-header-row"><span class="chat-name">Избранное</span>${favTime?`<span class="chat-time">${favTime}</span>`:''}</div><div class="chat-message-row"><span class="chat-last-message">${favLast}</span></div></div></div>`;
@@ -1280,23 +968,23 @@
                 let lastText='Нет сообщений';
                 if(last){
                     if(last.type==='file') lastText=(last.username||'Собеседник')+': 📎 '+ (last.fileName||'Файл');
-                    else if(last.type==='image') lastText=(last.username||'Собеседник')+': 📷 Фото';
+                    else if(last.type==='image') lastText=(last.username||'Собеседник')+': 🖼 Фото';
                     else lastText=(last.username||'Собеседник')+': '+(last.message||'').substring(0,25);
                 }
                 let time=last?formatTime(last.date):'';
                 let isBot=chat.id==='bot_chat';
                 let avatarIcon=isBot?'🤖':'👤';
                 let avatarClass=isBot?'avatar-bot':'avatar-private';
-                html+=`<div class="chat-item" data-chat-id="${chat.id}"><div class="chat-avatar ${avatarClass}">${avatarIcon}</div><div class="chat-content"><div class="chat-header-row"><span class="chat-name">${escapeHtml(chat.name)}${isBot?' <span class="verified-badge">✅</span>':''}</span>${time?`<span class="chat-time">${time}</span>`:''}</div><div class="chat-message-row"><span class="chat-last-message">${escapeHtml(lastText)}</span></div></div></div>`;
+                html+=`<div class="chat-item" data-chat-id="${chat.id}"><div class="chat-avatar ${avatarClass}">${avatarIcon}</div><div class="chat-content"><div class="chat-header-row"><span class="chat-name">${escapeHtml(chat.name)}${isBot?' <span class="verified-badge">✓</span>':''}</span>${time?`<span class="chat-time">${time}</span>`:''}</div><div class="chat-message-row"><span class="chat-last-message">${escapeHtml(lastText)}</span></div></div></div>`;
             }
-            chatsList.innerHTML = html;
-            document.querySelectorAll('[data-chat-id]').forEach(el=>el.addEventListener('click',()=>openChat(el.dataset.chatId)));
+            chatsList.innerHTML=html;
+            document.querySelectorAll('.chat-item').forEach(el=>el.addEventListener('click',()=>openChat(el.dataset.chatId)));
         }
         
         async function loadPrivateMessages(chat){ try{ let resp=await fetch(API_URL); let all=await resp.json(); let msgs=all.filter(i=> i.chatId===chat.id || (i.fromBin===chat.binId && i.toBin===myBinId) || (i.toBin===chat.binId && i.fromBin===myBinId)); chat.messages=msgs.sort((a,b)=>new Date(a.date)-new Date(b.date)); savePrivateChats(); if(currentChat===chat.id && !chatScreen.classList.contains('hidden')) renderPrivateMessages(chat); }catch(e){} }
         
         function renderPrivateMessages(chat){
-            if(!chat.messages.length){ messagesListEl.innerHTML='<div class="empty-chat">✨ Нет сообщений</div>'; return; }
+            if(!chat.messages.length){ messagesListEl.innerHTML='<div class="empty-chat">Нет сообщений</div>'; return; }
             let html='';
             for(let m of chat.messages){
                 let isOwn = (m.fromBin===myBinId || m.user_id===currentUser);
@@ -1305,8 +993,8 @@
                 if(m.type==='image' && m.image){
                     html+=`<div class="message-row ${isOwn?'own':'other'}"><div class="bubble"><div class="bubble-header"><span class="name">${name}</span><span class="time">${formatTime(date)}</span></div><img src="${m.image}" class="message-image" onclick="window.openImageViewer('${m.image}')"><div class="image-caption">${escapeHtml(m.message||'')}</div></div></div>`;
                 } else if(m.type==='file' && m.fileData && m.fileName){
-                    let fileIcon=m.fileType?.startsWith('image/')?'🖼️':'📁';
-                    html+=`<div class="message-row ${isOwn?'own':'other'}"><div class="bubble"><div class="bubble-header"><span class="name">${name}</span><span class="time">${formatTime(date)}</span></div><div class="text-content">${escapeHtml(m.message||'')}</div><a class="file-attachment" href="${m.fileData}" download="${escapeHtml(m.fileName)}"><span class="file-icon">${fileIcon}</span><div class="file-info"><div class="file-name">${escapeHtml(m.fileName)}</div><div class="file-size">${formatSize(m.fileSize||0)}</div></div><span class="download-badge">⬇️</span></a></div></div>`;
+                    let fileIcon=m.fileType?.startsWith('image/')?'🖼':'📁';
+                    html+=`<div class="message-row ${isOwn?'own':'other'}"><div class="bubble"><div class="bubble-header"><span class="name">${name}</span><span class="time">${formatTime(date)}</span></div><div class="text-content">${escapeHtml(m.message||'')}</div><a class="file-attachment" href="${m.fileData}" download="${escapeHtml(m.fileName)}"><span class="file-icon">${fileIcon}</span><div class="file-info"><div class="file-name">${escapeHtml(m.fileName)}</div><div class="file-size">${formatSize(m.fileSize||0)}</div></div><span class="download-badge">↓</span></a></div></div>`;
                 } else {
                     html+=`<div class="message-row ${isOwn?'own':'other'}"><div class="bubble"><div class="bubble-header"><span class="name">${name}</span><span class="time">${formatTime(date)}</span></div><div class="text-content">${escapeHtml(m.message||m.text||'').replace(/\n/g,'<br>')}</div></div></div>`;
                 }
@@ -1318,65 +1006,6 @@
         
         window.openImageViewer = function(src){ let ov=document.createElement('div'); ov.className='image-viewer-overlay'; ov.innerHTML=`<button class="close-viewer">✕</button><img src="${src}">`; document.body.appendChild(ov); ov.addEventListener('click',(e)=>{ if(e.target===ov||e.target.classList.contains('close-viewer')) ov.remove(); }); };
         
-        async function openChannel(channelId) {
-            currentChannel = channels.find(c => c.channelId === channelId);
-            if (!currentChannel) return;
-            
-            chatsScreen.classList.add('hidden');
-            channelScreen.classList.remove('hidden');
-            
-            channelHeaderName.textContent = currentChannel.name;
-            channelHeaderAvatar.textContent = '📢';
-            updateSubscribeButton(currentChannel);
-            
-            let isOwner = currentChannel.ownerBinId === myBinId;
-            createPostBtn.style.display = isOwner ? 'block' : 'none';
-            
-            await renderChannelPosts(channelId);
-        }
-
-        async function renderChannelPosts(channelId) {
-            let posts = await loadChannelPosts(channelId);
-            if (!posts.length) {
-                channelMessagesList.innerHTML = '<div class="empty-chat">📢 Нет постов</div>';
-                return;
-            }
-            
-            let html = '';
-            for (let post of posts) {
-                let isOwn = post.authorBinId === myBinId;
-                html += `<div class="message-row ${isOwn ? 'own' : 'other'}">
-                    <div class="bubble">
-                        <div class="bubble-header">
-                            <span class="name">${escapeHtml(post.authorName || 'Автор')}</span>
-                            <span class="time">${formatTime(post.date)}</span>
-                        </div>`;
-                
-                if (post.fileData) {
-                    let fileIcon = post.fileType?.startsWith('image/') ? '🖼️' : '📁';
-                    if (post.fileType?.startsWith('image/')) {
-                        html += `<img src="${post.fileData}" class="message-image" onclick="window.openImageViewer('${post.fileData}')">`;
-                    }
-                    html += `<div class="text-content">${escapeHtml(post.text || '')}</div>
-                        <a class="file-attachment" href="${post.fileData}" download="${escapeHtml(post.fileName)}">
-                            <span class="file-icon">${fileIcon}</span>
-                            <div class="file-info">
-                                <div class="file-name">${escapeHtml(post.fileName)}</div>
-                                <div class="file-size">${formatSize(post.fileSize || 0)}</div>
-                            </div>
-                            <span class="download-badge">⬇️</span>
-                        </a>`;
-                } else {
-                    html += `<div class="text-content">${escapeHtml(post.text || '')}</div>`;
-                }
-                
-                html += `</div></div>`;
-            }
-            
-            channelMessagesList.innerHTML = html;
-            channelMessagesContainer.scrollTop = channelMessagesContainer.scrollHeight;
-        }
-
         async function sendMessage(){
             let text=messageField.value.trim();
             let hasFile=!!pendingFile;
@@ -1384,7 +1013,7 @@
             sendBtn.disabled=true;
             let displayName=savedUsername||'Аноним';
             if(currentChat==='favorites'){
-                favoritesMessages.push({id:'fav_'+Date.now(),message:text||'📎 Файл',date:new Date().toLocaleString('ru-RU')});
+                favoritesMessages.push({id:'fav_'+Date.now(),message:text||'Файл',date:new Date().toLocaleString('ru-RU')});
                 saveFavorites(); messageField.value=''; autoResize(messageField); pendingFile=null; filePreviewContainer.style.display='none'; renderFavoritesMessages(); renderChatsList(); showInfo('Добавлено');
             } else {
                 let priv=privateChats.find(c=>c.id===currentChat);
@@ -1409,7 +1038,7 @@
                             showInfo('Отправлено');
                             if(priv.id==='bot_chat'){
                                 setTimeout(async()=>{
-                                    let botResp=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chatId:priv.id,fromBin:'bot.official',toBin:myBinId,username:'MiS-MaS Bot',message:'✅ Файл получен! Ваш BIN ID: '+myBinId,date:new Date().toLocaleString('ru-RU')})});
+                                    let botResp=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chatId:priv.id,fromBin:'bot.official',toBin:myBinId,username:'MiS-MaS Bot',message:'Файл получен! Ваш BIN ID: '+myBinId,date:new Date().toLocaleString('ru-RU')})});
                                     if(botResp.ok){ let botMsg=await botResp.json(); priv.messages.push(botMsg); savePrivateChats(); if(currentChat===priv.id) renderPrivateMessages(priv); renderChatsList(); }
                                 },300);
                             }
@@ -1436,7 +1065,7 @@
                 pendingFile={ dataUrl:ev.target.result, name:file.name, size:file.size, type:file.type };
                 previewFileName.innerText=file.name;
                 previewFileSize.innerText=formatSize(file.size);
-                document.getElementById('previewFileIcon').innerText=file.type.startsWith('image/')?'🖼️':'📎';
+                document.getElementById('previewFileIcon').innerText=file.type.startsWith('image/')?'🖼':'📎';
                 filePreviewContainer.style.display='block';
                 showInfo('Файл готов к отправке');
             };
@@ -1456,7 +1085,7 @@
                 let priv=privateChats.find(c=>c.id===chatId);
                 if(priv){
                     let isBot=priv.id==='bot_chat';
-                    chatHeaderName.innerHTML=priv.name+(isBot?' <span class="verified-badge">✅</span>':'');
+                    chatHeaderName.innerHTML=priv.name+(isBot?' <span class="verified-badge">✓</span>':'');
                     chatHeaderAvatar.textContent=isBot?'🤖':'👤';
                     chatHeaderAvatar.className=`chat-header-avatar ${isBot?'avatar-bot':'avatar-private'}`;
                     chatHeaderStatus.textContent=isBot?'бот • BIN ID':'BIN: '+(priv.binId?.substring(0,10)||'???');
@@ -1465,100 +1094,29 @@
                 }
             }
         }
-
         function renderFavoritesMessages(){
-            if(!favoritesMessages.length){ messagesListEl.innerHTML='<div class="empty-chat">⭐ Заметки</div>'; return; }
+            if(!favoritesMessages.length){ messagesListEl.innerHTML='<div class="empty-chat">Заметки</div>'; return; }
             let html='';
-            [...favoritesMessages].sort((a,b)=>new Date(a.date)-new Date(b.date)).forEach(m=>{ html+=`<div class="message-row own"><div class="bubble"><div class="bubble-header"><span class="name">Вы</span><span class="time">${formatTime(m.date)}</span></div><div class="text-content">${escapeHtml(m.message)}</div><button class="delete-btn" onclick="window.delFav('${m.id}')">🗑️</button></div></div>`; });
+            [...favoritesMessages].sort((a,b)=>new Date(a.date)-new Date(b.date)).forEach(m=>{ html+=`<div class="message-row own"><div class="bubble"><div class="bubble-header"><span class="name">Вы</span><span class="time">${formatTime(m.date)}</span></div><div class="text-content">${escapeHtml(m.message)}</div><button class="delete-btn" onclick="window.delFav('${m.id}')">Удалить</button></div></div>`; });
             messagesListEl.innerHTML=html; messagesContainer.scrollTop=messagesContainer.scrollHeight;
         }
-
         window.delFav=function(id){ let idx=favoritesMessages.findIndex(m=>m.id===id); if(idx!==-1){ favoritesMessages.splice(idx,1); saveFavorites(); renderFavoritesMessages(); renderChatsList(); showInfo('Удалено'); } };
-        
-        // Event listeners
-        document.getElementById('backToChatsBtn')?.addEventListener('click',()=>{ chatScreen.classList.add('hidden'); chatsScreen.classList.remove('hidden'); pendingFile=null; filePreviewContainer.style.display='none'; renderChatsList(); });
-        document.getElementById('backFromChannelBtn')?.addEventListener('click',()=>{ channelScreen.classList.add('hidden'); chatsScreen.classList.remove('hidden'); renderChatsList(); });
+        backToChatsBtn?.addEventListener('click',()=>{ chatScreen.classList.add('hidden'); chatsScreen.classList.remove('hidden'); pendingFile=null; filePreviewContainer.style.display='none'; renderChatsList(); });
         document.getElementById('backFromSettingsBtn')?.addEventListener('click',()=>{ settingsScreen.classList.add('hidden'); chatsScreen.classList.remove('hidden'); renderChatsList(); });
+        document.querySelectorAll('.bottom-tab').forEach(t=>t.addEventListener('click',()=>{ document.querySelectorAll('.bottom-tab').forEach(bt=>bt.classList.remove('active')); t.classList.add('active'); if(t.dataset.tab==='chats'){ chatsScreen.classList.remove('hidden'); settingsScreen.classList.add('hidden'); chatScreen.classList.add('hidden'); renderChatsList(); } else { chatsScreen.classList.add('hidden'); settingsScreen.classList.remove('hidden'); chatScreen.classList.add('hidden'); updateNameDisplay(); } }));
+        document.getElementById('chatMenuBtn')?.addEventListener('click',()=>{ if(currentChat==='favorites'){ if(confirm('Очистить избранное?')){ favoritesMessages=[]; saveFavorites(); renderFavoritesMessages(); renderChatsList(); showInfo('Очищено'); } } else { let priv=privateChats.find(c=>c.id===currentChat); if(priv && confirm('Удалить чат?')){ privateChats=privateChats.filter(c=>c.id!==currentChat); savePrivateChats(); chatScreen.classList.add('hidden'); chatsScreen.classList.remove('hidden'); renderChatsList(); showInfo('Чат удалён'); } } });
+        document.getElementById('addChatBtn')?.addEventListener('click',()=>{ let ov=document.createElement('div'); ov.className='modal-overlay'; ov.innerHTML=`<div class="modal"><h3>Новый чат по BIN ID</h3><input id="binInput" placeholder="BIN ID собеседника"><div class="modal-hint">Ваш ID: ${myBinId}</div><div class="modal-actions"><button class="modal-btn cancel">Отмена</button><button class="modal-btn" id="confirmAddChat">Создать</button></div></div>`; document.body.appendChild(ov); let inp=ov.querySelector('#binInput'); let create=()=>{ let target=inp.value.trim(); if(!target) return showError('Введите BIN ID'); if(target===myBinId) return showError('Нельзя чат с собой'); if(privateChats.some(c=>c.binId===target)) return showError('Чат уже есть'); let chatId='priv_'+Date.now(); privateChats.push({id:chatId,binId:target,name:`Чат ${target.substring(0,8)}`,messages:[]}); savePrivateChats(); renderChatsList(); ov.remove(); showInfo('Чат создан'); openChat(chatId); }; ov.querySelector('#confirmAddChat').onclick=create; ov.querySelector('.cancel').onclick=()=>ov.remove(); inp.addEventListener('keydown',e=>{if(e.key==='Enter')create();}); ov.addEventListener('click',e=>{if(e.target===ov)ov.remove();}); });
+        document.getElementById('changeNameBtn')?.addEventListener('click',()=>{ let ov=document.createElement('div'); ov.className='modal-overlay'; ov.innerHTML=`<div class="modal"><h3>Имя</h3><input id="newNameInput" value="${escapeHtml(savedUsername)}"><div class="modal-actions"><button class="modal-btn cancel">Отмена</button><button class="modal-btn" id="confirmChangeName">Сохранить</button></div></div>`; document.body.appendChild(ov); let inp=ov.querySelector('#newNameInput'); let save=()=>{ let n=inp.value.trim(); if(n){ savedUsername=n; localStorage.setItem('mios_username',savedUsername); updateNameDisplay(); showInfo('Имя изменено'); } ov.remove(); }; ov.querySelector('#confirmChangeName').onclick=save; ov.querySelector('.cancel').onclick=()=>ov.remove(); inp.addEventListener('keydown',e=>{if(e.key==='Enter')save();}); });
+        document.getElementById('showMyBinBtn')?.addEventListener('click',()=>{ navigator.clipboard?.writeText(myBinId); showInfo('BIN ID скопирован: '+myBinId); });
+        document.getElementById('themeToggle')?.addEventListener('click',()=>{ if(currentTheme==='dark'){ currentTheme='light'; document.body.classList.add('light-theme'); document.getElementById('themeDescription').innerText='Светлая'; document.getElementById('themeIcon').innerText='☀'; localStorage.setItem('mios_theme','light'); } else { currentTheme='dark'; document.body.classList.remove('light-theme'); document.getElementById('themeDescription').innerText='Тёмная'; document.getElementById('themeIcon').innerText='🌙'; localStorage.setItem('mios_theme','dark'); } showInfo('Тема изменена'); });
+        document.getElementById('notificationsSwitch')?.addEventListener('click',()=>{ notificationsEnabled=!notificationsEnabled; let sw=document.getElementById('notificationsSwitch'); let st=document.getElementById('notificationsStatus'); if(notificationsEnabled){ sw.classList.add('active'); st.innerText='Включены'; localStorage.setItem('mios_notifications','true'); } else { sw.classList.remove('active'); st.innerText='Отключены'; localStorage.setItem('mios_notifications','false'); } showInfo(notificationsEnabled?'Уведомления вкл':'Отключены'); });
         
-        document.querySelectorAll('.bottom-tab').forEach(t=>t.addEventListener('click',()=>{ 
-            document.querySelectorAll('.bottom-tab').forEach(bt=>bt.classList.remove('active')); 
-            t.classList.add('active'); 
-            if(t.dataset.tab==='chats'){ 
-                chatsScreen.classList.remove('hidden'); 
-                settingsScreen.classList.add('hidden'); 
-                chatScreen.classList.add('hidden');
-                channelScreen.classList.add('hidden');
-                renderChatsList(); 
-            } else { 
-                chatsScreen.classList.add('hidden'); 
-                settingsScreen.classList.remove('hidden'); 
-                chatScreen.classList.add('hidden');
-                channelScreen.classList.add('hidden');
-                updateNameDisplay(); 
-            } 
-        }));
-
-        document.querySelectorAll('.segment-btn').forEach(btn => {
-            btn.addEventListener('click', async () => {
-                document.querySelectorAll('.segment-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                currentSegment = btn.dataset.segment;
-                if (currentSegment === 'chats') {
-                    await renderChatsList();
-                } else {
-                    await renderChannelsList();
-                }
-            });
-        });
-
-        document.getElementById('chatMenuBtn')?.addEventListener('click',()=>{ 
-            if(currentChat==='favorites'){ 
-                if(confirm('Очистить избранное?')){ 
-                    favoritesMessages=[]; saveFavorites(); renderFavoritesMessages(); renderChatsList(); showInfo('Очищено'); 
-                } 
-            } else { 
-                let priv=privateChats.find(c=>c.id===currentChat); 
-                if(priv && confirm('Удалить чат?')){ 
-                    privateChats=privateChats.filter(c=>c.id!==currentChat); 
-                    savePrivateChats(); 
-                    chatScreen.classList.add('hidden'); 
-                    chatsScreen.classList.remove('hidden'); 
-                    renderChatsList(); 
-                    showInfo('Чат удалён'); 
-                } 
-            } 
-        });
-
-        document.getElementById('addChatBtn')?.addEventListener('click',()=>{ 
-            let ov=document.createElement('div'); 
-            ov.className='modal-overlay'; 
-            ov.innerHTML=`<div class="modal"><h3>➕ Новый чат по BIN ID</h3><input id="binInput" placeholder="BIN ID собеседника"><div class="modal-hint">Ваш ID: ${myBinId}</div><div class="modal-actions"><button class="modal-btn cancel">Отмена</button><button class="modal-btn" id="confirmAddChat">Создать</button></div></div>`; 
-            document.body.appendChild(ov); 
-            let inp=ov.querySelector('#binInput'); 
-            let create=()=>{ 
-                let target=inp.value.trim(); 
-                if(!target) return showError('Введите BIN ID'); 
-                if(target===myBinId) return showError('Нельзя чат с собой'); 
-                if(privateChats.some(c=>c.binId===target)) return showError('Чат уже есть'); 
-                let chatId='priv_'+Date.now(); 
-                privateChats.push({id:chatId,binId:target,name:`Чат ${target.substring(0,8)}`,messages:[]}); 
-                savePrivateChats(); 
-                renderChatsList(); 
-                ov.remove(); 
-                showInfo('Чат создан'); 
-                openChat(chatId); 
-            }; 
-            ov.querySelector('#confirmAddChat').onclick=create; 
-            ov.querySelector('.cancel').onclick=()=>ov.remove(); 
-            inp.addEventListener('keydown',e=>{if(e.key==='Enter')create();}); 
-            ov.addEventListener('click',e=>{if(e.target===ov)ov.remove();}); 
-        });
-
-        document.getElementById('createChannelBtn')?.addEventListener('click',() => {
+        // Функция создания канала
+        document.getElementById('createChannelBtn')?.addEventListener('click', () => {
             let ov = document.createElement('div');
             ov.className = 'modal-overlay';
             ov.innerHTML = `<div class="modal">
-                <h3>📢 Создать канал</h3>
+                <h3>Создать канал</h3>
                 <input id="channelNameInput" placeholder="Название канала">
                 <textarea id="channelDescInput" placeholder="Описание (необязательно)"></textarea>
                 <div class="modal-actions">
@@ -1574,166 +1132,42 @@
             let create = async () => {
                 let name = nameInput.value.trim();
                 if (!name) return showError('Введите название канала');
-                await createChannel(name, descInput.value.trim());
-                ov.remove();
-                await renderChannelsList();
+                
+                let channelId = 'ch_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+                let channelData = {
+                    type: 'channel',
+                    channelId: channelId,
+                    name: name,
+                    description: descInput.value.trim(),
+                    ownerBinId: myBinId,
+                    subscribers: [myBinId],
+                    createdAt: new Date().toLocaleString('ru-RU')
+                };
+                
+                try {
+                    let resp = await fetch(CHANNEL_API_URL, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(channelData)
+                    });
+                    if (resp.ok) {
+                        showInfo('Канал создан!');
+                        ov.remove();
+                    }
+                } catch(e) {
+                    showError('Ошибка создания канала');
+                }
             };
             
             ov.querySelector('#confirmCreateChannel').onclick = create;
             ov.querySelector('.cancel').onclick = () => ov.remove();
             nameInput.addEventListener('keydown', e => { if (e.key === 'Enter') create(); });
         });
-
-        subscribeBtn?.addEventListener('click', async () => {
-            if (currentChannel) {
-                await subscribeToChannel(currentChannel);
-                showInfo(currentChannel.subscribers.includes(myBinId) ? 'Вы подписались' : 'Вы отписались');
-            }
-        });
-
-        createPostBtn?.addEventListener('click', () => {
-            let ov = document.createElement('div');
-            ov.className = 'modal-overlay';
-            ov.innerHTML = `<div class="modal">
-                <h3>📝 Новый пост</h3>
-                <textarea id="postTextInput" placeholder="Текст поста"></textarea>
-                <input type="file" id="postFileInput" accept="*/*" style="display: none;">
-                <button class="modal-btn" id="attachPostFileBtn" style="margin-bottom: 8px;">📎 Прикрепить файл</button>
-                <div class="modal-actions">
-                    <button class="modal-btn cancel">Отмена</button>
-                    <button class="modal-btn" id="confirmCreatePost">Опубликовать</button>
-                </div>
-            </div>`;
-            document.body.appendChild(ov);
-            
-            let textInput = ov.querySelector('#postTextInput');
-            let fileInput = ov.querySelector('#postFileInput');
-            let attachBtn = ov.querySelector('#attachPostFileBtn');
-            let postFileData = null;
-            
-            attachBtn.onclick = () => fileInput.click();
-            
-            fileInput.onchange = (e) => {
-                let file = e.target.files[0];
-                if (!file) return;
-                if (file.size > 1024 * 1024 * 1024) {
-                    showError('Файл не должен превышать 1 ГБ');
-                    return;
-                }
-                let reader = new FileReader();
-                reader.onload = (ev) => {
-                    postFileData = {
-                        dataUrl: ev.target.result,
-                        name: file.name,
-                        size: file.size,
-                        type: file.type
-                    };
-                    attachBtn.textContent = `📎 ${file.name}`;
-                };
-                reader.readAsDataURL(file);
-            };
-            
-            let create = async () => {
-                let text = textInput.value.trim();
-                if (!text && !postFileData) return showError('Введите текст или прикрепите файл');
-                await createChannelPost(currentChannel.channelId, text, postFileData);
-                ov.remove();
-            };
-            
-            ov.querySelector('#confirmCreatePost').onclick = create;
-            ov.querySelector('.cancel').onclick = () => ov.remove();
-        });
-
-        document.getElementById('changeNameBtn')?.addEventListener('click',()=>{ 
-            let ov=document.createElement('div'); 
-            ov.className='modal-overlay'; 
-            ov.innerHTML=`<div class="modal"><h3>✏️ Имя</h3><input id="newNameInput" value="${escapeHtml(savedUsername)}"><div class="modal-actions"><button class="modal-btn cancel">Отмена</button><button class="modal-btn" id="confirmChangeName">Сохранить</button></div></div>`; 
-            document.body.appendChild(ov); 
-            let inp=ov.querySelector('#newNameInput'); 
-            let save=()=>{ 
-                let n=inp.value.trim(); 
-                if(n){ 
-                    savedUsername=n; 
-                    localStorage.setItem('mios_username',savedUsername); 
-                    updateNameDisplay(); 
-                    showInfo('Имя изменено'); 
-                } 
-                ov.remove(); 
-            }; 
-            ov.querySelector('#confirmChangeName').onclick=save; 
-            ov.querySelector('.cancel').onclick=()=>ov.remove(); 
-            inp.addEventListener('keydown',e=>{if(e.key==='Enter')save();}); 
-        });
-
-        document.getElementById('showMyBinBtn')?.addEventListener('click',()=>{ 
-            navigator.clipboard?.writeText(myBinId); 
-            showInfo('BIN ID скопирован: '+myBinId); 
-        });
-
-        document.getElementById('themeToggle')?.addEventListener('click',()=>{ 
-            if(currentTheme==='dark'){ 
-                currentTheme='light'; 
-                document.body.classList.add('light-theme'); 
-                document.getElementById('themeDescription').innerText='Светлая'; 
-                document.getElementById('themeIcon').innerText='☀️'; 
-                localStorage.setItem('mios_theme','light'); 
-            } else { 
-                currentTheme='dark'; 
-                document.body.classList.remove('light-theme'); 
-                document.getElementById('themeDescription').innerText='Тёмная'; 
-                document.getElementById('themeIcon').innerText='🌙'; 
-                localStorage.setItem('mios_theme','dark'); 
-            } 
-            showInfo('Тема изменена'); 
-        });
-
-        document.getElementById('notificationsSwitch')?.addEventListener('click',()=>{ 
-            notificationsEnabled=!notificationsEnabled; 
-            let sw=document.getElementById('notificationsSwitch'); 
-            let st=document.getElementById('notificationsStatus'); 
-            if(notificationsEnabled){ 
-                sw.classList.add('active'); 
-                st.innerText='Включены'; 
-                localStorage.setItem('mios_notifications','true'); 
-            } else { 
-                sw.classList.remove('active'); 
-                st.innerText='Отключены'; 
-                localStorage.setItem('mios_notifications','false'); 
-            } 
-            showInfo(notificationsEnabled?'Уведомления вкл':'Отключены'); 
-        });
         
-        async function initApp(){ 
-            await getOrCreateBinId(); 
-            await loadChannels();
-            let botChat=privateChats.find(c=>c.id==='bot_chat'); 
-            if(!botChat){ 
-                privateChats.push({id:'bot_chat',name:'MiS-MaS Bot',binId:'bot.official',messages:[]}); 
-                savePrivateChats(); 
-            } 
-            await renderChatsList(); 
-        }
-
-        if(currentTheme==='light'){ 
-            document.body.classList.add('light-theme'); 
-            document.getElementById('themeDescription').innerText='Светлая'; 
-            document.getElementById('themeIcon').innerText='☀️'; 
-        } else { 
-            document.body.classList.remove('light-theme'); 
-        }
-
+        async function initApp(){ await getOrCreateBinId(); let botChat=privateChats.find(c=>c.id==='bot_chat'); if(!botChat){ privateChats.push({id:'bot_chat',name:'MiS-MaS Bot',binId:'bot.official',messages:[]}); savePrivateChats(); } await renderChatsList(); }
+        if(currentTheme==='light'){ document.body.classList.add('light-theme'); document.getElementById('themeDescription').innerText='Светлая'; document.getElementById('themeIcon').innerText='☀'; } else { document.body.classList.remove('light-theme'); }
         if(checkRegistration()) initApp();
-        
-        setInterval(async()=>{ 
-            if(!chatsScreen.classList.contains('hidden')) await renderChatsList(); 
-            if(currentChat && currentChat!=='favorites' && !chatScreen.classList.contains('hidden')){ 
-                let priv=privateChats.find(c=>c.id===currentChat); 
-                if(priv) await loadPrivateMessages(priv); 
-            }
-            if(currentChannel && !channelScreen.classList.contains('hidden')) {
-                await renderChannelPosts(currentChannel.channelId);
-            }
-        }, 5000);
+        setInterval(async()=>{ if(!chatsScreen.classList.contains('hidden')) await renderChatsList(); if(currentChat && currentChat!=='favorites' && !chatScreen.classList.contains('hidden')){ let priv=privateChats.find(c=>c.id===currentChat); if(priv) await loadPrivateMessages(priv); } },5000);
     })();
 </script>
 </body>
