@@ -371,7 +371,31 @@
             font-weight: 600; cursor: pointer; background: #3390ec; color: white;
         }
         .modal-btn.cancel { background: transparent; color: #8e8e93; }
+        .modal-btn.delete { background: #ff375f; }
         #fileInput { display: none; }
+        .channel-menu {
+            position: fixed; bottom: 0; left: 0; right: 0; background: #1c1c1e;
+            border-radius: 16px 16px 0 0; padding: 20px; z-index: 1000;
+            transform: translateY(100%); transition: transform 0.3s;
+        }
+        body.light-theme .channel-menu { background: #f2f2f7; }
+        .channel-menu.show { transform: translateY(0); }
+        .channel-menu-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5); z-index: 999; display: none;
+        }
+        .channel-menu-overlay.show { display: block; }
+        .channel-menu-item {
+            padding: 16px; text-align: center; cursor: pointer;
+            border-radius: 12px; font-size: 16px; margin-bottom: 8px;
+        }
+        .channel-menu-item:active { background: #2c2c2e; }
+        .channel-menu-item.delete { color: #ff375f; }
+        .channel-menu-cancel {
+            padding: 16px; text-align: center; cursor: pointer;
+            border-radius: 12px; font-size: 16px; font-weight: 600;
+            background: #2c2c2e; margin-top: 8px;
+        }
     </style>
 </head>
 <body>
@@ -379,9 +403,9 @@
     <div class="register-card">
         <div class="register-logo">📁</div>
         <h2 class="register-title">MiS-MaS</h2>
-        <p class="register-subtitle">Добро пожаловать!</p>
+        <p class="register-subtitle">Файлы до 1 ГБ + Каналы</p>
         <div class="register-input-wrapper"><span>👤</span><input type="text" id="registerNameInput" class="register-input" placeholder="Ваше имя"></div>
-        <p class="register-hint">введите имя</p>
+        <p class="register-hint">Имя будет видно в чатах и каналах</p>
         <button class="register-btn" id="registerBtn" disabled>Продолжить</button>
     </div>
 </div>
@@ -392,7 +416,7 @@
         <div class="chats-header">
             <h1>MiS-MaS</h1>
             <div class="header-actions">
-                <button class="header-icon" id="addChatBtn">+</button>
+                <button class="header-icon" id="addBtn">+</button>
             </div>
         </div>
         <div class="search-container">
@@ -451,12 +475,20 @@
                     <div class="channel-header-status" id="channelHeaderStatus"></div>
                 </div>
             </div>
-            <button class="subscribe-btn" id="subscribeBtn">Подписаться</button>
+            <button class="header-menu" id="channelMenuBtn">⋯</button>
         </div>
         <div class="messages-container" id="channelMessagesContainer">
             <div class="messages-list" id="channelMessagesList"></div>
         </div>
         <button class="create-post-btn" id="createPostBtn" style="display: none;">+</button>
+    </div>
+
+    <!-- Меню канала -->
+    <div class="channel-menu-overlay" id="channelMenuOverlay"></div>
+    <div class="channel-menu" id="channelMenu">
+        <div class="channel-menu-item" id="copyChannelIdBtn">📋 Скопировать ID канала</div>
+        <div class="channel-menu-item delete" id="deleteChannelBtn">🗑️ Удалить канал</div>
+        <div class="channel-menu-cancel" id="cancelChannelMenu">Отмена</div>
     </div>
 
     <!-- Экран настроек -->
@@ -533,6 +565,8 @@
     const channelScreen = document.getElementById('channelScreen');
     const settingsScreen = document.getElementById('settingsScreen');
     const chatsList = document.getElementById('chatsList');
+    const channelMenu = document.getElementById('channelMenu');
+    const channelMenuOverlay = document.getElementById('channelMenuOverlay');
     const showInfo = (t)=>{ let toast=document.getElementById('infoToast'); toast.textContent='✅ '+t; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),2500);};
     const showError = (t)=>{ let toast=document.getElementById('errorToast'); toast.textContent='⚠ '+t; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),3000);};
     
@@ -566,6 +600,31 @@
             localStorage.setItem('mios_channels', JSON.stringify(channels));
         } catch(e) {
             channels = JSON.parse(localStorage.getItem('mios_channels') || '[]');
+        }
+    }
+    
+    async function deleteChannel(channelId) {
+        let channel = channels.find(c => c.channelId === channelId);
+        if (!channel) return false;
+        
+        try {
+            // Удаляем канал
+            await fetch(CHANNEL_API_URL + '/' + channel.id, { method: 'DELETE' });
+            
+            // Удаляем все посты канала
+            let resp = await fetch(CHANNEL_API_URL);
+            let all = await resp.json();
+            let posts = all.filter(m => m.type === 'post' && m.channelId === channelId);
+            for (let post of posts) {
+                await fetch(CHANNEL_API_URL + '/' + post.id, { method: 'DELETE' });
+            }
+            
+            channels = channels.filter(c => c.channelId !== channelId);
+            localStorage.setItem('mios_channels', JSON.stringify(channels));
+            return true;
+        } catch(e) {
+            console.error('Ошибка удаления:', e);
+            return false;
         }
     }
     
@@ -699,15 +758,6 @@
         let subscriberCount = currentChannel.subscribers?.length || 0;
         let isSubscribed = currentChannel.subscribers?.includes(myBinId);
         document.getElementById('channelHeaderStatus').textContent = `👥 ${subscriberCount} подписчиков`;
-        
-        let btn = document.getElementById('subscribeBtn');
-        if (isSubscribed) {
-            btn.textContent = 'Отписаться';
-            btn.classList.add('subscribed');
-        } else {
-            btn.textContent = 'Подписаться';
-            btn.classList.remove('subscribed');
-        }
         
         let isOwner = currentChannel.ownerBinId === myBinId;
         document.getElementById('createPostBtn').style.display = isOwner ? 'block' : 'none';
@@ -981,6 +1031,53 @@
         renderChatsList();
     });
     
+    // Кнопка + (добавление чата или канала по ID)
+    document.getElementById('addBtn')?.addEventListener('click', () => {
+        let ov = document.createElement('div');
+        ov.className = 'modal-overlay';
+        ov.innerHTML = `<div class="modal">
+            <h3>Добавить по ID</h3>
+            <input id="idInput" placeholder="Введите BIN ID или ID канала">
+            <div class="modal-hint">Ваш ID: ${myBinId}</div>
+            <div class="modal-actions">
+                <button class="modal-btn cancel">Отмена</button>
+                <button class="modal-btn" id="confirmAdd">Добавить</button>
+            </div>
+        </div>`;
+        document.body.appendChild(ov);
+        
+        let inp = ov.querySelector('#idInput');
+        let add = () => {
+            let id = inp.value.trim();
+            if(!id) return showError('Введите ID');
+            
+            // Проверяем, это ID канала или BIN ID
+            let channel = channels.find(c => c.channelId === id);
+            if (channel) {
+                ov.remove();
+                openChannel(id);
+                return;
+            }
+            
+            // Проверяем, это BIN ID для чата
+            if (id === myBinId) return showError('Нельзя чат с собой');
+            if (privateChats.some(c => c.binId === id)) return showError('Чат уже есть');
+            
+            let chatId = 'priv_' + Date.now();
+            privateChats.push({id: chatId, binId: id, name: `Чат ${id.substring(0,8)}`, messages: []});
+            savePrivateChats();
+            renderChatsList();
+            ov.remove();
+            showInfo('Чат создан');
+            openChat(chatId);
+        };
+        
+        ov.querySelector('#confirmAdd').onclick = add;
+        ov.querySelector('.cancel').onclick = () => ov.remove();
+        inp.addEventListener('keydown', e => { if(e.key === 'Enter') add(); });
+    });
+    
+    // Создание канала
     document.getElementById('createChannelBtn')?.addEventListener('click', () => {
         let ov = document.createElement('div');
         ov.className = 'modal-overlay';
@@ -1020,7 +1117,7 @@
                     let newChannel = await resp.json();
                     channels.push(newChannel);
                     localStorage.setItem('mios_channels', JSON.stringify(channels));
-                    showInfo('Канал создан!');
+                    showInfo('Канал создан! ID: ' + channelId);
                     ov.remove();
                     await renderChatsList();
                 }
@@ -1036,44 +1133,62 @@
         });
     });
     
-    document.getElementById('subscribeBtn')?.addEventListener('click', async () => {
-        if(!currentChannel) return;
-        
-        if(!currentChannel.subscribers) currentChannel.subscribers = [];
-        let isSubscribed = currentChannel.subscribers.includes(myBinId);
-        
-        if(isSubscribed){
-            currentChannel.subscribers = currentChannel.subscribers.filter(id => id !== myBinId);
-        } else {
-            currentChannel.subscribers.push(myBinId);
-        }
-        
-        try {
-            await fetch(CHANNEL_API_URL + '/' + currentChannel.id, {
-                method: 'PUT',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(currentChannel)
-            });
-            localStorage.setItem('mios_channels', JSON.stringify(channels));
-            
-            let btn = document.getElementById('subscribeBtn');
-            let newIsSubscribed = currentChannel.subscribers.includes(myBinId);
-            btn.textContent = newIsSubscribed ? 'Отписаться' : 'Подписаться';
-            if(newIsSubscribed){
-                btn.classList.add('subscribed');
-            } else {
-                btn.classList.remove('subscribed');
-            }
-            document.getElementById('channelHeaderStatus').textContent = 
-                `👥 ${currentChannel.subscribers.length} подписчиков`;
-            
-            showInfo(newIsSubscribed ? 'Вы подписались' : 'Вы отписались');
-            await renderChatsList();
-        } catch(e) {
-            showError('Ошибка подписки');
-        }
+    // Меню канала
+    document.getElementById('channelMenuBtn')?.addEventListener('click', () => {
+        channelMenuOverlay.classList.add('show');
+        channelMenu.classList.add('show');
     });
     
+    document.getElementById('cancelChannelMenu')?.addEventListener('click', () => {
+        channelMenuOverlay.classList.remove('show');
+        channelMenu.classList.remove('show');
+    });
+    
+    channelMenuOverlay?.addEventListener('click', () => {
+        channelMenuOverlay.classList.remove('show');
+        channelMenu.classList.remove('show');
+    });
+    
+    // Копировать ID канала
+    document.getElementById('copyChannelIdBtn')?.addEventListener('click', () => {
+        if (currentChannel) {
+            navigator.clipboard?.writeText(currentChannel.channelId);
+            showInfo('ID канала скопирован: ' + currentChannel.channelId);
+        }
+        channelMenuOverlay.classList.remove('show');
+        channelMenu.classList.remove('show');
+    });
+    
+    // Удалить канал
+    document.getElementById('deleteChannelBtn')?.addEventListener('click', async () => {
+        if (!currentChannel) return;
+        
+        if (currentChannel.ownerBinId !== myBinId) {
+            showError('Только владелец может удалить канал');
+            channelMenuOverlay.classList.remove('show');
+            channelMenu.classList.remove('show');
+            return;
+        }
+        
+        if (confirm('Вы уверены, что хотите удалить канал "' + currentChannel.name + '"? Все посты будут потеряны.')) {
+            let success = await deleteChannel(currentChannel.channelId);
+            if (success) {
+                showInfo('Канал удален');
+                channelScreen.classList.add('hidden');
+                chatsScreen.classList.remove('hidden');
+                await renderChatsList();
+            } else {
+                showError('Ошибка удаления канала');
+            }
+        }
+        channelMenuOverlay.classList.remove('show');
+        channelMenu.classList.remove('show');
+    });
+    
+    // Подписка на канал (кнопка теперь скрыта, подписка через меню или автоматически)
+    // Но оставим возможность подписаться при открытии канала
+    
+    // Создание поста
     document.getElementById('createPostBtn')?.addEventListener('click', () => {
         let ov = document.createElement('div');
         ov.className = 'modal-overlay';
@@ -1119,41 +1234,6 @@
         
         ov.querySelector('#confirmCreatePost').onclick = create;
         ov.querySelector('.cancel').onclick = () => ov.remove();
-    });
-    
-    document.getElementById('addChatBtn')?.addEventListener('click', () => {
-        let ov = document.createElement('div');
-        ov.className = 'modal-overlay';
-        ov.innerHTML = `<div class="modal">
-            <h3>Новый чат по BIN ID</h3>
-            <input id="binInput" placeholder="BIN ID собеседника">
-            <div class="modal-hint">Ваш ID: ${myBinId}</div>
-            <div class="modal-actions">
-                <button class="modal-btn cancel">Отмена</button>
-                <button class="modal-btn" id="confirmAddChat">Создать</button>
-            </div>
-        </div>`;
-        document.body.appendChild(ov);
-        
-        let inp = ov.querySelector('#binInput');
-        let create = () => {
-            let target = inp.value.trim();
-            if(!target) return showError('Введите BIN ID');
-            if(target === myBinId) return showError('Нельзя чат с собой');
-            if(privateChats.some(c => c.binId === target)) return showError('Чат уже есть');
-            
-            let chatId = 'priv_' + Date.now();
-            privateChats.push({id: chatId, binId: target, name: `Чат ${target.substring(0,8)}`, messages: []});
-            savePrivateChats();
-            renderChatsList();
-            ov.remove();
-            showInfo('Чат создан');
-            openChat(chatId);
-        };
-        
-        ov.querySelector('#confirmAddChat').onclick = create;
-        ov.querySelector('.cancel').onclick = () => ov.remove();
-        inp.addEventListener('keydown', e => { if(e.key === 'Enter') create(); });
     });
     
     document.getElementById('changeNameBtn')?.addEventListener('click', () => {
