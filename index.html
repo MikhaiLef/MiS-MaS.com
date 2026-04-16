@@ -401,9 +401,9 @@
 <body>
 <div id="registerScreen" class="register-screen">
     <div class="register-card">
-        <div class="register-logo">📁</div>
+        <div class="register-logo"></div>
         <h2 class="register-title">MiS-MaS</h2>
-        <p class="register-subtitle">Файлы до 1 ГБ + Каналы</p>
+        <p class="register-subtitle">Добро пожаловать!</p>
         <div class="register-input-wrapper"><span>👤</span><input type="text" id="registerNameInput" class="register-input" placeholder="Ваше имя"></div>
         <p class="register-hint">Имя будет видно в чатах и каналах</p>
         <button class="register-btn" id="registerBtn" disabled>Продолжить</button>
@@ -416,11 +416,11 @@
         <div class="chats-header">
             <h1>MiS-MaS</h1>
             <div class="header-actions">
-                <button class="header-icon" id="addBtn">+</button>
+                <button class="header-icon" id="addChatBtn">+</button>
             </div>
         </div>
         <div class="search-container">
-            <div class="search-bar"><span>🔍</span><input type="text" placeholder="Поиск" id="searchInput"></div>
+            <div class="search-bar"><span>🔍</span><input type="text" placeholder="Поиск по чатам" id="searchInput"></div>
         </div>
         <div class="chats-list" id="chatsList"></div>
         <div class="bottom-tabs">
@@ -487,6 +487,7 @@
     <div class="channel-menu-overlay" id="channelMenuOverlay"></div>
     <div class="channel-menu" id="channelMenu">
         <div class="channel-menu-item" id="copyChannelIdBtn">📋 Скопировать ID канала</div>
+        <div class="channel-menu-item" id="subscribeChannelBtn">👥 Подписаться/Отписаться</div>
         <div class="channel-menu-item delete" id="deleteChannelBtn">🗑️ Удалить канал</div>
         <div class="channel-menu-cancel" id="cancelChannelMenu">Отмена</div>
     </div>
@@ -516,6 +517,13 @@
                         <div class="setting-description" id="currentBinDisplay">Загрузка...</div>
                     </div>
                     <span class="setting-value">📋</span>
+                </div>
+                <div class="setting-item" id="findChannelBtn">
+                    <div class="setting-info">
+                        <div class="setting-label">Найти канал по ID</div>
+                        <div class="setting-description">Введите ID канала для подписки</div>
+                    </div>
+                    <span class="setting-value">🔍</span>
                 </div>
                 <div class="setting-item" id="createChannelBtn">
                     <div class="setting-info">
@@ -558,7 +566,6 @@
     let pendingFile = null;
     let currentTheme = localStorage.getItem('mios_theme') || 'dark';
     
-    // DOM элементы
     const registerScreen = document.getElementById('registerScreen');
     const chatsScreen = document.getElementById('chatsScreen');
     const chatScreen = document.getElementById('chatScreen');
@@ -574,7 +581,6 @@
     function escapeHtml(s){ if(!s) return ''; return String(s).replace(/[&<>]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
     function formatTime(d){ try{ let t=new Date(d); if(!isNaN(t)) return t.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'}); }catch(e){} return ''; }
     
-    // Загрузка данных
     function loadPrivateChats(){ try{ privateChats = JSON.parse(localStorage.getItem('mios_private_chats')||'[]'); privateChats.forEach(c=>{if(!c.messages)c.messages=[];}); }catch(e){ privateChats=[]; } }
     function savePrivateChats(){ localStorage.setItem('mios_private_chats',JSON.stringify(privateChats)); }
     function loadFavorites(){ try{ favoritesMessages=JSON.parse(localStorage.getItem('mios_fav')||'[]'); }catch(e){ favoritesMessages=[]; } }
@@ -583,7 +589,6 @@
     loadPrivateChats();
     loadFavorites();
     
-    // API для каналов
     async function loadChannels() {
         try {
             let resp = await fetch(CHANNEL_API_URL);
@@ -608,22 +613,38 @@
         if (!channel) return false;
         
         try {
-            // Удаляем канал
             await fetch(CHANNEL_API_URL + '/' + channel.id, { method: 'DELETE' });
-            
-            // Удаляем все посты канала
             let resp = await fetch(CHANNEL_API_URL);
             let all = await resp.json();
             let posts = all.filter(m => m.type === 'post' && m.channelId === channelId);
             for (let post of posts) {
                 await fetch(CHANNEL_API_URL + '/' + post.id, { method: 'DELETE' });
             }
-            
             channels = channels.filter(c => c.channelId !== channelId);
             localStorage.setItem('mios_channels', JSON.stringify(channels));
             return true;
         } catch(e) {
-            console.error('Ошибка удаления:', e);
+            return false;
+        }
+    }
+    
+    async function subscribeToChannel(channel) {
+        if (!channel.subscribers) channel.subscribers = [];
+        let isSubscribed = channel.subscribers.includes(myBinId);
+        if (isSubscribed) {
+            channel.subscribers = channel.subscribers.filter(id => id !== myBinId);
+        } else {
+            channel.subscribers.push(myBinId);
+        }
+        try {
+            await fetch(CHANNEL_API_URL + '/' + channel.id, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(channel)
+            });
+            localStorage.setItem('mios_channels', JSON.stringify(channels));
+            return !isSubscribed;
+        } catch(e) {
             return false;
         }
     }
@@ -648,11 +669,10 @@
         } 
     }
     
-    // Рендер общего списка (чаты + каналы)
     async function renderChatsList(){
+        let searchTerm = document.getElementById('searchInput')?.value.toLowerCase() || '';
         let html = '';
         
-        // Избранное
         let favLast = favoritesMessages.length ? favoritesMessages[favoritesMessages.length-1].message.substring(0,30) : 'Нет заметок';
         let favTime = favoritesMessages.length ? formatTime(favoritesMessages[favoritesMessages.length-1].date) : '';
         html += `<div class="chat-item" data-type="favorites" data-id="favorites">
@@ -668,10 +688,11 @@
             </div>
         </div>`;
         
-        // Каналы
         for(let channel of channels) {
+            if (searchTerm && !channel.name.toLowerCase().includes(searchTerm)) continue;
             let subscriberCount = channel.subscribers?.length || 0;
             let isOwner = channel.ownerBinId === myBinId;
+            let isSubscribed = channel.subscribers?.includes(myBinId);
             html += `<div class="chat-item" data-type="channel" data-id="${channel.channelId}">
                 <div class="chat-avatar avatar-channel">📢</div>
                 <div class="chat-content">
@@ -680,6 +701,7 @@
                             ${escapeHtml(channel.name)}
                             <span class="channel-badge">канал</span>
                             ${isOwner ? '<span class="verified-badge">✓</span>' : ''}
+                            ${isSubscribed ? '<span style="color: #3390ec; font-size: 12px;">✓ подписаны</span>' : ''}
                         </span>
                     </div>
                     <div class="chat-message-row">
@@ -690,8 +712,8 @@
             </div>`;
         }
         
-        // Личные чаты
         for(let chat of privateChats){
+            if (searchTerm && !chat.name.toLowerCase().includes(searchTerm)) continue;
             let last = chat.messages[chat.messages.length-1];
             let lastText = 'Нет сообщений';
             if(last){
@@ -721,7 +743,6 @@
         
         chatsList.innerHTML = html;
         
-        // Навешиваем обработчики
         document.querySelectorAll('.chat-item').forEach(el => {
             el.addEventListener('click', () => {
                 let type = el.dataset.type;
@@ -745,8 +766,12 @@
     }
     
     async function openChannel(channelId) {
+        await loadChannels();
         currentChannel = channels.find(c => c.channelId === channelId);
-        if (!currentChannel) return;
+        if (!currentChannel) {
+            showError('Канал не найден');
+            return;
+        }
         
         chatsScreen.classList.add('hidden');
         channelScreen.classList.remove('hidden');
@@ -757,7 +782,7 @@
         
         let subscriberCount = currentChannel.subscribers?.length || 0;
         let isSubscribed = currentChannel.subscribers?.includes(myBinId);
-        document.getElementById('channelHeaderStatus').textContent = `👥 ${subscriberCount} подписчиков`;
+        document.getElementById('channelHeaderStatus').textContent = `👥 ${subscriberCount} подписчиков` + (isSubscribed ? ' • вы подписаны' : '');
         
         let isOwner = currentChannel.ownerBinId === myBinId;
         document.getElementById('createPostBtn').style.display = isOwner ? 'block' : 'none';
@@ -811,9 +836,7 @@
             container.innerHTML = html;
             document.getElementById('channelMessagesContainer').scrollTop = 
                 document.getElementById('channelMessagesContainer').scrollHeight;
-        } catch(e) {
-            console.error('Ошибка загрузки постов:', e);
-        }
+        } catch(e) {}
     }
     
     async function openChat(chatId){
@@ -963,7 +986,6 @@
     
     function autoResize(ta){ if(ta){ ta.style.height = 'auto'; ta.style.height = Math.min(ta.scrollHeight, 120) + 'px'; } }
     
-    // Инициализация и обработчики событий
     function checkRegistration(){ 
         if(isRegistered && savedUsername){ 
             registerScreen.classList.add('hidden'); 
@@ -1031,40 +1053,32 @@
         renderChatsList();
     });
     
-    // Кнопка + (добавление чата или канала по ID)
-    document.getElementById('addBtn')?.addEventListener('click', () => {
+    document.getElementById('searchInput')?.addEventListener('input', () => renderChatsList());
+    
+    // Кнопка + для добавления чата по BIN ID
+    document.getElementById('addChatBtn')?.addEventListener('click', () => {
         let ov = document.createElement('div');
         ov.className = 'modal-overlay';
         ov.innerHTML = `<div class="modal">
-            <h3>Добавить по ID</h3>
-            <input id="idInput" placeholder="Введите BIN ID или ID канала">
+            <h3>Новый чат</h3>
+            <input id="binInput" placeholder="BIN ID собеседника">
             <div class="modal-hint">Ваш ID: ${myBinId}</div>
             <div class="modal-actions">
                 <button class="modal-btn cancel">Отмена</button>
-                <button class="modal-btn" id="confirmAdd">Добавить</button>
+                <button class="modal-btn" id="confirmAddChat">Создать</button>
             </div>
         </div>`;
         document.body.appendChild(ov);
         
-        let inp = ov.querySelector('#idInput');
-        let add = () => {
-            let id = inp.value.trim();
-            if(!id) return showError('Введите ID');
-            
-            // Проверяем, это ID канала или BIN ID
-            let channel = channels.find(c => c.channelId === id);
-            if (channel) {
-                ov.remove();
-                openChannel(id);
-                return;
-            }
-            
-            // Проверяем, это BIN ID для чата
-            if (id === myBinId) return showError('Нельзя чат с собой');
-            if (privateChats.some(c => c.binId === id)) return showError('Чат уже есть');
+        let inp = ov.querySelector('#binInput');
+        let create = () => {
+            let target = inp.value.trim();
+            if(!target) return showError('Введите BIN ID');
+            if(target === myBinId) return showError('Нельзя чат с собой');
+            if(privateChats.some(c => c.binId === target)) return showError('Чат уже есть');
             
             let chatId = 'priv_' + Date.now();
-            privateChats.push({id: chatId, binId: id, name: `Чат ${id.substring(0,8)}`, messages: []});
+            privateChats.push({id: chatId, binId: target, name: `Чат ${target.substring(0,8)}`, messages: []});
             savePrivateChats();
             renderChatsList();
             ov.remove();
@@ -1072,9 +1086,54 @@
             openChat(chatId);
         };
         
-        ov.querySelector('#confirmAdd').onclick = add;
+        ov.querySelector('#confirmAddChat').onclick = create;
         ov.querySelector('.cancel').onclick = () => ov.remove();
-        inp.addEventListener('keydown', e => { if(e.key === 'Enter') add(); });
+        inp.addEventListener('keydown', e => { if(e.key === 'Enter') create(); });
+    });
+    
+    // Найти канал по ID (в настройках)
+    document.getElementById('findChannelBtn')?.addEventListener('click', async () => {
+        await loadChannels();
+        
+        let ov = document.createElement('div');
+        ov.className = 'modal-overlay';
+        ov.innerHTML = `<div class="modal">
+            <h3>Найти канал</h3>
+            <input id="channelIdInput" placeholder="Введите ID канала">
+            <div class="modal-hint">ID канала начинается с "ch_"</div>
+            <div class="modal-actions">
+                <button class="modal-btn cancel">Отмена</button>
+                <button class="modal-btn" id="confirmFindChannel">Найти</button>
+            </div>
+        </div>`;
+        document.body.appendChild(ov);
+        
+        let inp = ov.querySelector('#channelIdInput');
+        let find = async () => {
+            let id = inp.value.trim();
+            if(!id) return showError('Введите ID канала');
+            
+            let channel = channels.find(c => c.channelId === id);
+            if (!channel) {
+                showError('Канал с таким ID не найден');
+                return;
+            }
+            
+            ov.remove();
+            settingsScreen.classList.add('hidden');
+            chatsScreen.classList.add('hidden');
+            
+            // Подписываем автоматически
+            if (!channel.subscribers.includes(myBinId)) {
+                await subscribeToChannel(channel);
+            }
+            
+            openChannel(id);
+        };
+        
+        ov.querySelector('#confirmFindChannel').onclick = find;
+        ov.querySelector('.cancel').onclick = () => ov.remove();
+        inp.addEventListener('keydown', e => { if(e.key === 'Enter') find(); });
     });
     
     // Создание канала
@@ -1135,6 +1194,7 @@
     
     // Меню канала
     document.getElementById('channelMenuBtn')?.addEventListener('click', () => {
+        if (!currentChannel) return;
         channelMenuOverlay.classList.add('show');
         channelMenu.classList.add('show');
     });
@@ -1149,7 +1209,6 @@
         channelMenu.classList.remove('show');
     });
     
-    // Копировать ID канала
     document.getElementById('copyChannelIdBtn')?.addEventListener('click', () => {
         if (currentChannel) {
             navigator.clipboard?.writeText(currentChannel.channelId);
@@ -1159,7 +1218,18 @@
         channelMenu.classList.remove('show');
     });
     
-    // Удалить канал
+    document.getElementById('subscribeChannelBtn')?.addEventListener('click', async () => {
+        if (!currentChannel) return;
+        let success = await subscribeToChannel(currentChannel);
+        if (success !== false) {
+            showInfo(success ? 'Вы подписались на канал' : 'Вы отписались от канала');
+            await renderChatsList();
+            await openChannel(currentChannel.channelId);
+        }
+        channelMenuOverlay.classList.remove('show');
+        channelMenu.classList.remove('show');
+    });
+    
     document.getElementById('deleteChannelBtn')?.addEventListener('click', async () => {
         if (!currentChannel) return;
         
@@ -1170,7 +1240,7 @@
             return;
         }
         
-        if (confirm('Вы уверены, что хотите удалить канал "' + currentChannel.name + '"? Все посты будут потеряны.')) {
+        if (confirm('Удалить канал "' + currentChannel.name + '"? Все посты будут потеряны.')) {
             let success = await deleteChannel(currentChannel.channelId);
             if (success) {
                 showInfo('Канал удален');
@@ -1178,17 +1248,13 @@
                 chatsScreen.classList.remove('hidden');
                 await renderChatsList();
             } else {
-                showError('Ошибка удаления канала');
+                showError('Ошибка удаления');
             }
         }
         channelMenuOverlay.classList.remove('show');
         channelMenu.classList.remove('show');
     });
     
-    // Подписка на канал (кнопка теперь скрыта, подписка через меню или автоматически)
-    // Но оставим возможность подписаться при открытии канала
-    
-    // Создание поста
     document.getElementById('createPostBtn')?.addEventListener('click', () => {
         let ov = document.createElement('div');
         ov.className = 'modal-overlay';
@@ -1371,7 +1437,14 @@
             if(priv) await loadPrivateMessages(priv);
         }
         if(currentChannel && !channelScreen.classList.contains('hidden')){
-            await renderChannelPosts(currentChannel.channelId);
+            await loadChannels();
+            let updated = channels.find(c => c.channelId === currentChannel.channelId);
+            if (updated) {
+                currentChannel = updated;
+                let subscriberCount = updated.subscribers?.length || 0;
+                let isSubscribed = updated.subscribers?.includes(myBinId);
+                document.getElementById('channelHeaderStatus').textContent = `👥 ${subscriberCount} подписчиков` + (isSubscribed ? ' • вы подписаны' : '');
+            }
         }
     }, 5000);
 })();
