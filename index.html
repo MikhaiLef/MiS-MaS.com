@@ -56,22 +56,22 @@
             flex-direction: column;
             background: #000000;
         }
-        .register-screen {
+        .register-screen, .license-screen, .reject-screen {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background: #000000; display: flex; align-items: center; justify-content: center;
             z-index: 2000; padding: 20px;
         }
-        body.light-theme .register-screen { background: #ffffff; }
-        .register-screen.hidden { display: none; }
-        .register-card {
+        body.light-theme .register-screen, body.light-theme .license-screen, body.light-theme .reject-screen { background: #ffffff; }
+        .register-screen.hidden, .license-screen.hidden, .reject-screen.hidden { display: none; }
+        .register-card, .license-card, .reject-card {
             background: #1c1c1e; border-radius: 20px; padding: 32px 24px;
-            max-width: 380px; width: 100%; text-align: center;
+            max-width: 500px; width: 100%;
         }
-        body.light-theme .register-card { background: #f2f2f7; }
-        .register-logo { font-size: 64px; margin-bottom: 16px; }
-        .register-title { font-size: 28px; font-weight: 700; margin-bottom: 8px; color: #ffffff; }
+        body.light-theme .register-card, body.light-theme .license-card, body.light-theme .reject-card { background: #f2f2f7; }
+        .register-logo { font-size: 64px; margin-bottom: 16px; text-align: center; }
+        .register-title { font-size: 28px; font-weight: 700; margin-bottom: 8px; color: #ffffff; text-align: center; }
         body.light-theme .register-title { color: #000000; }
-        .register-subtitle { font-size: 15px; color: #8e8e93; margin-bottom: 32px; }
+        .register-subtitle { font-size: 15px; color: #8e8e93; margin-bottom: 32px; text-align: center; }
         .register-input-wrapper {
             background: #2c2c2e; border-radius: 14px; padding: 4px 16px;
             margin-bottom: 24px; display: flex; align-items: center;
@@ -85,14 +85,32 @@
         body.light-theme .register-input { color: #000000; }
         .register-input::placeholder { color: #636366; }
         .register-hint { font-size: 13px; color: #8e8e93; margin-bottom: 24px; }
-        .register-btn {
+        .register-btn, .license-accept-btn, .license-reject-btn, .reject-back-btn {
             background: #3390ec; border: none; border-radius: 14px; padding: 16px;
             width: 100%; color: white; font-size: 17px; font-weight: 600;
             cursor: pointer; transition: opacity 0.2s;
         }
         .register-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .license-reject-btn { background: #ff375f; margin-bottom: 12px; }
+        .license-accept-btn { background: #34c759; }
+        .license-text-container {
+            background: #2c2c2e; border-radius: 14px; padding: 16px;
+            margin-bottom: 24px; max-height: 350px; overflow-y: auto;
+            color: #ffffff; font-size: 14px; line-height: 1.5;
+            text-align: left; border: 1px solid #3a3a3c;
+        }
+        body.light-theme .license-text-container { background: #ffffff; border-color: #e5e5ea; color: #000000; }
+        .license-text-container h3 { margin: 16px 0 8px 0; color: #3390ec; font-size: 16px; }
+        .license-text-container h3:first-child { margin-top: 0; }
+        .license-text-container p { margin-bottom: 12px; }
+        .license-text-container strong { color: #ff9f0a; }
+        body.light-theme .license-text-container strong { color: #cc7a00; }
+        .reject-icon { font-size: 64px; text-align: center; margin-bottom: 16px; }
+        .reject-message { font-size: 22px; font-weight: 600; margin-bottom: 16px; color: #ffffff; text-align: center; }
+        body.light-theme .reject-message { color: #000000; }
+        .reject-submessage { font-size: 15px; color: #8e8e93; margin-bottom: 32px; text-align: center; }
         
-        /* Экраны */
+        /* Стили для остального интерфейса */
         .chats-screen, .my-channels-screen { flex: 1; display: flex; flex-direction: column; background: #000000; }
         .chats-screen.hidden, .my-channels-screen.hidden { display: none; }
         .chats-header, .my-channels-header {
@@ -399,18 +417,53 @@
 <body>
 <div id="registerScreen" class="register-screen">
     <div class="register-card">
-        <div class="register-logo"></div>
+        <div class="register-logo">💬</div>
         <h2 class="register-title">MiS-MaS</h2>
-        <p class="register-subtitle">Привет!</p>
+        <p class="register-subtitle">Привет! Представься, пожалуйста</p>
         <div class="register-input-wrapper"><span>👤</span><input type="text" id="registerNameInput" class="register-input" placeholder="Ваше имя"></div>
         <p class="register-hint">Имя будет видно в чатах и каналах</p>
         <button class="register-btn" id="registerBtn" disabled>Продолжить</button>
     </div>
 </div>
 
+<div id="licenseScreen" class="license-screen hidden">
+    <div class="license-card">
+        <div class="register-logo">📜</div>
+        <h2 class="register-title">Лицензионное соглашение</h2>
+        <div class="license-text-container">
+            <h3>ЛИЦЕНЗИОННОЕ СОГЛАШЕНИЕ И ПРАВИЛА ИСПОЛЬЗОВАНИЯ СЕРВИСА MiS-MaS</h3>
+            <p><em>Версия 1.0 от 20 апреля 2026 года</em></p>
+            <p>Привет. Раз ты это читаешь, значит, ты либо решил воспользоваться нашим мессенджером MiS-MaS, либо тебе просто стало скучно. В любом случае, мы рады. Но перед тем как ты начнешь переписываться, создавать каналы и забивать избранное мемами, нам нужно о кое-чем договориться.</p>
+            <h3>1. О нашей анонимности и сути сервиса</h3>
+            <p>MiS-MaS задумывался как место для свободного, легкого и, главное, анонимного общения. Мы не требуем от тебя паспорт, номер телефона, отпечатки пальцев или анализы крови. Ты придумываешь имя — и ты уже в системе. Твой уникальный BIN ID — это твой цифровой псевдоним в нашей системе.</p>
+            <h3>2. Отказ от ответственности за контент</h3>
+            <p>MiS-MaS — это просто инструмент. Как молоток или кухонный нож. Им можно забить гвоздь и нарезать салат, а можно... ну, ты понял. Мы предоставляем «трубу» для обмена данными и кнопки для интерфейса. Мы не модерируем личные переписки, не читаем сообщения в приватных чатах и не следим за тем, что ты постишь в своем канале в три часа ночи.</p>
+            <p><strong>Мы категорически снимаем с себя любую ответственность за содержание диалогов между пользователями.</strong> Если твой собеседник оказался грубияном, хамом, спамером или человеком с крайне специфическими политическими или религиозными взглядами — это зона вашей с ним личной коммуникации.</p>
+            <h3>3. Твои авторские права</h3>
+            <p>Всё, что ты создаешь в MiS-MaS (тексты, картинки, названия каналов), принадлежит тебе. Мы не претендуем на твой гениальный контент.</p>
+            <h3>4. Каналы и публичность</h3>
+            <p>Если ты создаешь публичный канал, помни: это уже не совсем «кухонный разговор». Твои подписчики видят то, что ты пишешь. Отвечать за слова в этом канале придется тебе.</p>
+            <h3>5. Что мы можем и чего не можем гарантировать?</h3>
+            <p>Мы стараемся, чтобы сервис работал как швейцарские часы. Но мы маленькая команда. Мы не гарантируем 100% бесперебойный доступ 24/7.</p>
+            <p><strong>Приятного общения в MiS-MaS!</strong></p>
+        </div>
+        <button class="license-accept-btn" id="licenseAcceptBtn">✅ Принимаю соглашение</button>
+        <button class="license-reject-btn" id="licenseRejectBtn">❌ Отказываюсь</button>
+    </div>
+</div>
+
+<div id="rejectScreen" class="reject-screen hidden">
+    <div class="reject-card">
+        <div class="reject-icon">🚫</div>
+        <h2 class="reject-message">Доступ запрещён</h2>
+        <p class="reject-submessage">Вы не имеете права на использование этого мессенджера, так как отказались от лицензионного соглашения.</p>
+        <button class="reject-back-btn" id="rejectBackBtn">↩️ Вернуться в начало</button>
+    </div>
+</div>
+
 <div class="app">
     <!-- Главный экран со списком чатов и каналов -->
-    <div id="chatsScreen" class="chats-screen">
+    <div id="chatsScreen" class="chats-screen hidden">
         <div class="chats-header">
             <h1>MiS-MaS</h1>
             <div class="header-actions">
@@ -477,7 +530,7 @@
         <div class="channel-header">
             <button class="back-button" id="backFromChannelBtn">←</button>
             <div class="channel-header-info">
-                <div class="channel-header-avatar" id="channelHeaderAvatar">k</div>
+                <div class="channel-header-avatar" id="channelHeaderAvatar">📢</div>
                 <div class="channel-header-text">
                     <div class="channel-header-name" id="channelHeaderName">Канал</div>
                     <div class="channel-header-status" id="channelHeaderStatus"></div>
@@ -494,9 +547,9 @@
     <!-- Меню канала -->
     <div class="channel-menu-overlay" id="channelMenuOverlay"></div>
     <div class="channel-menu" id="channelMenu">
-        <div class="channel-menu-item" id="copyChannelIdBtn"> Скопировать ID канала</div>
-        <div class="channel-menu-item" id="subscribeChannelBtn"> Отписаться</div>
-        <div class="channel-menu-item delete" id="deleteChannelBtn"> Удалить канал</div>
+        <div class="channel-menu-item" id="copyChannelIdBtn">📋 Скопировать ID канала</div>
+        <div class="channel-menu-item" id="subscribeChannelBtn">🚫 Отписаться</div>
+        <div class="channel-menu-item delete" id="deleteChannelBtn">🗑️ Удалить канал</div>
         <div class="channel-menu-cancel" id="cancelChannelMenu">Отмена</div>
     </div>
 
@@ -531,7 +584,7 @@
                         <div class="setting-label">Мои Каналы</div>
                         <div class="setting-description">Управление вашими каналами</div>
                     </div>
-                    <span class="setting-value">k</span>
+                    <span class="setting-value">📢</span>
                 </div>
                 <div class="setting-item" id="findChannelBtn">
                     <div class="setting-info">
@@ -572,6 +625,7 @@
     localStorage.setItem('mios_user_id', currentUser);
     let savedUsername = localStorage.getItem('mios_username') || '';
     let isRegistered = localStorage.getItem('mios_registered') === 'true';
+    let licenseAccepted = localStorage.getItem('mios_license_accepted') === 'true';
     let myBinId = null;
     let privateChats = [];
     let favoritesMessages = [];
@@ -582,6 +636,8 @@
     let currentTheme = localStorage.getItem('mios_theme') || 'dark';
     
     const registerScreen = document.getElementById('registerScreen');
+    const licenseScreen = document.getElementById('licenseScreen');
+    const rejectScreen = document.getElementById('rejectScreen');
     const chatsScreen = document.getElementById('chatsScreen');
     const myChannelsScreen = document.getElementById('myChannelsScreen');
     const chatScreen = document.getElementById('chatScreen');
@@ -591,6 +647,7 @@
     const myChannelsList = document.getElementById('myChannelsList');
     const channelMenu = document.getElementById('channelMenu');
     const channelMenuOverlay = document.getElementById('channelMenuOverlay');
+    
     const showInfo = (t)=>{ let toast=document.getElementById('infoToast'); toast.textContent='✅ '+t; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),2500);};
     const showError = (t)=>{ let toast=document.getElementById('errorToast'); toast.textContent='⚠ '+t; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),3000);};
     
@@ -608,6 +665,44 @@
     loadPrivateChats();
     loadFavorites();
     loadMyChannels();
+    
+    // Функция автоочистки API личных сообщений
+    async function autoClearMessagesAPI() {
+        try {
+            let resp = await fetch(API_URL);
+            let allMessages = await resp.json();
+            
+            let now = new Date();
+            let oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+            
+            let messagesToDelete = allMessages.filter(msg => {
+                if (!msg.date) return false;
+                try {
+                    let msgDate = new Date(msg.date);
+                    return msgDate < oneHourAgo;
+                } catch(e) { return false; }
+            });
+            
+            let deletedCount = 0;
+            for (let msg of messagesToDelete) {
+                try {
+                    await fetch(API_URL + '/' + msg.id, { method: 'DELETE' });
+                    deletedCount++;
+                } catch(e) {}
+            }
+            
+            if (deletedCount > 0) {
+                console.log(`🧹 Автоочистка: удалено ${deletedCount} старых сообщений`);
+            }
+        } catch(e) {
+            console.error('Ошибка автоочистки API:', e);
+        }
+    }
+    
+    // Запускаем автоочистку каждый час
+    setInterval(autoClearMessagesAPI, 60 * 60 * 1000);
+    // И сразу при запуске
+    setTimeout(autoClearMessagesAPI, 5000);
     
     async function getChannelInfo(channelId) {
         try {
@@ -768,7 +863,7 @@
                     </div>
                     <div class="channel-id" style="display: flex; align-items: center; justify-content: space-between; margin-top: 4px;">
                         <span style="font-family: monospace;">${channel.channelId}</span>
-                        <button class="copy-id-btn" data-channel-id="${channel.channelId}" style="background: none; border: none; color: #3390ec; cursor: pointer; font-size: 16px;">📋</button>
+                        <button class="copy-id-btn" data-channel-id="${channel.channelId}">📋</button>
                     </div>
                 </div>
             </div>`;
@@ -1109,14 +1204,25 @@
     function autoResize(ta){ if(ta){ ta.style.height = 'auto'; ta.style.height = Math.min(ta.scrollHeight, 120) + 'px'; } }
     
     function checkRegistration(){ 
-        if(isRegistered && savedUsername){ 
+        if(isRegistered && savedUsername && licenseAccepted){ 
             registerScreen.classList.add('hidden'); 
+            licenseScreen.classList.add('hidden');
+            rejectScreen.classList.add('hidden');
             return true; 
-        } 
-        registerScreen.classList.remove('hidden'); 
+        }
+        if (!savedUsername || !isRegistered) {
+            registerScreen.classList.remove('hidden');
+            licenseScreen.classList.add('hidden');
+            rejectScreen.classList.add('hidden');
+        } else if (isRegistered && savedUsername && !licenseAccepted) {
+            registerScreen.classList.add('hidden');
+            licenseScreen.classList.remove('hidden');
+            rejectScreen.classList.add('hidden');
+        }
         return false; 
     }
     
+    // Обработчики регистрации
     document.getElementById('registerNameInput')?.addEventListener('input', (e) => {
         document.getElementById('registerBtn').disabled = !e.target.value.trim();
     });
@@ -1130,10 +1236,37 @@
         isRegistered = true;
         document.getElementById('currentNameDisplay').innerText = savedUsername;
         registerScreen.classList.add('hidden');
-        showInfo('Добро пожаловать!');
+        licenseScreen.classList.remove('hidden');
+    });
+    
+    // Обработчики лицензии
+    document.getElementById('licenseAcceptBtn')?.addEventListener('click', () => {
+        localStorage.setItem('mios_license_accepted', 'true');
+        licenseAccepted = true;
+        licenseScreen.classList.add('hidden');
+        showInfo('Добро пожаловать в MiS-MaS!');
         initApp();
     });
     
+    document.getElementById('licenseRejectBtn')?.addEventListener('click', () => {
+        licenseScreen.classList.add('hidden');
+        rejectScreen.classList.remove('hidden');
+    });
+    
+    document.getElementById('rejectBackBtn')?.addEventListener('click', () => {
+        localStorage.removeItem('mios_username');
+        localStorage.removeItem('mios_registered');
+        localStorage.removeItem('mios_license_accepted');
+        savedUsername = '';
+        isRegistered = false;
+        licenseAccepted = false;
+        rejectScreen.classList.add('hidden');
+        registerScreen.classList.remove('hidden');
+        document.getElementById('registerNameInput').value = '';
+        document.getElementById('registerBtn').disabled = true;
+    });
+    
+    // Обработчики табов и навигации
     document.querySelectorAll('.bottom-tab').forEach(tab => {
         tab.addEventListener('click', async () => {
             document.querySelectorAll('.bottom-tab').forEach(t => t.classList.remove('active'));
@@ -1184,7 +1317,6 @@
     
     document.getElementById('searchInput')?.addEventListener('input', () => renderChatsList());
     
-    // Кнопка "Мои Каналы" в настройках
     document.getElementById('myChannelsBtn')?.addEventListener('click', async () => {
         await refreshMyChannels();
         renderMyChannelsList();
@@ -1192,7 +1324,6 @@
         myChannelsScreen.classList.remove('hidden');
     });
     
-    // Кнопка + для добавления чата
     document.getElementById('addChatBtn')?.addEventListener('click', () => {
         let ov = document.createElement('div');
         ov.className = 'modal-overlay';
@@ -1228,7 +1359,6 @@
         inp.addEventListener('keydown', e => { if(e.key === 'Enter') create(); });
     });
     
-    // Найти канал по ID
     document.getElementById('findChannelBtn')?.addEventListener('click', async () => {
         let ov = document.createElement('div');
         ov.className = 'modal-overlay';
@@ -1267,7 +1397,6 @@
         inp.addEventListener('keydown', e => { if(e.key === 'Enter') find(); });
     });
     
-    // Создание канала
     document.getElementById('createChannelBtn')?.addEventListener('click', () => {
         let ov = document.createElement('div');
         ov.className = 'modal-overlay';
@@ -1332,7 +1461,6 @@
         });
     });
     
-    // Меню канала
     document.getElementById('channelMenuBtn')?.addEventListener('click', () => {
         if (!currentChannel) return;
         channelMenuOverlay.classList.add('show');
@@ -1558,6 +1686,7 @@
             savePrivateChats();
         }
         
+        chatsScreen.classList.remove('hidden');
         await renderChatsList();
     }
     
