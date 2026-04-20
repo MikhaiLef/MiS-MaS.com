@@ -412,6 +412,28 @@
             border-radius: 12px; font-size: 16px; font-weight: 600;
             background: #2c2c2e; margin-top: 8px;
         }
+        
+        /* Стили для модального окна с лицензией */
+        .license-modal {
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .license-modal .license-text-container {
+            max-height: 350px;
+            margin-bottom: 20px;
+        }
+        .license-modal-close {
+            background: #3390ec;
+            border: none;
+            border-radius: 12px;
+            padding: 12px;
+            width: 100%;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -430,23 +452,7 @@
     <div class="license-card">
         <div class="register-logo">📜</div>
         <h2 class="register-title">Лицензионное соглашение</h2>
-        <div class="license-text-container">
-            <h3>ЛИЦЕНЗИОННОЕ СОГЛАШЕНИЕ И ПРАВИЛА ИСПОЛЬЗОВАНИЯ СЕРВИСА MiS-MaS</h3>
-            <p><em>Версия 1.0 от 20 апреля 2026 года</em></p>
-            <p>Привет. Раз ты это читаешь, значит, ты либо решил воспользоваться нашим мессенджером MiS-MaS, либо тебе просто стало скучно. В любом случае, мы рады. Но перед тем как ты начнешь переписываться, создавать каналы и забивать избранное мемами, нам нужно о кое-чем договориться.</p>
-            <h3>1. О нашей анонимности и сути сервиса</h3>
-            <p>MiS-MaS задумывался как место для свободного, легкого и, главное, анонимного общения. Мы не требуем от тебя паспорт, номер телефона, отпечатки пальцев или анализы крови. Ты придумываешь имя — и ты уже в системе. Твой уникальный BIN ID — это твой цифровой псевдоним в нашей системе.</p>
-            <h3>2. Отказ от ответственности за контент</h3>
-            <p>MiS-MaS — это просто инструмент. Как молоток или кухонный нож. Им можно забить гвоздь и нарезать салат, а можно... ну, ты понял. Мы предоставляем «трубу» для обмена данными и кнопки для интерфейса. Мы не модерируем личные переписки, не читаем сообщения в приватных чатах и не следим за тем, что ты постишь в своем канале в три часа ночи.</p>
-            <p><strong>Мы категорически снимаем с себя любую ответственность за содержание диалогов между пользователями.</strong> Если твой собеседник оказался грубияном, хамом, спамером или человеком с крайне специфическими политическими или религиозными взглядами — это зона вашей с ним личной коммуникации.</p>
-            <h3>3. Твои авторские права</h3>
-            <p>Всё, что ты создаешь в MiS-MaS (тексты, картинки, названия каналов), принадлежит тебе. Мы не претендуем на твой гениальный контент.</p>
-            <h3>4. Каналы и публичность</h3>
-            <p>Если ты создаешь публичный канал, помни: это уже не совсем «кухонный разговор». Твои подписчики видят то, что ты пишешь. Отвечать за слова в этом канале придется тебе.</p>
-            <h3>5. Что мы можем и чего не можем гарантировать?</h3>
-            <p>Мы стараемся, чтобы сервис работал как швейцарские часы. Но мы маленькая команда. Мы не гарантируем 100% бесперебойный доступ 24/7.</p>
-            <p><strong>Приятного общения в MiS-MaS!</strong></p>
-        </div>
+        <div class="license-text-container" id="licenseTextContainer"></div>
         <button class="license-accept-btn" id="licenseAcceptBtn">✅ Принимаю соглашение</button>
         <button class="license-reject-btn" id="licenseRejectBtn">❌ Отказываюсь</button>
     </div>
@@ -607,6 +613,13 @@
                     </div>
                     <span class="setting-value" id="themeIcon">🌙</span>
                 </div>
+                <div class="setting-item" id="showLicenseBtn">
+                    <div class="setting-info">
+                        <div class="setting-label">Лицензионное соглашение</div>
+                        <div class="setting-description">Просмотреть условия использования</div>
+                    </div>
+                    <span class="setting-value">📜</span>
+                </div>
             </div>
         </div>
     </div>
@@ -650,6 +663,28 @@
     
     const showInfo = (t)=>{ let toast=document.getElementById('infoToast'); toast.textContent='✅ '+t; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),2500);};
     const showError = (t)=>{ let toast=document.getElementById('errorToast'); toast.textContent='⚠ '+t; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),3000);};
+    
+    // Текст лицензионного соглашения
+    const LICENSE_TEXT = `
+        <h3>ЛИЦЕНЗИОННОЕ СОГЛАШЕНИЕ И ПРАВИЛА ИСПОЛЬЗОВАНИЯ СЕРВИСА MiS-MaS</h3>
+        <p><em>Версия 1.0 от 20 апреля 2026 года</em></p>
+        <p>Привет. Раз ты это читаешь, значит, ты либо решил воспользоваться нашим мессенджером MiS-MaS, либо тебе просто стало скучно. В любом случае, мы рады. Но перед тем как ты начнешь переписываться, создавать каналы и забивать избранное мемами, нам нужно о кое-чем договориться.</p>
+        <h3>1. О нашей анонимности и сути сервиса</h3>
+        <p>MiS-MaS задумывался как место для свободного, легкого и, главное, анонимного общения. Мы не требуем от тебя паспорт, номер телефона, отпечатки пальцев или анализы крови. Ты придумываешь имя — и ты уже в системе. Твой уникальный BIN ID — это твой цифровой псевдоним в нашей системе.</p>
+        <h3>2. Отказ от ответственности за контент</h3>
+        <p>MiS-MaS — это просто инструмент. Как молоток или кухонный нож. Им можно забить гвоздь и нарезать салат, а можно... ну, ты понял. Мы предоставляем «трубу» для обмена данными и кнопки для интерфейса. Мы не модерируем личные переписки, не читаем сообщения в приватных чатах и не следим за тем, что ты постишь в своем канале в три часа ночи.</p>
+        <p><strong>Мы категорически снимаем с себя любую ответственность за содержание диалогов между пользователями.</strong> Если твой собеседник оказался грубияном, хамом, спамером или человеком с крайне специфическими политическими или религиозными взглядами — это зона вашей с ним личной коммуникации.</p>
+        <h3>3. Твои авторские права</h3>
+        <p>Всё, что ты создаешь в MiS-MaS (тексты, картинки, названия каналов), принадлежит тебе. Мы не претендуем на твой гениальный контент.</p>
+        <h3>4. Каналы и публичность</h3>
+        <p>Если ты создаешь публичный канал, помни: это уже не совсем «кухонный разговор». Твои подписчики видят то, что ты пишешь. Отвечать за слова в этом канале придется тебе.</p>
+        <h3>5. Что мы можем и чего не можем гарантировать?</h3>
+        <p>Мы стараемся, чтобы сервис работал как швейцарские часы. Но мы маленькая команда. Мы не гарантируем 100% бесперебойный доступ 24/7.</p>
+        <p><strong>Приятного общения в MiS-MaS!</strong></p>
+    `;
+    
+    // Заполняем текст лицензии
+    document.getElementById('licenseTextContainer').innerHTML = LICENSE_TEXT;
     
     function formatSize(bytes){ if(bytes<1024) return bytes+' Б'; if(bytes<1048576) return (bytes/1024).toFixed(1)+' КБ'; return (bytes/1048576).toFixed(1)+' МБ'; }
     function escapeHtml(s){ if(!s) return ''; return String(s).replace(/[&<>]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
@@ -701,8 +736,24 @@
     
     // Запускаем автоочистку каждый час
     setInterval(autoClearMessagesAPI, 60 * 60 * 1000);
-    // И сразу при запуске
     setTimeout(autoClearMessagesAPI, 5000);
+    
+    // Функция для показа лицензии в модальном окне (из настроек)
+    function showLicenseModal() {
+        let ov = document.createElement('div');
+        ov.className = 'modal-overlay';
+        ov.innerHTML = `<div class="modal license-modal">
+            <h3>📜 Лицензионное соглашение</h3>
+            <div class="license-text-container">${LICENSE_TEXT}</div>
+            <button class="license-modal-close">Понятно</button>
+        </div>`;
+        document.body.appendChild(ov);
+        
+        ov.querySelector('.license-modal-close').onclick = () => ov.remove();
+        ov.addEventListener('click', (e) => {
+            if(e.target === ov) ov.remove();
+        });
+    }
     
     async function getChannelInfo(channelId) {
         try {
@@ -1239,7 +1290,7 @@
         licenseScreen.classList.remove('hidden');
     });
     
-    // Обработчики лицензии
+    // Обработчики лицензии (только при регистрации)
     document.getElementById('licenseAcceptBtn')?.addEventListener('click', () => {
         localStorage.setItem('mios_license_accepted', 'true');
         licenseAccepted = true;
@@ -1264,6 +1315,11 @@
         registerScreen.classList.remove('hidden');
         document.getElementById('registerNameInput').value = '';
         document.getElementById('registerBtn').disabled = true;
+    });
+    
+    // Обработчик для кнопки "Лицензионное соглашение" в настройках
+    document.getElementById('showLicenseBtn')?.addEventListener('click', () => {
+        showLicenseModal();
     });
     
     // Обработчики табов и навигации
