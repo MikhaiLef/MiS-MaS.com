@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Полная очистка API | MiS-MaS</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #000000;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            padding: 20px;
+        }
+        .cleaner-card {
+            background: #1c1c1e;
+            border-radius: 24px;
+            padding: 40px 32px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+        .cleaner-icon {
+            font-size: 72px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #ffffff;
+        }
+        .subtitle {
+            font-size: 15px;
+            color: #8e8e93;
+            margin-bottom: 32px;
+            line-height: 1.5;
+        }
+        .api-url {
+            background: #2c2c2e;
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin-bottom: 24px;
+            font-family: 'SF Mono', 'Menlo', 'Monaco', monospace;
+            font-size: 14px;
+            color: #64d2ff;
+            word-break: break-all;
+            border: 1px solid #3a3a3c;
+        }
+        .stats-container {
+            background: #2c2c2e;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+            display: none;
+        }
+        .stats-container.show { display: block; }
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #3a3a3c;
+        }
+        .stat-row:last-child { border-bottom: none; }
+        .stat-label { color: #8e8e93; font-size: 14px; }
+        .stat-value { color: #ffffff; font-size: 18px; font-weight: 600; }
+        .stat-value.warning { color: #ff375f; }
+        .clean-btn {
+            background: #ff375f;
+            border: none;
+            border-radius: 16px;
+            padding: 18px 24px;
+            width: 100%;
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .clean-btn:active { opacity: 0.8; transform: scale(0.98); }
+        .clean-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .clean-btn .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            display: none;
+        }
+        .clean-btn.loading .spinner { display: block; }
+        .clean-btn.loading .btn-text { display: none; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .progress-container {
+            margin: 20px 0;
+            display: none;
+        }
+        .progress-container.show { display: block; }
+        .progress-bar-bg {
+            background: #2c2c2e;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            background: #ff375f;
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        .progress-text {
+            margin-top: 8px;
+            font-size: 13px;
+            color: #8e8e93;
+        }
+        .message {
+            margin-top: 20px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            display: none;
+        }
+        .message.show { display: block; }
+        .message.success {
+            background: rgba(52, 199, 89, 0.15);
+            color: #34c759;
+            border-left: 4px solid #34c759;
+        }
+        .message.error {
+            background: rgba(255, 55, 95, 0.15);
+            color: #ff5e5e;
+            border-left: 4px solid #ff375f;
+        }
+        .message.info {
+            background: rgba(51, 144, 236, 0.15);
+            color: #3390ec;
+            border-left: 4px solid #3390ec;
+        }
+        .warning-note {
+            margin-top: 24px;
+            padding: 14px;
+            background: rgba(255, 55, 95, 0.15);
+            border-radius: 12px;
+            color: #ff5e5e;
+            font-size: 13px;
+            text-align: left;
+            border-left: 4px solid #ff375f;
+        }
+        .warning-note strong { color: #ff5e5e; }
+        .back-link {
+            margin-top: 20px;
+            color: #3390ec;
+            text-decoration: none;
+            font-size: 14px;
+            display: inline-block;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .confirm-input {
+            margin: 20px 0;
+            display: none;
+        }
+        .confirm-input.show { display: block; }
+        .confirm-input input {
+            width: 100%;
+            padding: 14px 16px;
+            background: #2c2c2e;
+            border: 1px solid #3a3a3c;
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            text-align: center;
+            outline: none;
+        }
+        .confirm-input input:focus { border-color: #ff375f; }
+        .confirm-input input::placeholder { color: #636366; }
+        .confirm-hint {
+            font-size: 12px;
+            color: #8e8e93;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="cleaner-card">
+        <div class="cleaner-icon">💣</div>
+        <h1>ПОЛНАЯ ОЧИСТКА API</h1>
+        <p class="subtitle">Инструмент для удаления ВСЕХ сообщений<br>из API личных переписок MiS-MaS</p>
+        
+        <div class="api-url">
+            📡 https://69da27d226585bd92dd3a309.mockapi.io/mi
+        </div>
+        
+        <div class="stats-container" id="statsContainer">
+            <div class="stat-row">
+                <span class="stat-label">Всего сообщений в API</span>
+                <span class="stat-value warning" id="totalMessages">-</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Будет удалено</span>
+                <span class="stat-value warning" id="toDelete">-</span>
+            </div>
+        </div>
+        
+        <div class="confirm-input" id="confirmInput">
+            <input type="text" id="confirmText" placeholder="Введите: УДАЛИТЬ ВСЁ" autocomplete="off">
+            <div class="confirm-hint">Для подтверждения введите текст "УДАЛИТЬ ВСЁ" (заглавными буквами)</div>
+        </div>
+        
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="progressBar"></div>
+            </div>
+            <div class="progress-text" id="progressText">Удаление сообщений...</div>
+        </div>
+        
+        <button class="clean-btn" id="cleanBtn">
+            <span class="spinner"></span>
+            <span class="btn-text">💣 УДАЛИТЬ ВСЕ СООБЩЕНИЯ</span>
+        </button>
+        
+        <div class="message" id="messageBox"></div>
+        
+        <div class="warning-note">
+            <strong>⚠️ ВНИМАНИЕ! ЭТО НЕОБРАТИМО!</strong><br>
+            Будут удалены <strong>ВСЕ</strong> сообщения из API личных переписок, независимо от времени отправки. 
+            Эта операция необратима. Данные о каналах и постах не затрагиваются.
+            После очистки все чаты станут пустыми.
+        </div>
+        
+        <a href="messenger.html" class="back-link">← Вернуться в мессенджер</a>
+    </div>
+
+    <script>
+        (function(){
+            const API_URL = 'https://69da27d226585bd92dd3a309.mockapi.io/mi';
+            const CONFIRM_PHRASE = 'УДАЛИТЬ ВСЁ';
+            
+            const statsContainer = document.getElementById('statsContainer');
+            const totalMessagesSpan = document.getElementById('totalMessages');
+            const toDeleteSpan = document.getElementById('toDelete');
+            const cleanBtn = document.getElementById('cleanBtn');
+            const messageBox = document.getElementById('messageBox');
+            const confirmInput = document.getElementById('confirmInput');
+            const confirmText = document.getElementById('confirmText');
+            const progressContainer = document.getElementById('progressContainer');
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            
+            let allMessages = [];
+            let deleteConfirmed = false;
+            
+            function showMessage(text, type) {
+                messageBox.textContent = text;
+                messageBox.className = 'message show ' + type;
+                setTimeout(() => {
+                    messageBox.classList.remove('show');
+                }, 5000);
+            }
+            
+            async function loadStats() {
+                try {
+                    let resp = await fetch(API_URL);
+                    allMessages = await resp.json();
+                    
+                    totalMessagesSpan.textContent = allMessages.length;
+                    toDeleteSpan.textContent = allMessages.length;
+                    
+                    statsContainer.classList.add('show');
+                    
+                    if (allMessages.length > 0) {
+                        cleanBtn.disabled = false;
+                    } else {
+                        cleanBtn.disabled = true;
+                        showMessage('API пуст. Нечего удалять! ✨', 'info');
+                    }
+                    
+                } catch(e) {
+                    showMessage('Ошибка загрузки данных с API. Проверьте соединение.', 'error');
+                    cleanBtn.disabled = true;
+                }
+            }
+            
+            async function deleteAllMessages() {
+                if (allMessages.length === 0) {
+                    showMessage('API уже пуст. Нечего удалять.', 'info');
+                    return;
+                }
+                
+                try {
+                    cleanBtn.disabled = true;
+                    cleanBtn.classList.add('loading');
+                    progressContainer.classList.add('show');
+                    confirmInput.classList.remove('show');
+                    
+                    let deletedCount = 0;
+                    let failedCount = 0;
+                    let total = allMessages.length;
+                    
+                    progressText.textContent = `Удаление сообщений... 0/${total}`;
+                    progressBar.style.width = '0%';
+                    
+                    for (let i = 0; i < allMessages.length; i++) {
+                        let msg = allMessages[i];
+                        try {
+                            let resp = await fetch(API_URL + '/' + msg.id, { method: 'DELETE' });
+                            if (resp.ok) {
+                                deletedCount++;
+                            } else {
+                                failedCount++;
+                            }
+                        } catch(e) {
+                            failedCount++;
+                        }
+                        
+                        // Обновляем прогресс
+                        let percent = Math.round(((i + 1) / total) * 100);
+                        progressBar.style.width = percent + '%';
+                        progressText.textContent = `Удаление сообщений... ${i + 1}/${total}`;
+                        
+                        // Небольшая задержка чтобы не перегружать API
+                        await new Promise(resolve => setTimeout(resolve, 50));
+                    }
+                    
+                    progressText.textContent = `Завершено! Удалено: ${deletedCount}, ошибок: ${failedCount}`;
+                    
+                    if (deletedCount > 0) {
+                        showMessage(`✅ Успешно удалено ${deletedCount} сообщений! API полностью очищен.`, 'success');
+                    }
+                    if (failedCount > 0) {
+                        showMessage(`⚠️ Не удалось удалить ${failedCount} сообщений.`, 'error');
+                    }
+                    
+                    // Сбрасываем состояние
+                    deleteConfirmed = false;
+                    confirmText.value = '';
+                    
+                    // Обновляем статистику
+                    setTimeout(async () => {
+                        let resp = await fetch(API_URL);
+                        allMessages = await resp.json();
+                        totalMessagesSpan.textContent = allMessages.length;
+                        toDeleteSpan.textContent = allMessages.length;
+                        
+                        progressContainer.classList.remove('show');
+                        cleanBtn.classList.remove('loading');
+                        
+                        if (allMessages.length > 0) {
+                            cleanBtn.disabled = false;
+                        } else {
+                            cleanBtn.disabled = true;
+                        }
+                    }, 500);
+                    
+                } catch(e) {
+                    showMessage('Произошла критическая ошибка при очистке API.', 'error');
+                    cleanBtn.classList.remove('loading');
+                    progressContainer.classList.remove('show');
+                    deleteConfirmed = false;
+                }
+            }
+            
+            // Проверка подтверждения
+            confirmText.addEventListener('input', function() {
+                if (this.value === CONFIRM_PHRASE) {
+                    deleteConfirmed = true;
+                    this.style.borderColor = '#34c759';
+                } else {
+                    deleteConfirmed = false;
+                    this.style.borderColor = '#3a3a3c';
+                }
+            });
+            
+            confirmText.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && deleteConfirmed) {
+                    e.preventDefault();
+                    confirmInput.classList.remove('show');
+                    deleteAllMessages();
+                }
+            });
+            
+            cleanBtn.addEventListener('click', async () => {
+                if (allMessages.length === 0) {
+                    showMessage('API пуст. Нечего удалять.', 'info');
+                    return;
+                }
+                
+                if (!deleteConfirmed) {
+                    // Показываем поле подтверждения
+                    confirmInput.classList.add('show');
+                    confirmText.focus();
+                    showMessage('Введите "УДАЛИТЬ ВСЁ" для подтверждения', 'info');
+                    return;
+                }
+                
+                // Скрываем поле подтверждения и запускаем удаление
+                confirmInput.classList.remove('show');
+                await deleteAllMessages();
+            });
+            
+            // Загружаем статистику при открытии страницы
+            loadStats();
+            
+            // Обновляем статистику каждые 10 секунд
+            setInterval(loadStats, 10000);
+        })();
+    </script>
+</body>
+</html>
