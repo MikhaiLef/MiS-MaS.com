@@ -17,10 +17,8 @@
       font-size: 13px;
       line-height: 1.4;
     }
-    
     .app { max-width: 1000px; margin: 0 auto; width: 100%; flex: 1; display: flex; flex-direction: column; }
 
-    /* Регистрация */
     .register-screen {
       position: fixed; top: 0; left: 0; right: 0; bottom: 0;
       background: #4a6d8c; display: flex; align-items: center; justify-content: center; z-index: 2000;
@@ -45,7 +43,6 @@
     }
     .register-btn:disabled { opacity: 0.5; cursor: not-allowed; background: #8faec9; }
     .register-btn:not(:disabled):hover { background: #4a6d8c; }
-    .register-btn:not(:disabled):active { background: #3a5d7c; }
 
     .license-screen, .reject-screen {
       position: fixed; top: 0; left: 0; right: 0; bottom: 0;
@@ -69,7 +66,6 @@
     }
     .hidden { display: none !important; }
 
-    /* Шапка */
     .page-header {
       background: #4a6d8c; padding: 8px 16px; display: flex;
       align-items: center; justify-content: space-between; color: white; position: sticky; top: 0; z-index: 20;
@@ -89,7 +85,6 @@
     .left-menu-item.active { background: #e9edf1; border-left-color: #4a6d8c; font-weight: 600; }
     .content-area { flex: 1; padding: 16px; overflow-y: auto; max-height: calc(100vh - 42px); }
 
-    /* Профиль и посты */
     .profile-header {
       background: white; border-radius: 4px; padding: 20px;
       margin-bottom: 16px; border: 1px solid #e7e8ec;
@@ -123,7 +118,6 @@
     .post-date { color: #888; font-size: 12px; }
     .post-text { margin-bottom: 8px; line-height: 1.4; }
 
-    /* Чаты */
     .chat-layout {
       display: flex; flex: 1; background: white; border-radius: 4px;
       border: 1px solid #e7e8ec; min-height: 500px;
@@ -147,9 +141,10 @@
     }
     .chat-window { flex: 1; display: flex; flex-direction: column; }
     .messages-container { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
-    .message-bubble { max-width: 70%; padding: 8px 12px; border-radius: 6px; background: #e9edf1; align-self: flex-start; }
+    .message-bubble { max-width: 70%; padding: 8px 12px; border-radius: 6px; background: #e9edf1; align-self: flex-start; word-wrap: break-word; }
     .message-bubble.own { background: #cce4ff; align-self: flex-end; }
     .message-sender { font-weight: 600; color: #4a6d8c; font-size: 12px; margin-bottom: 4px; }
+    .message-time { font-size: 10px; color: #888; margin-top: 4px; }
     .chat-input-area { border-top: 1px solid #e7e8ec; padding: 10px; display: flex; gap: 8px; }
     .chat-input-area input {
       flex: 1; padding: 10px; border: 1px solid #d3d9de;
@@ -158,47 +153,43 @@
     .btn { padding: 8px 18px; border-radius: 4px; border: none; cursor: pointer; font-weight: 500; font-size: 13px; }
     .btn-primary { background: #5b7ea0; color: white; }
     .btn-primary:hover { background: #4a6d8c; }
-    .btn-secondary { background: #e9edf1; color: #333; }
     .send-btn {
       background: #5b7ea0; border: none; color: white; padding: 10px 18px;
       border-radius: 4px; cursor: pointer; font-weight: 600;
     }
     .send-btn:hover { background: #4a6d8c; }
+    .send-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
-    /* Toast уведомления */
     .toast {
       position: fixed; top: 50px; left: 50%; transform: translateX(-50%);
-      background: #4a6d8c; color: white; padding: 10px 20px;
+      background: #333; color: white; padding: 10px 20px;
       border-radius: 4px; font-size: 13px; z-index: 3000; opacity: 0; transition: opacity 0.3s;
       pointer-events: none;
     }
     .toast.show { opacity: 1; }
 
-    .modal-overlay {
-      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 1000;
-    }
-    .modal-content {
-      background: white; border-radius: 4px; padding: 20px;
-      width: 90%; max-width: 400px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-    }
-    .modal-content h3 { margin-bottom: 16px; }
-    .modal-content input {
-      width: 100%; padding: 10px; margin: 8px 0;
-      border: 1px solid #d3d9de; border-radius: 4px; box-sizing: border-box;
-    }
-    .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
-
     @media (max-width: 700px) {
       .left-menu { display: none; }
-      .chat-list-panel { width: 100%; max-width: 100%; }
+      .chat-list-panel { width: 100%; }
       .chat-layout { flex-direction: column; }
+    }
+
+    .loading-indicator {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid #ccc;
+      border-top-color: #4a6d8c;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
   </style>
 </head>
 <body>
 <div id="appRoot" class="app">
-  <!-- Регистрация -->
   <div id="registerScreen" class="register-screen">
     <div class="register-card">
       <div class="register-logo">MiS-MaS</div>
@@ -212,7 +203,6 @@
     </div>
   </div>
 
-  <!-- Лицензия -->
   <div id="licenseScreen" class="license-screen hidden">
     <div class="license-card">
       <h3 style="margin-bottom:16px;">Лицензионное соглашение</h3>
@@ -230,7 +220,6 @@
     </div>
   </div>
 
-  <!-- Основной интерфейс -->
   <div id="mainInterface" class="hidden" style="display:flex;flex-direction:column;flex:1;">
     <header class="page-header">
       <div class="header-logo" id="logoBtn">MiS-MaS</div>
@@ -257,20 +246,17 @@
 
 <script>
 (function() {
-  // API endpoints из оригинального кода
   const API_URL = 'https://69da27d226585bd92dd3a309.mockapi.io/mi';
   const CHANNEL_API_URL = 'https://69da27d226585bd92dd3a309.mockapi.io/messages';
   
-  const LICENSE_TEXT = `
+  document.getElementById('licenseTextContainer').innerHTML = `
     <p><strong>Лицензионное соглашение MiS-MaS</strong></p>
     <p>1. Сервис предоставляется "как есть".</p>
     <p>2. Запрещено нарушать законодательство.</p>
     <p>3. Администрация не несет ответственности за контент пользователей.</p>
     <p>4. Используя сервис, вы соглашаетесь с правилами.</p>
   `;
-  document.getElementById('licenseTextContainer').innerHTML = LICENSE_TEXT;
 
-  // Пользователь
   let currentUser = {
     id: localStorage.getItem('mismos_user_id') || ('user_' + Date.now() + '_' + Math.random().toString(36).substr(2,8)),
     name: localStorage.getItem('mismos_username') || '',
@@ -281,23 +267,10 @@
   let isRegistered = localStorage.getItem('mismos_registered') === 'true';
   let licenseAccepted = localStorage.getItem('mismos_license') === 'true';
   let currentPage = 'profile';
-  let privateChats = JSON.parse(localStorage.getItem('mismos_chats_list') || '[]');
+  let privateChats = [];
   let currentChatId = null;
+  let messageRefreshTimer = null;
 
-  // Сохранение чатов в localStorage для предотвращения потери
-  function saveChatsToStorage() {
-    // Сохраняем только метаданные чатов, без сообщений (сообщения грузятся из API)
-    var chatsMeta = privateChats.map(function(c) {
-      return {
-        id: c.id,
-        binId: c.binId,
-        name: c.name
-      };
-    });
-    localStorage.setItem('mismos_chats_list', JSON.stringify(chatsMeta));
-  }
-
-  // Toast
   function showToast(msg) {
     var toast = document.getElementById('toast');
     toast.textContent = msg;
@@ -305,134 +278,203 @@
     setTimeout(function() { toast.classList.remove('show'); }, 2500);
   }
 
-  // API функции
+  function escapeHtml(s) {
+    if (!s) return '';
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  // ============== API ФУНКЦИИ ==============
+  
   async function getOrCreateBinId() {
     var bid = localStorage.getItem('mismos_bin_id');
     if (bid) {
       currentUser.binId = bid;
+      console.log('BIN ID из localStorage:', bid);
       return bid;
     }
+    
+    bid = 'bin_' + Date.now();
+    localStorage.setItem('mismos_bin_id', bid);
+    currentUser.binId = bid;
+    console.log('Создан новый BIN ID:', bid);
+    return bid;
+  }
+
+  // Загрузка ВСЕХ сообщений из API
+  async function loadAllMessagesFromAPI() {
+    try {
+      var resp = await fetch(API_URL);
+      if (!resp.ok) {
+        console.error('API ответил с ошибкой:', resp.status);
+        return [];
+      }
+      var allMessages = await resp.json();
+      console.log('Загружено сообщений из API:', allMessages.length);
+      return allMessages;
+    } catch(e) {
+      console.error('Ошибка загрузки сообщений:', e);
+      return [];
+    }
+  }
+
+  // Построение чатов из сообщений API
+  async function buildChatsFromAPI() {
+    if (!currentUser.binId) return;
+    
+    var allMessages = await loadAllMessagesFromAPI();
+    
+    // Группируем сообщения по собеседнику
+    var chatsMap = {};
+    
+    allMessages.forEach(function(msg) {
+      // Определяем, с кем чат
+      var partnerBin = null;
+      if (msg.fromBin === currentUser.binId) {
+        partnerBin = msg.toBin;
+      } else if (msg.toBin === currentUser.binId) {
+        partnerBin = msg.fromBin;
+      }
+      
+      if (!partnerBin || partnerBin === currentUser.binId) return;
+      
+      if (!chatsMap[partnerBin]) {
+        chatsMap[partnerBin] = {
+          id: 'chat_' + partnerBin,
+          binId: partnerBin,
+          name: 'Пользователь ' + partnerBin.substring(0, 8),
+          messages: []
+        };
+      }
+      
+      // Проверяем, нет ли уже такого сообщения
+      var exists = chatsMap[partnerBin].messages.find(function(m) {
+        return m.id === msg.id;
+      });
+      
+      if (!exists) {
+        chatsMap[partnerBin].messages.push(msg);
+      }
+    });
+    
+    // Восстанавливаем сохраненные чаты
+    var savedChats = JSON.parse(localStorage.getItem('mismos_chats_list') || '[]');
+    savedChats.forEach(function(sc) {
+      if (!chatsMap[sc.binId]) {
+        chatsMap[sc.binId] = {
+          id: sc.id || 'chat_' + sc.binId,
+          binId: sc.binId,
+          name: sc.name || 'Пользователь ' + sc.binId.substring(0, 8),
+          messages: []
+        };
+      } else {
+        chatsMap[sc.binId].name = sc.name || chatsMap[sc.binId].name;
+      }
+    });
+    
+    privateChats = Object.values(chatsMap);
+    
+    // Сортируем сообщения
+    privateChats.forEach(function(chat) {
+      chat.messages.sort(function(a, b) {
+        return new Date(a.date || a.createdAt || 0) - new Date(b.date || b.createdAt || 0);
+      });
+    });
+    
+    // Добавляем бота
+    if (!privateChats.find(function(c) { return c.binId === 'bot.official'; })) {
+      privateChats.unshift({
+        id: 'chat_bot',
+        binId: 'bot.official',
+        name: 'MiS-MaS Bot',
+        messages: []
+      });
+    }
+    
+    // Сохраняем список чатов
+    saveChatsList();
+    
+    console.log('Построено чатов:', privateChats.length);
+  }
+
+  function saveChatsList() {
+    var chatsMeta = privateChats.map(function(c) {
+      return { id: c.id, binId: c.binId, name: c.name };
+    });
+    localStorage.setItem('mismos_chats_list', JSON.stringify(chatsMeta));
+  }
+
+  // Отправка сообщения через API
+  async function sendMessageViaAPI(chat, text) {
+    var payload = {
+      fromBin: currentUser.binId,
+      toBin: chat.binId,
+      username: currentUser.name,
+      message: text,
+      text: text,
+      date: new Date().toISOString(),
+      createdAt: new Date().toISOString()
+    };
+    
+    console.log('Отправка сообщения:', payload);
+    
     try {
       var resp = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          binId: 'bin_' + Date.now(), 
-          username: currentUser.name,
-          user_id: currentUser.id
-        })
-      });
-      var data = await resp.json();
-      bid = data.id || data.binId || ('bin_' + Date.now());
-      localStorage.setItem('mismos_bin_id', bid);
-      currentUser.binId = bid;
-      return bid;
-    } catch(e) {
-      console.log('Ошибка создания BIN ID через API, создаем локально:', e);
-      bid = 'bin_' + Date.now();
-      localStorage.setItem('mismos_bin_id', bid);
-      currentUser.binId = bid;
-      return bid;
-    }
-  }
-
-  async function loadMessagesFromAPI() {
-    if (!currentUser.binId) return;
-    
-    try {
-      var resp = await fetch(API_URL);
-      if (!resp.ok) throw new Error('API недоступен');
-      
-      var all = await resp.json();
-      
-      // Фильтруем сообщения, где участвует наш пользователь
-      var myMsgs = all.filter(function(m) {
-        return (m.fromBin === currentUser.binId || m.toBin === currentUser.binId) &&
-               (m.message || m.text);
+        body: JSON.stringify(payload)
       });
       
-      // Восстанавливаем чаты из сохраненного списка
-      var savedChats = JSON.parse(localStorage.getItem('mismos_chats_list') || '[]');
-      
-      // Собираем уникальных собеседников из API сообщений
-      var partnerBins = {};
-      myMsgs.forEach(function(m) {
-        var partnerBin = m.fromBin === currentUser.binId ? m.toBin : m.fromBin;
-        if (partnerBin && partnerBin !== currentUser.binId) {
-          if (!partnerBins[partnerBin]) {
-            partnerBins[partnerBin] = {
-              id: 'chat_' + partnerBin,
-              binId: partnerBin,
-              name: 'Пользователь ' + (partnerBin ? partnerBin.substring(0, 8) : '???'),
-              messages: []
+      if (resp.ok) {
+        var savedMsg = await resp.json();
+        console.log('Сообщение сохранено в API:', savedMsg);
+        
+        // Добавляем в локальный чат
+        chat.messages.push(savedMsg);
+        
+        // Отправляем ответ бота если нужно
+        if (chat.binId === 'bot.official') {
+          setTimeout(async function() {
+            var botPayload = {
+              fromBin: 'bot.official',
+              toBin: currentUser.binId,
+              username: 'MiS-MaS Bot',
+              message: 'Привет! Я бот. Твой BIN ID: ' + currentUser.binId,
+              text: 'Привет! Я бот. Твой BIN ID: ' + currentUser.binId,
+              date: new Date().toISOString(),
+              createdAt: new Date().toISOString()
             };
-          }
-          partnerBins[partnerBin].messages.push(m);
+            
+            try {
+              var botResp = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(botPayload)
+              });
+              if (botResp.ok) {
+                var botMsg = await botResp.json();
+                chat.messages.push(botMsg);
+                if (currentChatId === chat.id) {
+                  refreshCurrentChat();
+                }
+              }
+            } catch(e) {
+              console.error('Ошибка ответа бота:', e);
+            }
+          }, 1000);
         }
-      });
-      
-      // Добавляем сохраненные чаты, которых нет в API
-      savedChats.forEach(function(sc) {
-        if (!partnerBins[sc.binId]) {
-          partnerBins[sc.binId] = {
-            id: sc.id || 'chat_' + sc.binId,
-            binId: sc.binId,
-            name: sc.name || 'Пользователь ' + sc.binId.substring(0, 8),
-            messages: []
-          };
-        } else {
-          // Обновляем имя из сохраненного
-          partnerBins[sc.binId].name = sc.name || partnerBins[sc.binId].name;
-        }
-      });
-      
-      privateChats = Object.values(partnerBins);
-      
-      // Сортируем сообщения в каждом чате
-      privateChats.forEach(function(c) {
-        c.messages.sort(function(a, b) {
-          var dateA = new Date(a.date || a.createdAt || 0);
-          var dateB = new Date(b.date || b.createdAt || 0);
-          return dateA - dateB;
-        });
-      });
-      
-      // Добавляем бота если нет
-      if (!privateChats.find(function(c) { return c.binId === 'bot.official'; })) {
-        privateChats.unshift({
-          id: 'chat_bot',
-          binId: 'bot.official',
-          name: 'MiS-MaS Bot',
-          messages: []
-        });
+        
+        return true;
+      } else {
+        console.error('API вернул ошибку:', resp.status, await resp.text());
+        return false;
       }
-      
-      saveChatsToStorage();
-      
     } catch(e) {
-      console.log('Ошибка загрузки сообщений из API:', e);
-      // Восстанавливаем чаты из localStorage если API недоступен
-      var savedChats = JSON.parse(localStorage.getItem('mismos_chats_list') || '[]');
-      privateChats = savedChats.map(function(sc) {
-        return {
-          id: sc.id || 'chat_' + sc.binId,
-          binId: sc.binId,
-          name: sc.name || 'Пользователь ' + (sc.binId ? sc.binId.substring(0, 8) : '???'),
-          messages: []
-        };
-      });
-      
-      if (!privateChats.find(function(c) { return c.binId === 'bot.official'; })) {
-        privateChats.unshift({
-          id: 'chat_bot',
-          binId: 'bot.official',
-          name: 'MiS-MaS Bot',
-          messages: []
-        });
-      }
+      console.error('Ошибка отправки:', e);
+      return false;
     }
   }
 
+  // Загрузка постов
   async function loadPosts() {
     try {
       var resp = await fetch(CHANNEL_API_URL);
@@ -444,12 +486,12 @@
         return new Date(b.date || b.createdAt || 0) - new Date(a.date || a.createdAt || 0);
       });
     } catch(e) {
-      console.log('Ошибка загрузки постов:', e);
-      // Запасной вариант - localStorage
-      return JSON.parse(localStorage.getItem('mismos_posts_local') || '[]');
+      console.error('Ошибка загрузки постов:', e);
+      return [];
     }
   }
 
+  // Создание поста
   async function createPost(text) {
     var postData = {
       type: 'post',
@@ -466,135 +508,391 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(postData)
       });
-      if (resp.ok) {
-        return true;
-      }
+      return resp.ok;
     } catch(e) {
-      console.log('Ошибка отправки поста через API, сохраняем локально:', e);
+      console.error('Ошибка создания поста:', e);
+      return false;
     }
-    
-    // Запасной вариант - localStorage
-    var localPosts = JSON.parse(localStorage.getItem('mismos_posts_local') || '[]');
-    postData.id = 'post_local_' + Date.now();
-    localPosts.push(postData);
-    localStorage.setItem('mismos_posts_local', JSON.stringify(localPosts));
-    return true;
   }
 
-  async function sendMessageToAPI(chat, text) {
-    var payload = {
-      chatId: chat.id,
-      fromBin: currentUser.binId,
-      toBin: chat.binId,
-      username: currentUser.name,
-      message: text,
-      text: text,
-      date: new Date().toISOString(),
-      createdAt: new Date().toISOString(),
-      user_id: currentUser.id
-    };
-    
-    try {
-      var resp = await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      
-      if (resp.ok) {
-        var newMsg = await resp.json();
-        // Убеждаемся что у сообщения есть все нужные поля
-        newMsg.message = newMsg.message || text;
-        newMsg.text = newMsg.text || text;
-        newMsg.fromBin = newMsg.fromBin || currentUser.binId;
-        newMsg.toBin = newMsg.toBin || chat.binId;
-        newMsg.username = newMsg.username || currentUser.name;
-        chat.messages.push(newMsg);
-        return true;
+  // ============== UI ФУНКЦИИ ==============
+
+  function refreshCurrentChat() {
+    if (!currentChatId) return;
+    var chat = privateChats.find(function(c) { return c.id === currentChatId; });
+    if (!chat) return;
+    renderChatMessages(chat);
+    renderChatList(document.getElementById('chatSearchInput')?.value || '');
+  }
+
+  async function refreshMessages() {
+    await buildChatsFromAPI();
+    refreshCurrentChat();
+    renderChatList(document.getElementById('chatSearchInput')?.value || '');
+  }
+
+  async function renderPage(page) {
+    currentPage = page;
+    switch(page) {
+      case 'profile': await renderProfile(); break;
+      case 'feed': await renderFeed(); break;
+      case 'messages': await renderMessages(); break;
+      default: await renderProfile();
+    }
+  }
+
+  async function renderProfile() {
+    var posts = await loadPosts();
+    var myPosts = posts.filter(function(p) {
+      return p.authorBinId === currentUser.binId;
+    });
+
+    contentArea.innerHTML = `
+      <div class="profile-header">
+        <div class="profile-info">
+          <div class="profile-avatar">${escapeHtml(currentUser.name.charAt(0).toUpperCase())}</div>
+          <div class="profile-details">
+            <h2>${escapeHtml(currentUser.name)}</h2>
+            <div class="status">BIN ID: ${currentUser.binId || 'Загрузка...'}</div>
+          </div>
+        </div>
+      </div>
+      <div class="post-creator">
+        <textarea id="newPostText" placeholder="Что у вас нового?"></textarea>
+        <button class="btn btn-primary" id="publishPostBtn">Опубликовать</button>
+      </div>
+      <div class="post-feed" id="profilePosts"></div>
+    `;
+
+    document.getElementById('publishPostBtn').addEventListener('click', async function() {
+      var text = document.getElementById('newPostText').value.trim();
+      if (!text) return;
+      var ok = await createPost(text);
+      if (ok) {
+        showToast('Пост опубликован');
+        await renderProfile();
       } else {
-        console.log('API ответил с ошибкой:', resp.status);
+        showToast('Ошибка публикации');
       }
-    } catch(e) {
-      console.log('Ошибка отправки через API:', e);
+    });
+
+    if (myPosts.length === 0) {
+      document.getElementById('profilePosts').innerHTML = '<p style="color:#656565; padding:20px; text-align:center;">У вас пока нет постов.</p>';
+    } else {
+      document.getElementById('profilePosts').innerHTML = myPosts.map(function(p) {
+        return buildPostHTML(p);
+      }).join('');
     }
-    
-    // Запасной вариант - добавляем сообщение локально
-    var localMsg = {
-      id: 'msg_local_' + Date.now(),
-      chatId: chat.id,
-      fromBin: currentUser.binId,
-      toBin: chat.binId,
-      username: currentUser.name,
-      message: text,
-      text: text,
-      date: new Date().toISOString(),
-      createdAt: new Date().toISOString(),
-      user_id: currentUser.id
-    };
-    chat.messages.push(localMsg);
-    
-    // Сохраняем сообщения локально
-    var localMessages = JSON.parse(localStorage.getItem('mismos_messages_local') || '{}');
-    if (!localMessages[chat.id]) {
-      localMessages[chat.id] = [];
-    }
-    localMessages[chat.id].push(localMsg);
-    localStorage.setItem('mismos_messages_local', JSON.stringify(localMessages));
-    
-    return true;
   }
 
-  // Восстановление локальных сообщений
-  function loadLocalMessages(chat) {
+  async function renderFeed() {
+    var posts = await loadPosts();
+    contentArea.innerHTML = '<div class="post-feed" id="feedPosts"></div>';
+    if (posts.length === 0) {
+      document.getElementById('feedPosts').innerHTML = '<p style="color:#656565; padding:20px; text-align:center;">Лента пуста.</p>';
+    } else {
+      document.getElementById('feedPosts').innerHTML = posts.map(function(p) {
+        return buildPostHTML(p);
+      }).join('');
+    }
+  }
+
+  function buildPostHTML(p) {
+    var name = p.authorName || 'Пользователь';
+    var dateStr = '';
     try {
-      var localMessages = JSON.parse(localStorage.getItem('mismos_messages_local') || '{}');
-      if (localMessages[chat.id]) {
-        localMessages[chat.id].forEach(function(m) {
-          // Проверяем нет ли уже такого сообщения
-          var exists = chat.messages.find(function(existing) {
-            return existing.id === m.id;
-          });
-          if (!exists) {
-            chat.messages.push(m);
-          }
-        });
-        // Сортируем
-        chat.messages.sort(function(a, b) {
-          var dateA = new Date(a.date || a.createdAt || 0);
-          var dateB = new Date(b.date || b.createdAt || 0);
-          return dateA - dateB;
-        });
-      }
+      var d = new Date(p.date || p.createdAt);
+      if (!isNaN(d.getTime())) dateStr = d.toLocaleString('ru-RU');
     } catch(e) {}
+    return `
+      <div class="post-item">
+        <div class="post-author">
+          <div class="post-author-avatar">${escapeHtml(name.charAt(0).toUpperCase())}</div>
+          <div>
+            <div class="post-author-name">${escapeHtml(name)}</div>
+            <div class="post-date">${dateStr}</div>
+          </div>
+        </div>
+        <div class="post-text">${escapeHtml(p.text || '')}</div>
+      </div>
+    `;
   }
 
-  // Проверка регистрации
-  function checkAuth() {
-    if (isRegistered && currentUser.name && licenseAccepted) {
-      registerScreen.classList.add('hidden');
-      licenseScreen.classList.add('hidden');
-      rejectScreen.classList.add('hidden');
-      mainInterface.classList.remove('hidden');
-      initApp();
-      return true;
+  async function renderMessages() {
+    await buildChatsFromAPI();
+    
+    contentArea.innerHTML = `
+      <div class="chat-layout">
+        <div class="chat-list-panel">
+          <div class="chat-search">
+            <input type="text" placeholder="Поиск чатов" id="chatSearchInput">
+          </div>
+          <div class="chat-contacts" id="chatContactsList"></div>
+          <button class="btn btn-primary" style="margin:10px;" id="newChatBtn">Новый чат</button>
+          <button class="btn btn-secondary" style="margin:0 10px 10px 10px;" id="refreshChatsBtn">Обновить чаты</button>
+        </div>
+        <div class="chat-window" id="chatWindow">
+          <div style="flex:1;display:flex;align-items:center;justify-content:center;color:#888;">Выберите чат</div>
+        </div>
+      </div>
+    `;
+    
+    renderChatList();
+
+    document.getElementById('newChatBtn').addEventListener('click', function() {
+      var binId = prompt('Введите BIN ID собеседника:');
+      if (!binId || !binId.trim()) return;
+      binId = binId.trim();
+      
+      if (binId === currentUser.binId) {
+        showToast('Нельзя создать чат с самим собой');
+        return;
+      }
+      
+      var existing = privateChats.find(function(c) { return c.binId === binId; });
+      if (existing) {
+        openChat(existing.id);
+        showToast('Чат уже существует');
+      } else {
+        var newChat = {
+          id: 'chat_' + binId,
+          binId: binId,
+          name: 'Пользователь ' + binId.substring(0, 8),
+          messages: []
+        };
+        privateChats.push(newChat);
+        saveChatsList();
+        renderChatList();
+        openChat(newChat.id);
+        showToast('Чат создан. Отправьте первое сообщение!');
+      }
+    });
+
+    document.getElementById('refreshChatsBtn').addEventListener('click', async function() {
+      showToast('Обновление...');
+      await refreshMessages();
+      showToast('Чаты обновлены');
+    });
+
+    document.getElementById('chatSearchInput').addEventListener('input', function() {
+      renderChatList(this.value);
+    });
+
+    // Если был открыт чат, восстанавливаем его
+    if (currentChatId) {
+      var chat = privateChats.find(function(c) { return c.id === currentChatId; });
+      if (chat) {
+        openChat(chat.id);
+      }
     }
-    if (!isRegistered || !currentUser.name) {
-      registerScreen.classList.remove('hidden');
-      licenseScreen.classList.add('hidden');
-      rejectScreen.classList.add('hidden');
-      mainInterface.classList.add('hidden');
-      registerBtn.disabled = true;
-      if (registerNameInput) registerNameInput.value = '';
-    } else if (isRegistered && currentUser.name && !licenseAccepted) {
-      registerScreen.classList.add('hidden');
-      licenseScreen.classList.remove('hidden');
-      rejectScreen.classList.add('hidden');
-      mainInterface.classList.add('hidden');
-    }
-    return false;
+
+    // Запускаем автообновление сообщений
+    startMessageAutoRefresh();
   }
 
-  // Обработчики регистрации
+  function startMessageAutoRefresh() {
+    if (messageRefreshTimer) clearInterval(messageRefreshTimer);
+    messageRefreshTimer = setInterval(async function() {
+      if (currentPage === 'messages') {
+        await buildChatsFromAPI();
+        if (currentChatId) {
+          var chat = privateChats.find(function(c) { return c.id === currentChatId; });
+          if (chat && document.getElementById('chatMessages')) {
+            renderChatMessages(chat);
+          }
+        }
+        renderChatList(document.getElementById('chatSearchInput')?.value || '');
+      }
+    }, 3000);
+  }
+
+  function renderChatList(filter) {
+    filter = filter || '';
+    var list = document.getElementById('chatContactsList');
+    if (!list) return;
+    
+    var filtered = privateChats.filter(function(c) {
+      return c.name.toLowerCase().indexOf(filter.toLowerCase()) !== -1;
+    });
+    
+    if (filtered.length === 0) {
+      list.innerHTML = '<div style="padding:20px;text-align:center;color:#888;">Нет чатов</div>';
+      return;
+    }
+    
+    list.innerHTML = filtered.map(function(c) {
+      var lastMsg = 'Нет сообщений';
+      if (c.messages.length > 0) {
+        var last = c.messages[c.messages.length - 1];
+        lastMsg = (last.message || last.text || '').substring(0, 30);
+      }
+      var isActive = c.id === currentChatId;
+      return `
+        <div class="chat-contact ${isActive ? 'active' : ''}" data-chat-id="${c.id}">
+          <div class="chat-contact-avatar">${escapeHtml(c.name.charAt(0).toUpperCase())}</div>
+          <div style="flex:1;">
+            <div style="font-weight:600;">${escapeHtml(c.name)}</div>
+            <div style="font-size:12px;color:#888;">${escapeHtml(lastMsg)}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    list.querySelectorAll('.chat-contact').forEach(function(el) {
+      el.addEventListener('click', function() {
+        openChat(this.getAttribute('data-chat-id'));
+      });
+    });
+  }
+
+  function openChat(chatId) {
+    currentChatId = chatId;
+    var chat = privateChats.find(function(c) { return c.id === chatId; });
+    if (!chat) {
+      showToast('Чат не найден');
+      return;
+    }
+
+    var windowDiv = document.getElementById('chatWindow');
+    if (!windowDiv) return;
+    
+    windowDiv.innerHTML = `
+      <div class="messages-container" id="chatMessages"></div>
+      <div class="chat-input-area">
+        <input type="text" id="chatMessageInput" placeholder="Напишите сообщение...">
+        <button class="send-btn" id="sendChatMsgBtn">Отправить</button>
+      </div>
+    `;
+
+    renderChatMessages(chat);
+    renderChatList(document.getElementById('chatSearchInput')?.value || '');
+
+    var sendBtn = document.getElementById('sendChatMsgBtn');
+    var msgInput = document.getElementById('chatMessageInput');
+
+    async function handleSend() {
+      if (!msgInput) return;
+      var text = msgInput.value.trim();
+      if (!text) return;
+      
+      if (sendBtn) {
+        sendBtn.disabled = true;
+        sendBtn.textContent = '...';
+      }
+
+      var success = await sendMessageViaAPI(chat, text);
+      
+      if (success) {
+        msgInput.value = '';
+        renderChatMessages(chat);
+        renderChatList(document.getElementById('chatSearchInput')?.value || '');
+        showToast('Отправлено');
+      } else {
+        showToast('Ошибка отправки. Проверьте подключение к интернету.');
+      }
+      
+      if (sendBtn) {
+        sendBtn.disabled = false;
+        sendBtn.textContent = 'Отправить';
+      }
+      
+      if (msgInput) msgInput.focus();
+    }
+
+    if (sendBtn) sendBtn.addEventListener('click', handleSend);
+    
+    if (msgInput) {
+      msgInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          handleSend();
+        }
+      });
+      setTimeout(function() { msgInput.focus(); }, 100);
+    }
+  }
+
+  function renderChatMessages(chat) {
+    var msgContainer = document.getElementById('chatMessages');
+    if (!msgContainer) return;
+    
+    if (!chat.messages || chat.messages.length === 0) {
+      msgContainer.innerHTML = '<div style="text-align:center;color:#888;padding:20px;">Нет сообщений. Напишите первое!</div>';
+      return;
+    }
+    
+    msgContainer.innerHTML = chat.messages.map(function(m) {
+      var isOwn = (m.fromBin === currentUser.binId);
+      var senderName = isOwn ? 'Вы' : (m.username || 'Собеседник');
+      var msgText = m.message || m.text || '';
+      var timeStr = '';
+      try {
+        var d = new Date(m.date || m.createdAt);
+        if (!isNaN(d.getTime())) timeStr = d.toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'});
+      } catch(e) {}
+      
+      return `
+        <div class="message-bubble ${isOwn ? 'own' : ''}">
+          <div class="message-sender">${escapeHtml(senderName)}</div>
+          <div>${escapeHtml(msgText)}</div>
+          <div class="message-time">${timeStr}</div>
+        </div>
+      `;
+    }).join('');
+    
+    msgContainer.scrollTop = msgContainer.scrollHeight;
+  }
+
+  // ============== НАВИГАЦИЯ ==============
+
+  document.querySelectorAll('.header-nav span').forEach(function(el) {
+    el.addEventListener('click', function() {
+      navigateTo(this.getAttribute('data-page'));
+    });
+  });
+
+  document.querySelectorAll('.left-menu-item[data-page]').forEach(function(el) {
+    el.addEventListener('click', function() {
+      navigateTo(this.getAttribute('data-page'));
+    });
+  });
+
+  document.getElementById('logoBtn').addEventListener('click', function() {
+    navigateTo('profile');
+  });
+
+  document.getElementById('settingsMenuBtn').addEventListener('click', function() {
+    var newName = prompt('Новое имя:', currentUser.name);
+    if (newName && newName.trim()) {
+      currentUser.name = newName.trim();
+      localStorage.setItem('mismos_username', currentUser.name);
+      navigateTo('profile');
+      showToast('Имя изменено');
+    }
+  });
+
+  function navigateTo(page) {
+    currentPage = page;
+    currentChatId = null;
+    
+    if (messageRefreshTimer && page !== 'messages') {
+      clearInterval(messageRefreshTimer);
+      messageRefreshTimer = null;
+    }
+    
+    document.querySelectorAll('.header-nav span').forEach(function(s) { s.classList.remove('active'); });
+    var hi = document.querySelector('.header-nav span[data-page="' + page + '"]');
+    if (hi) hi.classList.add('active');
+    
+    document.querySelectorAll('.left-menu-item[data-page]').forEach(function(i) { i.classList.remove('active'); });
+    var li = document.querySelector('.left-menu-item[data-page="' + page + '"]');
+    if (li) li.classList.add('active');
+    
+    renderPage(page);
+  }
+
+  // ============== РЕГИСТРАЦИЯ ==============
+
   var registerNameInput = document.getElementById('registerNameInput');
   var registerBtn = document.getElementById('registerBtn');
   
@@ -602,7 +900,6 @@
     registerNameInput.addEventListener('input', function(e) {
       registerBtn.disabled = e.target.value.trim().length === 0;
     });
-    
     registerNameInput.addEventListener('keydown', function(e) {
       if (e.key === 'Enter' && this.value.trim().length > 0) {
         registerBtn.click();
@@ -649,393 +946,43 @@
     registerBtn.disabled = true;
   });
 
-  // Навигация
-  document.querySelectorAll('.header-nav span').forEach(function(el) {
-    el.addEventListener('click', function() {
-      var page = this.getAttribute('data-page');
-      if (page) {
-        navigateTo(page);
-      }
-    });
-  });
-
-  document.querySelectorAll('.left-menu-item[data-page]').forEach(function(el) {
-    el.addEventListener('click', function() {
-      var page = this.getAttribute('data-page');
-      if (page) {
-        navigateTo(page);
-      }
-    });
-  });
-
-  document.getElementById('logoBtn').addEventListener('click', function() {
-    navigateTo('profile');
-  });
-
-  document.getElementById('settingsMenuBtn').addEventListener('click', function() {
-    var newName = prompt('Новое имя:', currentUser.name);
-    if (newName && newName.trim()) {
-      currentUser.name = newName.trim();
-      localStorage.setItem('mismos_username', currentUser.name);
-      navigateTo('profile');
-      showToast('Имя изменено');
-    }
-  });
-
-  function navigateTo(page) {
-    currentPage = page;
-    currentChatId = null; // Сбрасываем текущий чат при навигации
-    
-    // Обновляем активные классы
-    document.querySelectorAll('.header-nav span').forEach(function(s) { s.classList.remove('active'); });
-    var headerItem = document.querySelector('.header-nav span[data-page="' + page + '"]');
-    if (headerItem) headerItem.classList.add('active');
-    
-    document.querySelectorAll('.left-menu-item[data-page]').forEach(function(i) { i.classList.remove('active'); });
-    var leftItem = document.querySelector('.left-menu-item[data-page="' + page + '"]');
-    if (leftItem) leftItem.classList.add('active');
-    
-    renderPage(page);
-  }
-
-  async function renderPage(page) {
-    switch(page) {
-      case 'profile': await renderProfile(); break;
-      case 'feed': await renderFeed(); break;
-      case 'messages': await renderMessages(); break;
-      default: await renderProfile();
-    }
-  }
-
-  async function renderProfile() {
-    var posts = await loadPosts();
-    var myPosts = posts.filter(function(p) {
-      return p.authorBinId === currentUser.binId;
-    });
-
-    contentArea.innerHTML = `
-      <div class="profile-header">
-        <div class="profile-info">
-          <div class="profile-avatar">${escapeHtml(currentUser.name.charAt(0).toUpperCase())}</div>
-          <div class="profile-details">
-            <h2>${escapeHtml(currentUser.name)}</h2>
-            <div class="status">BIN ID: ${currentUser.binId || 'Загрузка...'}</div>
-          </div>
-        </div>
-      </div>
-      <div class="post-creator">
-        <textarea id="newPostText" placeholder="Что у вас нового?"></textarea>
-        <button class="btn btn-primary" id="publishPostBtn">Опубликовать</button>
-      </div>
-      <div class="post-feed" id="profilePosts"></div>
-    `;
-
-    document.getElementById('publishPostBtn').addEventListener('click', async function() {
-      var text = document.getElementById('newPostText').value.trim();
-      if (!text) return;
-      var success = await createPost(text);
-      if (success) {
-        showToast('Пост опубликован');
-        await renderProfile();
-      } else {
-        showToast('Ошибка публикации');
-      }
-    });
-
-    renderPostList(myPosts, 'profilePosts');
-  }
-
-  async function renderFeed() {
-    var posts = await loadPosts();
-    contentArea.innerHTML = '<div class="post-feed" id="feedPosts"></div>';
-    renderPostList(posts, 'feedPosts');
-  }
-
-  function renderPostList(postArray, containerId) {
-    var container = document.getElementById(containerId);
-    if (!container) return;
-    if (!postArray || postArray.length === 0) {
-      container.innerHTML = '<p style="color:#656565; padding:20px; text-align:center;">Пока нет записей.</p>';
-      return;
-    }
-    container.innerHTML = postArray.map(function(p) {
-      var name = p.authorName || 'Пользователь';
-      var dateStr = p.date || p.createdAt || '';
-      try {
-        var d = new Date(dateStr);
-        if (!isNaN(d.getTime())) {
-          dateStr = d.toLocaleString('ru-RU');
-        }
-      } catch(e) {
-        dateStr = '';
-      }
-      return `
-        <div class="post-item">
-          <div class="post-author">
-            <div class="post-author-avatar">${escapeHtml(name.charAt(0).toUpperCase())}</div>
-            <div>
-              <div class="post-author-name">${escapeHtml(name)}</div>
-              <div class="post-date">${dateStr}</div>
-            </div>
-          </div>
-          <div class="post-text">${escapeHtml(p.text || '')}</div>
-        </div>
-      `;
-    }).join('');
-  }
-
-  async function renderMessages() {
-    // Загружаем актуальные сообщения перед показом
-    await loadMessagesFromAPI();
-    
-    contentArea.innerHTML = `
-      <div class="chat-layout">
-        <div class="chat-list-panel">
-          <div class="chat-search">
-            <input type="text" placeholder="Поиск чатов" id="chatSearchInput">
-          </div>
-          <div class="chat-contacts" id="chatContactsList"></div>
-          <button class="btn btn-primary" style="margin:10px;" id="newChatBtn">Новый чат</button>
-        </div>
-        <div class="chat-window" id="chatWindow">
-          <div style="flex:1;display:flex;align-items:center;justify-content:center;color:#888;">Выберите чат</div>
-        </div>
-      </div>
-    `;
-    renderChatList();
-
-    document.getElementById('newChatBtn').addEventListener('click', function() {
-      var binId = prompt('Введите BIN ID собеседника:');
-      if (!binId || !binId.trim()) return;
-      binId = binId.trim();
-      
-      if (binId === currentUser.binId) {
-        showToast('Нельзя создать чат с самим собой');
-        return;
-      }
-      
-      var existing = privateChats.find(function(c) { return c.binId === binId; });
-      if (existing) {
-        openChat(existing.id);
-      } else {
-        var newChat = {
-          id: 'chat_' + binId,
-          binId: binId,
-          name: 'Пользователь ' + binId.substring(0, 8),
-          messages: []
-        };
-        privateChats.push(newChat);
-        saveChatsToStorage();
-        renderChatList();
-        openChat(newChat.id);
-        showToast('Чат создан');
-      }
-    });
-
-    var searchInput = document.getElementById('chatSearchInput');
-    if (searchInput) {
-      searchInput.addEventListener('input', function() {
-        renderChatList(this.value);
-      });
-    }
-  }
-
-  function renderChatList(filter) {
-    filter = filter || '';
-    var list = document.getElementById('chatContactsList');
-    if (!list) return;
-    
-    var filtered = privateChats.filter(function(c) {
-      return c.name.toLowerCase().indexOf(filter.toLowerCase()) !== -1;
-    });
-    
-    if (filtered.length === 0) {
-      list.innerHTML = '<div style="padding:20px;text-align:center;color:#888;">Нет чатов</div>';
-      return;
-    }
-    
-    list.innerHTML = filtered.map(function(c) {
-      var lastMsg = '';
-      if (c.messages.length > 0) {
-        lastMsg = (c.messages[c.messages.length - 1].message || c.messages[c.messages.length - 1].text || '').substring(0, 30);
-      } else {
-        lastMsg = 'Нет сообщений';
-      }
-      var isActive = c.id === currentChatId;
-      return `
-        <div class="chat-contact ${isActive ? 'active' : ''}" data-chat-id="${c.id}">
-          <div class="chat-contact-avatar">${escapeHtml(c.name.charAt(0).toUpperCase())}</div>
-          <div style="flex:1;">
-            <div style="font-weight:600;">${escapeHtml(c.name)}</div>
-            <div style="font-size:12px;color:#888;">${escapeHtml(lastMsg)}</div>
-          </div>
-        </div>
-      `;
-    }).join('');
-
-    list.querySelectorAll('.chat-contact').forEach(function(el) {
-      el.addEventListener('click', function() {
-        openChat(this.getAttribute('data-chat-id'));
-      });
-    });
-  }
-
-  function openChat(chatId) {
-    currentChatId = chatId;
-    var chat = privateChats.find(function(c) { return c.id === chatId; });
-    if (!chat) {
-      showToast('Чат не найден');
-      return;
-    }
-    
-    // Загружаем локальные сообщения
-    loadLocalMessages(chat);
-
-    var windowDiv = document.getElementById('chatWindow');
-    windowDiv.innerHTML = `
-      <div class="messages-container" id="chatMessages"></div>
-      <div class="chat-input-area">
-        <input type="text" id="chatMessageInput" placeholder="Напишите сообщение...">
-        <button class="send-btn" id="sendChatMsgBtn">Отправить</button>
-      </div>
-    `;
-
-    renderChatMessages(chat);
-    
-    // Обновляем список чатов для подсветки активного
-    var searchInput = document.getElementById('chatSearchInput');
-    renderChatList(searchInput ? searchInput.value : '');
-
-    function sendMessageHandler() {
-      var input = document.getElementById('chatMessageInput');
-      if (!input) return;
-      var text = input.value.trim();
-      if (!text) return;
-      
-      // Блокируем кнопку на время отправки
-      var sendBtn = document.getElementById('sendChatMsgBtn');
-      if (sendBtn) sendBtn.disabled = true;
-      
-      sendMessageToAPI(chat, text).then(function(success) {
-        if (success) {
-          input.value = '';
-          renderChatMessages(chat);
-          renderChatList(document.getElementById('chatSearchInput')?.value || '');
-          
-          // Ответ бота
-          if (chat.binId === 'bot.official') {
-            setTimeout(function() {
-              var botMsg = {
-                id: 'bot_msg_' + Date.now(),
-                chatId: chat.id,
-                fromBin: 'bot.official',
-                toBin: currentUser.binId,
-                username: 'MiS-MaS Bot',
-                message: 'Привет! Я бот MiS-MaS. Ваш BIN ID: ' + currentUser.binId,
-                text: 'Привет! Я бот MiS-MaS. Ваш BIN ID: ' + currentUser.binId,
-                date: new Date().toISOString(),
-                createdAt: new Date().toISOString()
-              };
-              chat.messages.push(botMsg);
-              if (currentChatId === chat.id) {
-                renderChatMessages(chat);
-                renderChatList(document.getElementById('chatSearchInput')?.value || '');
-              }
-            }, 500);
-          }
-        } else {
-          showToast('Ошибка отправки');
-        }
-        if (sendBtn) sendBtn.disabled = false;
-      });
-    }
-
-    var sendBtn = document.getElementById('sendChatMsgBtn');
-    var msgInput = document.getElementById('chatMessageInput');
-    
-    if (sendBtn) {
-      sendBtn.addEventListener('click', sendMessageHandler);
-    }
-    
-    if (msgInput) {
-      msgInput.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' && !e.shiftKey) {
-          e.preventDefault();
-          sendMessageHandler();
-        }
-      });
-      
-      // Фокус на поле ввода
-      setTimeout(function() { msgInput.focus(); }, 100);
-    }
-  }
-
-  function renderChatMessages(chat) {
-    var msgContainer = document.getElementById('chatMessages');
-    if (!msgContainer) return;
-    
-    if (chat.messages.length === 0) {
-      msgContainer.innerHTML = '<div style="text-align:center;color:#888;padding:20px;">Нет сообщений. Напишите первое!</div>';
-      return;
-    }
-    
-    msgContainer.innerHTML = chat.messages.map(function(m) {
-      var isOwn = m.fromBin === currentUser.binId || m.username === currentUser.name;
-      var senderName = isOwn ? 'Вы' : (m.username || chat.name || 'Собеседник');
-      var msgText = m.message || m.text || '';
-      return `
-        <div class="message-bubble ${isOwn ? 'own' : ''}">
-          <div class="message-sender">${escapeHtml(senderName)}</div>
-          <div>${escapeHtml(msgText)}</div>
-        </div>
-      `;
-    }).join('');
-    
-    // Прокрутка вниз
-    msgContainer.scrollTop = msgContainer.scrollHeight;
-  }
-
-  function escapeHtml(s) {
-    if (!s) return '';
-    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  }
+  // ============== ИНИЦИАЛИЗАЦИЯ ==============
 
   async function initApp() {
     await getOrCreateBinId();
-    await loadMessagesFromAPI();
+    await buildChatsFromAPI();
     renderPage('profile');
-    showToast('Добро пожаловать, ' + currentUser.name + '!');
+    showToast('Добро пожаловать, ' + currentUser.name + '! Ваш BIN ID: ' + currentUser.binId);
+  }
+
+  function checkAuth() {
+    var registerScreen = document.getElementById('registerScreen');
+    var licenseScreen = document.getElementById('licenseScreen');
+    var rejectScreen = document.getElementById('rejectScreen');
+    var mainInterface = document.getElementById('mainInterface');
     
-    // Периодическое обновление
-    setInterval(async function() {
-      if (currentPage === 'messages') {
-        await loadMessagesFromAPI();
-        if (currentChatId) {
-          var chat = privateChats.find(function(c) { return c.id === currentChatId; });
-          if (chat && document.getElementById('chatMessages')) {
-            loadLocalMessages(chat);
-            renderChatMessages(chat);
-            renderChatList(document.getElementById('chatSearchInput')?.value || '');
-          }
-        } else {
-          renderChatList(document.getElementById('chatSearchInput')?.value || '');
-        }
-      }
-      
-      if (currentPage === 'feed') {
-        await renderFeed();
-      }
-      
-      if (currentPage === 'profile') {
-        var posts = await loadPosts();
-        var myPosts = posts.filter(function(p) {
-          return p.authorBinId === currentUser.binId;
-        });
-        if (document.getElementById('profilePosts')) {
-          renderPostList(myPosts, 'profilePosts');
-        }
-      }
-    }, 5000);
+    if (isRegistered && currentUser.name && licenseAccepted) {
+      registerScreen.classList.add('hidden');
+      licenseScreen.classList.add('hidden');
+      rejectScreen.classList.add('hidden');
+      mainInterface.classList.remove('hidden');
+      initApp();
+      return true;
+    }
+    if (!isRegistered || !currentUser.name) {
+      registerScreen.classList.remove('hidden');
+      licenseScreen.classList.add('hidden');
+      rejectScreen.classList.add('hidden');
+      mainInterface.classList.add('hidden');
+      registerBtn.disabled = true;
+      registerNameInput.value = '';
+    } else if (isRegistered && currentUser.name && !licenseAccepted) {
+      registerScreen.classList.add('hidden');
+      licenseScreen.classList.remove('hidden');
+      rejectScreen.classList.add('hidden');
+      mainInterface.classList.add('hidden');
+    }
+    return false;
   }
 
   // Запуск
@@ -1043,4 +990,4 @@
 })();
 </script>
 </body>
-  </html>
+</html>
