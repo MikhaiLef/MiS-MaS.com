@@ -140,6 +140,7 @@
       cursor: pointer; border-bottom: 1px solid #f0f2f5;
     }
     .chat-contact:hover { background: #f0f2f5; }
+    .chat-contact.active { background: #e9edf1; }
     .chat-contact-avatar {
       width: 42px; height: 42px; border-radius: 50%; background: #e0e4e8;
       display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;
@@ -169,6 +170,7 @@
       position: fixed; top: 50px; left: 50%; transform: translateX(-50%);
       background: #4a6d8c; color: white; padding: 10px 20px;
       border-radius: 4px; font-size: 13px; z-index: 3000; opacity: 0; transition: opacity 0.3s;
+      pointer-events: none;
     }
     .toast.show { opacity: 1; }
 
@@ -189,7 +191,8 @@
 
     @media (max-width: 700px) {
       .left-menu { display: none; }
-      .chat-list-panel { width: 100%; }
+      .chat-list-panel { width: 100%; max-width: 100%; }
+      .chat-layout { flex-direction: column; }
     }
   </style>
 </head>
@@ -278,21 +281,25 @@
   let isRegistered = localStorage.getItem('mismos_registered') === 'true';
   let licenseAccepted = localStorage.getItem('mismos_license') === 'true';
   let currentPage = 'profile';
-  let privateChats = [];
+  let privateChats = JSON.parse(localStorage.getItem('mismos_chats_list') || '[]');
   let currentChatId = null;
 
-  // UI элементы
-  const registerScreen = document.getElementById('registerScreen');
-  const licenseScreen = document.getElementById('licenseScreen');
-  const rejectScreen = document.getElementById('rejectScreen');
-  const mainInterface = document.getElementById('mainInterface');
-  const contentArea = document.getElementById('contentArea');
-  const registerNameInput = document.getElementById('registerNameInput');
-  const registerBtn = document.getElementById('registerBtn');
+  // Сохранение чатов в localStorage для предотвращения потери
+  function saveChatsToStorage() {
+    // Сохраняем только метаданные чатов, без сообщений (сообщения грузятся из API)
+    var chatsMeta = privateChats.map(function(c) {
+      return {
+        id: c.id,
+        binId: c.binId,
+        name: c.name
+      };
+    });
+    localStorage.setItem('mismos_chats_list', JSON.stringify(chatsMeta));
+  }
 
   // Toast
   function showToast(msg) {
-    const toast = document.getElementById('toast');
+    var toast = document.getElementById('toast');
     toast.textContent = msg;
     toast.classList.add('show');
     setTimeout(function() { toast.classList.remove('show'); }, 2500);
@@ -300,23 +307,28 @@
 
   // API функции
   async function getOrCreateBinId() {
-    let bid = localStorage.getItem('mismos_bin_id');
+    var bid = localStorage.getItem('mismos_bin_id');
     if (bid) {
       currentUser.binId = bid;
       return bid;
     }
     try {
-      let resp = await fetch(API_URL, {
+      var resp = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ binId: 'bin_' + Date.now(), username: currentUser.name })
+        body: JSON.stringify({ 
+          binId: 'bin_' + Date.now(), 
+          username: currentUser.name,
+          user_id: currentUser.id
+        })
       });
-      let data = await resp.json();
+      var data = await resp.json();
       bid = data.id || data.binId || ('bin_' + Date.now());
       localStorage.setItem('mismos_bin_id', bid);
       currentUser.binId = bid;
       return bid;
     } catch(e) {
+      console.log('Ошибка создания BIN ID через API, создаем локально:', e);
       bid = 'bin_' + Date.now();
       localStorage.setItem('mismos_bin_id', bid);
       currentUser.binId = bid;
@@ -324,116 +336,236 @@
     }
   }
 
-  async function loadPrivateChats() {
+  async function loadMessagesFromAPI() {
+    if (!currentUser.binId) return;
+    
     try {
-      let resp = await fetch(API_URL);
-      let all = await resp.json();
-      let myMsgs = all.filter(function(m) {
-        return m.fromBin === currentUser.binId || m.toBin === currentUser.binId;
+      var resp = await fetch(API_URL);
+      if (!resp.ok) throw new Error('API недоступен');
+      
+      var all = await resp.json();
+      
+      // Фильтруем сообщения, где участвует наш пользователь
+      var myMsgs = all.filter(function(m) {
+        return (m.fromBin === currentUser.binId || m.toBin === currentUser.binId) &&
+               (m.message || m.text);
       });
       
-      // Группируем по чатам
-      let chatMap = {};
+      // Восстанавливаем чаты из сохраненного списка
+      var savedChats = JSON.parse(localStorage.getItem('mismos_chats_list') || '[]');
+      
+      // Собираем уникальных собеседников из API сообщений
+      var partnerBins = {};
       myMsgs.forEach(function(m) {
-        let partnerBin = m.fromBin === currentUser.binId ? m.toBin : m.fromBin;
-        if (!chatMap[partnerBin]) {
-          chatMap[partnerBin] = {
-            id: 'chat_' + partnerBin,
-            binId: partnerBin,
-            name: 'Пользователь ' + (partnerBin ? partnerBin.substring(0,8) : '???'),
+        var partnerBin = m.fromBin === currentUser.binId ? m.toBin : m.fromBin;
+        if (partnerBin && partnerBin !== currentUser.binId) {
+          if (!partnerBins[partnerBin]) {
+            partnerBins[partnerBin] = {
+              id: 'chat_' + partnerBin,
+              binId: partnerBin,
+              name: 'Пользователь ' + (partnerBin ? partnerBin.substring(0, 8) : '???'),
+              messages: []
+            };
+          }
+          partnerBins[partnerBin].messages.push(m);
+        }
+      });
+      
+      // Добавляем сохраненные чаты, которых нет в API
+      savedChats.forEach(function(sc) {
+        if (!partnerBins[sc.binId]) {
+          partnerBins[sc.binId] = {
+            id: sc.id || 'chat_' + sc.binId,
+            binId: sc.binId,
+            name: sc.name || 'Пользователь ' + sc.binId.substring(0, 8),
             messages: []
           };
+        } else {
+          // Обновляем имя из сохраненного
+          partnerBins[sc.binId].name = sc.name || partnerBins[sc.binId].name;
         }
-        chatMap[partnerBin].messages.push(m);
       });
       
-      privateChats = Object.values(chatMap);
+      privateChats = Object.values(partnerBins);
+      
+      // Сортируем сообщения в каждом чате
       privateChats.forEach(function(c) {
         c.messages.sort(function(a, b) {
-          return new Date(a.date || a.createdAt || 0) - new Date(b.date || b.createdAt || 0);
+          var dateA = new Date(a.date || a.createdAt || 0);
+          var dateB = new Date(b.date || b.createdAt || 0);
+          return dateA - dateB;
         });
       });
       
       // Добавляем бота если нет
       if (!privateChats.find(function(c) { return c.binId === 'bot.official'; })) {
-        privateChats.push({
+        privateChats.unshift({
           id: 'chat_bot',
           binId: 'bot.official',
           name: 'MiS-MaS Bot',
           messages: []
         });
       }
+      
+      saveChatsToStorage();
+      
     } catch(e) {
-      console.error('Ошибка загрузки чатов:', e);
-      privateChats = [{
-        id: 'chat_bot',
-        binId: 'bot.official',
-        name: 'MiS-MaS Bot',
-        messages: []
-      }];
+      console.log('Ошибка загрузки сообщений из API:', e);
+      // Восстанавливаем чаты из localStorage если API недоступен
+      var savedChats = JSON.parse(localStorage.getItem('mismos_chats_list') || '[]');
+      privateChats = savedChats.map(function(sc) {
+        return {
+          id: sc.id || 'chat_' + sc.binId,
+          binId: sc.binId,
+          name: sc.name || 'Пользователь ' + (sc.binId ? sc.binId.substring(0, 8) : '???'),
+          messages: []
+        };
+      });
+      
+      if (!privateChats.find(function(c) { return c.binId === 'bot.official'; })) {
+        privateChats.unshift({
+          id: 'chat_bot',
+          binId: 'bot.official',
+          name: 'MiS-MaS Bot',
+          messages: []
+        });
+      }
     }
   }
 
   async function loadPosts() {
     try {
-      let resp = await fetch(CHANNEL_API_URL);
-      let all = await resp.json();
+      var resp = await fetch(CHANNEL_API_URL);
+      if (!resp.ok) return [];
+      var all = await resp.json();
       return all.filter(function(m) {
-        return m.type === 'post';
+        return m.type === 'post' && m.text;
       }).sort(function(a, b) {
         return new Date(b.date || b.createdAt || 0) - new Date(a.date || a.createdAt || 0);
       });
     } catch(e) {
-      return [];
+      console.log('Ошибка загрузки постов:', e);
+      // Запасной вариант - localStorage
+      return JSON.parse(localStorage.getItem('mismos_posts_local') || '[]');
     }
   }
 
   async function createPost(text) {
+    var postData = {
+      type: 'post',
+      authorBinId: currentUser.binId,
+      authorName: currentUser.name,
+      text: text,
+      date: new Date().toISOString(),
+      createdAt: new Date().toISOString()
+    };
+    
     try {
-      let postData = {
-        type: 'post',
-        authorBinId: currentUser.binId,
-        authorName: currentUser.name,
-        text: text,
-        date: new Date().toISOString(),
-        createdAt: new Date().toISOString()
-      };
-      let resp = await fetch(CHANNEL_API_URL, {
+      var resp = await fetch(CHANNEL_API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(postData)
       });
-      return resp.ok;
+      if (resp.ok) {
+        return true;
+      }
     } catch(e) {
-      return false;
+      console.log('Ошибка отправки поста через API, сохраняем локально:', e);
     }
+    
+    // Запасной вариант - localStorage
+    var localPosts = JSON.parse(localStorage.getItem('mismos_posts_local') || '[]');
+    postData.id = 'post_local_' + Date.now();
+    localPosts.push(postData);
+    localStorage.setItem('mismos_posts_local', JSON.stringify(localPosts));
+    return true;
   }
 
   async function sendMessageToAPI(chat, text) {
+    var payload = {
+      chatId: chat.id,
+      fromBin: currentUser.binId,
+      toBin: chat.binId,
+      username: currentUser.name,
+      message: text,
+      text: text,
+      date: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      user_id: currentUser.id
+    };
+    
     try {
-      let payload = {
-        chatId: chat.id,
-        fromBin: currentUser.binId,
-        toBin: chat.binId,
-        username: currentUser.name,
-        message: text,
-        date: new Date().toISOString(),
-        user_id: currentUser.id
-      };
-      let resp = await fetch(API_URL, {
+      var resp = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
+      
       if (resp.ok) {
-        let newMsg = await resp.json();
+        var newMsg = await resp.json();
+        // Убеждаемся что у сообщения есть все нужные поля
+        newMsg.message = newMsg.message || text;
+        newMsg.text = newMsg.text || text;
+        newMsg.fromBin = newMsg.fromBin || currentUser.binId;
+        newMsg.toBin = newMsg.toBin || chat.binId;
+        newMsg.username = newMsg.username || currentUser.name;
         chat.messages.push(newMsg);
         return true;
+      } else {
+        console.log('API ответил с ошибкой:', resp.status);
       }
-      return false;
     } catch(e) {
-      return false;
+      console.log('Ошибка отправки через API:', e);
     }
+    
+    // Запасной вариант - добавляем сообщение локально
+    var localMsg = {
+      id: 'msg_local_' + Date.now(),
+      chatId: chat.id,
+      fromBin: currentUser.binId,
+      toBin: chat.binId,
+      username: currentUser.name,
+      message: text,
+      text: text,
+      date: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      user_id: currentUser.id
+    };
+    chat.messages.push(localMsg);
+    
+    // Сохраняем сообщения локально
+    var localMessages = JSON.parse(localStorage.getItem('mismos_messages_local') || '{}');
+    if (!localMessages[chat.id]) {
+      localMessages[chat.id] = [];
+    }
+    localMessages[chat.id].push(localMsg);
+    localStorage.setItem('mismos_messages_local', JSON.stringify(localMessages));
+    
+    return true;
+  }
+
+  // Восстановление локальных сообщений
+  function loadLocalMessages(chat) {
+    try {
+      var localMessages = JSON.parse(localStorage.getItem('mismos_messages_local') || '{}');
+      if (localMessages[chat.id]) {
+        localMessages[chat.id].forEach(function(m) {
+          // Проверяем нет ли уже такого сообщения
+          var exists = chat.messages.find(function(existing) {
+            return existing.id === m.id;
+          });
+          if (!exists) {
+            chat.messages.push(m);
+          }
+        });
+        // Сортируем
+        chat.messages.sort(function(a, b) {
+          var dateA = new Date(a.date || a.createdAt || 0);
+          var dateB = new Date(b.date || b.createdAt || 0);
+          return dateA - dateB;
+        });
+      }
+    } catch(e) {}
   }
 
   // Проверка регистрации
@@ -463,15 +595,24 @@
   }
 
   // Обработчики регистрации
+  var registerNameInput = document.getElementById('registerNameInput');
+  var registerBtn = document.getElementById('registerBtn');
+  
   if (registerNameInput) {
     registerNameInput.addEventListener('input', function(e) {
       registerBtn.disabled = e.target.value.trim().length === 0;
+    });
+    
+    registerNameInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && this.value.trim().length > 0) {
+        registerBtn.click();
+      }
     });
   }
 
   if (registerBtn) {
     registerBtn.addEventListener('click', function() {
-      const name = registerNameInput.value.trim();
+      var name = registerNameInput.value.trim();
       if (!name) return;
       currentUser.name = name;
       localStorage.setItem('mismos_username', name);
@@ -511,34 +652,24 @@
   // Навигация
   document.querySelectorAll('.header-nav span').forEach(function(el) {
     el.addEventListener('click', function() {
-      var page = el.getAttribute('data-page');
+      var page = this.getAttribute('data-page');
       if (page) {
-        renderPage(page);
-        document.querySelectorAll('.header-nav span').forEach(function(s) { s.classList.remove('active'); });
-        el.classList.add('active');
-        document.querySelectorAll('.left-menu-item[data-page]').forEach(function(i) { i.classList.remove('active'); });
-        var leftItem = document.querySelector('.left-menu-item[data-page="' + page + '"]');
-        if (leftItem) leftItem.classList.add('active');
+        navigateTo(page);
       }
     });
   });
 
   document.querySelectorAll('.left-menu-item[data-page]').forEach(function(el) {
     el.addEventListener('click', function() {
-      var page = el.getAttribute('data-page');
+      var page = this.getAttribute('data-page');
       if (page) {
-        renderPage(page);
-        document.querySelectorAll('.left-menu-item[data-page]').forEach(function(i) { i.classList.remove('active'); });
-        el.classList.add('active');
-        document.querySelectorAll('.header-nav span').forEach(function(s) { s.classList.remove('active'); });
-        var headerItem = document.querySelector('.header-nav span[data-page="' + page + '"]');
-        if (headerItem) headerItem.classList.add('active');
+        navigateTo(page);
       }
     });
   });
 
   document.getElementById('logoBtn').addEventListener('click', function() {
-    renderPage('profile');
+    navigateTo('profile');
   });
 
   document.getElementById('settingsMenuBtn').addEventListener('click', function() {
@@ -546,24 +677,39 @@
     if (newName && newName.trim()) {
       currentUser.name = newName.trim();
       localStorage.setItem('mismos_username', currentUser.name);
-      renderPage('profile');
+      navigateTo('profile');
       showToast('Имя изменено');
     }
   });
 
-  async function renderPage(page) {
+  function navigateTo(page) {
     currentPage = page;
+    currentChatId = null; // Сбрасываем текущий чат при навигации
+    
+    // Обновляем активные классы
+    document.querySelectorAll('.header-nav span').forEach(function(s) { s.classList.remove('active'); });
+    var headerItem = document.querySelector('.header-nav span[data-page="' + page + '"]');
+    if (headerItem) headerItem.classList.add('active');
+    
+    document.querySelectorAll('.left-menu-item[data-page]').forEach(function(i) { i.classList.remove('active'); });
+    var leftItem = document.querySelector('.left-menu-item[data-page="' + page + '"]');
+    if (leftItem) leftItem.classList.add('active');
+    
+    renderPage(page);
+  }
+
+  async function renderPage(page) {
     switch(page) {
       case 'profile': await renderProfile(); break;
       case 'feed': await renderFeed(); break;
-      case 'messages': renderMessages(); break;
+      case 'messages': await renderMessages(); break;
       default: await renderProfile();
     }
   }
 
   async function renderProfile() {
-    let posts = await loadPosts();
-    let myPosts = posts.filter(function(p) {
+    var posts = await loadPosts();
+    var myPosts = posts.filter(function(p) {
       return p.authorBinId === currentUser.binId;
     });
 
@@ -600,7 +746,7 @@
   }
 
   async function renderFeed() {
-    let posts = await loadPosts();
+    var posts = await loadPosts();
     contentArea.innerHTML = '<div class="post-feed" id="feedPosts"></div>';
     renderPostList(posts, 'feedPosts');
   }
@@ -616,7 +762,10 @@
       var name = p.authorName || 'Пользователь';
       var dateStr = p.date || p.createdAt || '';
       try {
-        dateStr = new Date(dateStr).toLocaleString('ru-RU');
+        var d = new Date(dateStr);
+        if (!isNaN(d.getTime())) {
+          dateStr = d.toLocaleString('ru-RU');
+        }
       } catch(e) {
         dateStr = '';
       }
@@ -635,7 +784,10 @@
     }).join('');
   }
 
-  function renderMessages() {
+  async function renderMessages() {
+    // Загружаем актуальные сообщения перед показом
+    await loadMessagesFromAPI();
+    
     contentArea.innerHTML = `
       <div class="chat-layout">
         <div class="chat-list-panel">
@@ -656,10 +808,12 @@
       var binId = prompt('Введите BIN ID собеседника:');
       if (!binId || !binId.trim()) return;
       binId = binId.trim();
+      
       if (binId === currentUser.binId) {
         showToast('Нельзя создать чат с самим собой');
         return;
       }
+      
       var existing = privateChats.find(function(c) { return c.binId === binId; });
       if (existing) {
         openChat(existing.id);
@@ -671,28 +825,46 @@
           messages: []
         };
         privateChats.push(newChat);
+        saveChatsToStorage();
         renderChatList();
         openChat(newChat.id);
+        showToast('Чат создан');
       }
     });
 
-    document.getElementById('chatSearchInput').addEventListener('input', function() {
-      renderChatList(this.value);
-    });
+    var searchInput = document.getElementById('chatSearchInput');
+    if (searchInput) {
+      searchInput.addEventListener('input', function() {
+        renderChatList(this.value);
+      });
+    }
   }
 
   function renderChatList(filter) {
     filter = filter || '';
     var list = document.getElementById('chatContactsList');
     if (!list) return;
+    
     var filtered = privateChats.filter(function(c) {
       return c.name.toLowerCase().indexOf(filter.toLowerCase()) !== -1;
     });
+    
+    if (filtered.length === 0) {
+      list.innerHTML = '<div style="padding:20px;text-align:center;color:#888;">Нет чатов</div>';
+      return;
+    }
+    
     list.innerHTML = filtered.map(function(c) {
-      var lastMsg = c.messages.length > 0 ? (c.messages[c.messages.length - 1].message || '').substring(0, 25) : 'Нет сообщений';
+      var lastMsg = '';
+      if (c.messages.length > 0) {
+        lastMsg = (c.messages[c.messages.length - 1].message || c.messages[c.messages.length - 1].text || '').substring(0, 30);
+      } else {
+        lastMsg = 'Нет сообщений';
+      }
+      var isActive = c.id === currentChatId;
       return `
-        <div class="chat-contact" data-chat-id="${c.id}">
-          <div class="chat-contact-avatar">${escapeHtml(c.name.charAt(0))}</div>
+        <div class="chat-contact ${isActive ? 'active' : ''}" data-chat-id="${c.id}">
+          <div class="chat-contact-avatar">${escapeHtml(c.name.charAt(0).toUpperCase())}</div>
           <div style="flex:1;">
             <div style="font-weight:600;">${escapeHtml(c.name)}</div>
             <div style="font-size:12px;color:#888;">${escapeHtml(lastMsg)}</div>
@@ -701,9 +873,9 @@
       `;
     }).join('');
 
-    document.querySelectorAll('.chat-contact').forEach(function(el) {
+    list.querySelectorAll('.chat-contact').forEach(function(el) {
       el.addEventListener('click', function() {
-        openChat(el.getAttribute('data-chat-id'));
+        openChat(this.getAttribute('data-chat-id'));
       });
     });
   }
@@ -711,7 +883,13 @@
   function openChat(chatId) {
     currentChatId = chatId;
     var chat = privateChats.find(function(c) { return c.id === chatId; });
-    if (!chat) return;
+    if (!chat) {
+      showToast('Чат не найден');
+      return;
+    }
+    
+    // Загружаем локальные сообщения
+    loadLocalMessages(chat);
 
     var windowDiv = document.getElementById('chatWindow');
     windowDiv.innerHTML = `
@@ -722,89 +900,147 @@
       </div>
     `;
 
-    var msgContainer = document.getElementById('chatMessages');
-    msgContainer.innerHTML = chat.messages.map(function(m) {
-      var isOwn = m.fromBin === currentUser.binId;
-      return `
-        <div class="message-bubble ${isOwn ? 'own' : ''}">
-          <div class="message-sender">${isOwn ? 'Вы' : escapeHtml(chat.name)}</div>
-          ${escapeHtml(m.message || m.text || '')}
-        </div>
-      `;
-    }).join('');
-    msgContainer.scrollTop = msgContainer.scrollHeight;
+    renderChatMessages(chat);
+    
+    // Обновляем список чатов для подсветки активного
+    var searchInput = document.getElementById('chatSearchInput');
+    renderChatList(searchInput ? searchInput.value : '');
 
-    async function sendMessage() {
+    function sendMessageHandler() {
       var input = document.getElementById('chatMessageInput');
       if (!input) return;
       var text = input.value.trim();
       if (!text) return;
-
-      var success = await sendMessageToAPI(chat, text);
-      if (success) {
-        input.value = '';
-        openChat(chatId);
-        if (chat.binId === 'bot.official') {
-          setTimeout(async function() {
-            await sendMessageToAPI(chat, 'Привет! Я бот MiS-MaS. Ваш BIN ID: ' + currentUser.binId);
-            if (currentChatId === chatId) openChat(chatId);
-          }, 500);
+      
+      // Блокируем кнопку на время отправки
+      var sendBtn = document.getElementById('sendChatMsgBtn');
+      if (sendBtn) sendBtn.disabled = true;
+      
+      sendMessageToAPI(chat, text).then(function(success) {
+        if (success) {
+          input.value = '';
+          renderChatMessages(chat);
+          renderChatList(document.getElementById('chatSearchInput')?.value || '');
+          
+          // Ответ бота
+          if (chat.binId === 'bot.official') {
+            setTimeout(function() {
+              var botMsg = {
+                id: 'bot_msg_' + Date.now(),
+                chatId: chat.id,
+                fromBin: 'bot.official',
+                toBin: currentUser.binId,
+                username: 'MiS-MaS Bot',
+                message: 'Привет! Я бот MiS-MaS. Ваш BIN ID: ' + currentUser.binId,
+                text: 'Привет! Я бот MiS-MaS. Ваш BIN ID: ' + currentUser.binId,
+                date: new Date().toISOString(),
+                createdAt: new Date().toISOString()
+              };
+              chat.messages.push(botMsg);
+              if (currentChatId === chat.id) {
+                renderChatMessages(chat);
+                renderChatList(document.getElementById('chatSearchInput')?.value || '');
+              }
+            }, 500);
+          }
+        } else {
+          showToast('Ошибка отправки');
         }
-      } else {
-        showToast('Ошибка отправки');
-      }
+        if (sendBtn) sendBtn.disabled = false;
+      });
     }
 
-    document.getElementById('sendChatMsgBtn').addEventListener('click', sendMessage);
-    document.getElementById('chatMessageInput').addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        sendMessage();
-      }
-    });
+    var sendBtn = document.getElementById('sendChatMsgBtn');
+    var msgInput = document.getElementById('chatMessageInput');
+    
+    if (sendBtn) {
+      sendBtn.addEventListener('click', sendMessageHandler);
+    }
+    
+    if (msgInput) {
+      msgInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          sendMessageHandler();
+        }
+      });
+      
+      // Фокус на поле ввода
+      setTimeout(function() { msgInput.focus(); }, 100);
+    }
+  }
+
+  function renderChatMessages(chat) {
+    var msgContainer = document.getElementById('chatMessages');
+    if (!msgContainer) return;
+    
+    if (chat.messages.length === 0) {
+      msgContainer.innerHTML = '<div style="text-align:center;color:#888;padding:20px;">Нет сообщений. Напишите первое!</div>';
+      return;
+    }
+    
+    msgContainer.innerHTML = chat.messages.map(function(m) {
+      var isOwn = m.fromBin === currentUser.binId || m.username === currentUser.name;
+      var senderName = isOwn ? 'Вы' : (m.username || chat.name || 'Собеседник');
+      var msgText = m.message || m.text || '';
+      return `
+        <div class="message-bubble ${isOwn ? 'own' : ''}">
+          <div class="message-sender">${escapeHtml(senderName)}</div>
+          <div>${escapeHtml(msgText)}</div>
+        </div>
+      `;
+    }).join('');
+    
+    // Прокрутка вниз
+    msgContainer.scrollTop = msgContainer.scrollHeight;
   }
 
   function escapeHtml(s) {
     if (!s) return '';
-    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
   async function initApp() {
     await getOrCreateBinId();
-    await loadPrivateChats();
+    await loadMessagesFromAPI();
     renderPage('profile');
     showToast('Добро пожаловать, ' + currentUser.name + '!');
     
     // Периодическое обновление
     setInterval(async function() {
+      if (currentPage === 'messages') {
+        await loadMessagesFromAPI();
+        if (currentChatId) {
+          var chat = privateChats.find(function(c) { return c.id === currentChatId; });
+          if (chat && document.getElementById('chatMessages')) {
+            loadLocalMessages(chat);
+            renderChatMessages(chat);
+            renderChatList(document.getElementById('chatSearchInput')?.value || '');
+          }
+        } else {
+          renderChatList(document.getElementById('chatSearchInput')?.value || '');
+        }
+      }
+      
       if (currentPage === 'feed') {
         await renderFeed();
-      } else if (currentPage === 'profile') {
-        await renderProfile();
       }
-      if (currentChatId && currentPage === 'messages') {
-        await loadPrivateChats();
-        var chat = privateChats.find(function(c) { return c.id === currentChatId; });
-        if (chat && document.getElementById('chatMessages')) {
-          var msgContainer = document.getElementById('chatMessages');
-          var wasAtBottom = msgContainer.scrollHeight - msgContainer.scrollTop - msgContainer.clientHeight < 50;
-          msgContainer.innerHTML = chat.messages.map(function(m) {
-            var isOwn = m.fromBin === currentUser.binId;
-            return `
-              <div class="message-bubble ${isOwn ? 'own' : ''}">
-                <div class="message-sender">${isOwn ? 'Вы' : escapeHtml(chat.name)}</div>
-                ${escapeHtml(m.message || m.text || '')}
-              </div>
-            `;
-          }).join('');
-          if (wasAtBottom) msgContainer.scrollTop = msgContainer.scrollHeight;
+      
+      if (currentPage === 'profile') {
+        var posts = await loadPosts();
+        var myPosts = posts.filter(function(p) {
+          return p.authorBinId === currentUser.binId;
+        });
+        if (document.getElementById('profilePosts')) {
+          renderPostList(myPosts, 'profilePosts');
         }
       }
     }, 5000);
   }
 
+  // Запуск
   checkAuth();
 })();
 </script>
 </body>
-</html>
+  </html>
