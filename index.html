@@ -29,20 +29,35 @@
     }
     .register-logo { font-size: 32px; font-weight: 700; color: #4a6d8c; margin-bottom: 8px; text-align: center; letter-spacing: 1px; }
     .register-subtitle { font-size: 14px; color: #656565; margin-bottom: 24px; text-align: center; border-bottom: 1px solid #e7e8ec; padding-bottom: 16px; }
-    .register-input-wrapper { margin-bottom: 20px; }
+    .register-input-wrapper { margin-bottom: 16px; }
     .register-input-wrapper label { display: block; font-size: 13px; color: #656565; margin-bottom: 6px; font-weight: 500; }
     .register-input {
       width: 100%; padding: 12px; border: 1px solid #d3d9de; border-radius: 4px;
       font-size: 14px; outline: none; background: #fafbfc; color: #000; box-sizing: border-box;
     }
     .register-input:focus { border-color: #4a6d8c; background: #fff; }
-    .register-hint { font-size: 12px; color: #888; margin-bottom: 24px; margin-top: -12px; }
+    .register-hint { font-size: 12px; color: #888; margin-bottom: 20px; margin-top: -8px; }
     .register-btn {
       background: #5b7ea0; border: none; border-radius: 4px; padding: 12px;
       width: 100%; color: white; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.15s;
     }
     .register-btn:disabled { opacity: 0.5; cursor: not-allowed; background: #8faec9; }
     .register-btn:not(:disabled):hover { background: #4a6d8c; }
+
+    .login-btn {
+      background: #ffffff; border: 1px solid #5b7ea0; border-radius: 4px; padding: 12px;
+      width: 100%; color: #5b7ea0; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.15s;
+      margin-top: 10px;
+    }
+    .login-btn:hover { background: #f0f4f8; }
+
+    .divider-text {
+      display: flex; align-items: center; text-align: center; color: #888; font-size: 12px; margin: 16px 0;
+    }
+    .divider-text::before, .divider-text::after {
+      content: ''; flex: 1; border-bottom: 1px solid #e7e8ec;
+    }
+    .divider-text span { padding: 0 10px; }
 
     .license-screen, .reject-screen {
       position: fixed; top: 0; left: 0; right: 0; bottom: 0;
@@ -93,7 +108,9 @@
     .profile-avatar {
       width: 80px; height: 80px; border-radius: 50%; background: #d3d9de;
       display: flex; align-items: center; justify-content: center; font-size: 32px; color: #4a6d8c; flex-shrink: 0;
+      overflow: hidden;
     }
+    .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
     .profile-details h2 { font-size: 20px; margin-bottom: 4px; }
     .profile-details .status { color: #656565; font-size: 13px; }
     .post-creator {
@@ -113,7 +130,9 @@
     .post-author-avatar {
       width: 40px; height: 40px; border-radius: 50%; background: #d3d9de;
       display: flex; align-items: center; justify-content: center; font-weight: bold; color: #4a6d8c;
+      overflow: hidden;
     }
+    .post-author-avatar img { width: 100%; height: 100%; object-fit: cover; }
     .post-author-name { font-weight: 600; color: #4a6d8c; }
     .post-date { color: #888; font-size: 12px; }
     .post-text { margin-bottom: 8px; line-height: 1.4; }
@@ -138,7 +157,9 @@
     .chat-contact-avatar {
       width: 42px; height: 42px; border-radius: 50%; background: #e0e4e8;
       display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;
+      overflow: hidden;
     }
+    .chat-contact-avatar img { width: 100%; height: 100%; object-fit: cover; }
     .chat-window { flex: 1; display: flex; flex-direction: column; }
     .messages-container { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
     .message-bubble { max-width: 70%; padding: 8px 12px; border-radius: 6px; background: #e9edf1; align-self: flex-start; word-wrap: break-word; }
@@ -183,11 +204,16 @@
       <div class="register-logo">MiS-MaS</div>
       <div class="register-subtitle">Добро пожаловать</div>
       <div class="register-input-wrapper">
-        <label>Ваше имя</label>
+        <label>Имя</label>
         <input type="text" id="registerNameInput" class="register-input" placeholder="Введите имя">
       </div>
-      <p class="register-hint">Имя будет отображаться в профиле и чатах</p>
-      <button class="register-btn" id="registerBtn" disabled>Продолжить</button>
+      <div class="register-input-wrapper">
+        <label>Пароль</label>
+        <input type="password" id="registerPasswordInput" class="register-input" placeholder="Введите пароль">
+      </div>
+      <p class="register-hint">Минимум 4 символа</p>
+      <button class="register-btn" id="registerBtn" disabled>Зарегистрироваться</button>
+      <button class="login-btn" id="loginBtn">Войти</button>
     </div>
   </div>
 
@@ -234,9 +260,12 @@
 
 <script>
 (function() {
+  // ==================== НАСТРОЙКИ API ====================
   const API_URL = 'https://69da27d226585bd92dd3a309.mockapi.io/mi';
   const CHANNEL_API_URL = 'https://69da27d226585bd92dd3a309.mockapi.io/messages';
-  
+  const ACCOUNTS_API_PRIMARY = 'https://69f32de6bd2396bf530f862c.mockapi.io/ac';
+  const ACCOUNTS_API_SECONDARY = 'https://69f32de6bd2396bf530f862c.mockapi.io/ac2';
+
   document.getElementById('licenseTextContainer').innerHTML = `
     <p><strong>Лицензионное соглашение MiS-MaS</strong></p>
     <p>1. Сервис предоставляется "как есть".</p>
@@ -246,11 +275,12 @@
   `;
 
   let currentUser = {
-    id: localStorage.getItem('mismos_user_id') || ('user_' + Date.now() + '_' + Math.random().toString(36).substr(2,8)),
+    id: localStorage.getItem('mismos_user_id') || null,
     name: localStorage.getItem('mismos_username') || '',
-    binId: null
+    password: localStorage.getItem('mismos_password') || '',
+    binId: null,
+    apiAccountId: localStorage.getItem('mismos_api_account_id') || null
   };
-  localStorage.setItem('mismos_user_id', currentUser.id);
 
   let isRegistered = localStorage.getItem('mismos_registered') === 'true';
   let licenseAccepted = localStorage.getItem('mismos_license') === 'true';
@@ -273,9 +303,133 @@
     return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
-  // ============== API ФУНКЦИИ ==============
+  function ensureUserId() {
+    if (!currentUser.id) {
+      currentUser.id = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 8);
+      localStorage.setItem('mismos_user_id', currentUser.id);
+    }
+    return currentUser.id;
+  }
 
-  // Проверка доступности API
+  // ====================== API ДЛЯ АККАУНТОВ ======================
+  async function apiCallWithFallback(url, options) {
+    try {
+      const resp = await fetch(url, options);
+      if (resp.ok) return resp;
+      console.warn(`Основной API ${url} недоступен, пробую запасной...`);
+      const fallbackUrl = url.includes(ACCOUNTS_API_PRIMARY) ? url.replace(ACCOUNTS_API_PRIMARY, ACCOUNTS_API_SECONDARY) : url.replace(ACCOUNTS_API_SECONDARY, ACCOUNTS_API_PRIMARY);
+      const fallbackResp = await fetch(fallbackUrl, options);
+      return fallbackResp;
+    } catch (e) {
+      console.error('Ошибка при запросе к API аккаунтов:', e);
+      try {
+        const fallbackUrl = url.includes(ACCOUNTS_API_PRIMARY) ? url.replace(ACCOUNTS_API_PRIMARY, ACCOUNTS_API_SECONDARY) : url.replace(ACCOUNTS_API_SECONDARY, ACCOUNTS_API_PRIMARY);
+        return await fetch(fallbackUrl, options);
+      } catch (e2) {
+        console.error('Оба API аккаунтов недоступны:', e2);
+        return null;
+      }
+    }
+  }
+
+  async function findAccountByName(name) {
+    const url = `${ACCOUNTS_API_PRIMARY}?name=${encodeURIComponent(name)}`;
+    try {
+      const resp = await apiCallWithFallback(url, { method: 'GET' });
+      if (!resp || !resp.ok) return null;
+      const accounts = await resp.json();
+      return accounts.length > 0 ? accounts[0] : null;
+    } catch (e) {
+      console.error('Ошибка поиска аккаунта:', e);
+      return null;
+    }
+  }
+
+  async function createAccountInAPI(accountData) {
+    try {
+      const resp = await apiCallWithFallback(ACCOUNTS_API_PRIMARY, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(accountData)
+      });
+      if (!resp || !resp.ok) {
+        console.error('Не удалось создать аккаунт через API');
+        return null;
+      }
+      return await resp.json();
+    } catch (e) {
+      console.error('Ошибка создания аккаунта:', e);
+      return null;
+    }
+  }
+
+  async function updateAccountInAPI(apiId, accountData) {
+    const urls = [ACCOUNTS_API_PRIMARY, ACCOUNTS_API_SECONDARY];
+    for (const baseUrl of urls) {
+      try {
+        const url = `${baseUrl}/${apiId}`;
+        const resp = await fetch(url, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(accountData)
+        });
+        if (resp.ok) return await resp.json();
+      } catch (e) {
+        console.warn(`Не удалось обновить аккаунт в ${baseUrl}:`, e);
+      }
+    }
+    return null;
+  }
+
+  async function saveAccountToAPI() {
+    const accountData = {
+      userId: currentUser.id,
+      name: currentUser.name,
+      password: currentUser.password,
+      binId: currentUser.binId,
+      lastLogin: new Date().toISOString()
+    };
+
+    if (currentUser.apiAccountId) {
+      const updated = await updateAccountInAPI(currentUser.apiAccountId, accountData);
+      if (updated) {
+        console.log('Аккаунт обновлён в API:', updated);
+        return updated;
+      }
+    }
+    
+    const created = await createAccountInAPI(accountData);
+    if (created) {
+      currentUser.apiAccountId = created.id;
+      localStorage.setItem('mismos_api_account_id', created.id);
+      console.log('Аккаунт создан в API:', created);
+      return created;
+    }
+    
+    console.warn('Не удалось сохранить аккаунт в API, сохраняем только локально');
+    return null;
+  }
+
+  // ====================== BIN ID ======================
+  async function getOrCreateBinId() {
+    var bid = localStorage.getItem('mismos_bin_id');
+    if (bid) {
+      currentUser.binId = bid;
+      return bid;
+    }
+    
+    bid = 'bin_' + Date.now();
+    localStorage.setItem('mismos_bin_id', bid);
+    currentUser.binId = bid;
+    
+    if (currentUser.name) {
+      await saveAccountToAPI();
+    }
+    
+    return bid;
+  }
+
+  // ====================== API СООБЩЕНИЙ И ПОСТОВ (БЕЗ ИЗМЕНЕНИЙ) ======================
   async function checkAPIAvailable() {
     try {
       var controller = new AbortController();
@@ -289,7 +443,6 @@
     }
   }
 
-  // Тестовый запрос к API
   async function testAPI() {
     try {
       var resp = await fetch(API_URL + '?limit=1');
@@ -305,20 +458,6 @@
     }
   }
 
-  async function getOrCreateBinId() {
-    var bid = localStorage.getItem('mismos_bin_id');
-    if (bid) {
-      currentUser.binId = bid;
-      return bid;
-    }
-    
-    bid = 'bin_' + Date.now();
-    localStorage.setItem('mismos_bin_id', bid);
-    currentUser.binId = bid;
-    return bid;
-  }
-
-  // Отправка сообщения через API с повторными попытками
   async function sendMessageViaAPI(chat, text) {
     var messageData = {
       fromBin: currentUser.binId,
@@ -332,7 +471,6 @@
     
     console.log('Попытка отправки сообщения:', messageData);
     
-    // Пробуем отправить 3 раза
     for (var attempt = 1; attempt <= 3; attempt++) {
       try {
         var controller = new AbortController();
@@ -365,7 +503,6 @@
       }
     }
     
-    // Если API недоступен, сохраняем локально
     console.log('Все попытки отправки через API не удались. Сохраняем локально.');
     var localMsg = {
       id: 'local_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
@@ -380,10 +517,9 @@
     };
     chat.messages.push(localMsg);
     saveLocalMessage(chat.id, localMsg);
-    return true; // Возвращаем true т.к. сообщение сохранено локально
+    return true;
   }
 
-  // Сохранение сообщения локально
   function saveLocalMessage(chatId, msg) {
     try {
       var allLocal = JSON.parse(localStorage.getItem('mismos_local_messages') || '{}');
@@ -397,7 +533,6 @@
     }
   }
 
-  // Загрузка локальных сообщений для чата
   function loadLocalMessages(chatId) {
     try {
       var allLocal = JSON.parse(localStorage.getItem('mismos_local_messages') || '{}');
@@ -407,7 +542,6 @@
     }
   }
 
-  // Загрузка сообщений из API
   async function loadAllMessagesFromAPI() {
     try {
       var resp = await fetch(API_URL);
@@ -430,7 +564,6 @@
     var allMessages = await loadAllMessagesFromAPI();
     var chatsMap = {};
     
-    // Обрабатываем сообщения из API
     allMessages.forEach(function(msg) {
       var partnerBin;
       if (msg.fromBin === currentUser.binId) {
@@ -438,7 +571,7 @@
       } else if (msg.toBin === currentUser.binId) {
         partnerBin = msg.fromBin;
       } else {
-        return; // Сообщение не относится к нашему пользователю
+        return;
       }
       
       if (!partnerBin || partnerBin === currentUser.binId) return;
@@ -458,7 +591,6 @@
       }
     });
     
-    // Восстанавливаем сохраненные чаты
     var savedChats = JSON.parse(localStorage.getItem('mismos_chats_list') || '[]');
     savedChats.forEach(function(sc) {
       if (!chatsMap[sc.binId]) {
@@ -476,7 +608,6 @@
     
     privateChats = Object.values(chatsMap);
     
-    // Добавляем локальные сообщения и сортируем
     privateChats.forEach(function(chat) {
       var localMsgs = loadLocalMessages(chat.id);
       localMsgs.forEach(function(lm) {
@@ -491,7 +622,6 @@
       });
     });
     
-    // Добавляем бота
     if (!privateChats.find(function(c) { return c.binId === 'bot.official'; })) {
       privateChats.unshift({
         id: 'chat_bot',
@@ -561,7 +691,6 @@
       console.log('Ошибка создания поста через API:', e.message);
     }
     
-    // Сохраняем локально
     var localPosts = JSON.parse(localStorage.getItem('mismos_posts_local') || '[]');
     postData.id = 'local_post_' + Date.now();
     localPosts.push(postData);
@@ -569,8 +698,7 @@
     return true;
   }
 
-  // ============== UI ФУНКЦИИ ==============
-
+  // ====================== UI ФУНКЦИИ ======================
   function refreshCurrentChat() {
     if (!currentChatId) return;
     var chat = privateChats.find(function(c) { return c.id === currentChatId; });
@@ -597,6 +725,10 @@
     }
   }
 
+  function getAvatarHTML() {
+    return escapeHtml(currentUser.name.charAt(0).toUpperCase());
+  }
+
   async function renderProfile() {
     var posts = await loadPosts();
     var myPosts = posts.filter(function(p) {
@@ -606,7 +738,7 @@
     contentArea.innerHTML = `
       <div class="profile-header">
         <div class="profile-info">
-          <div class="profile-avatar">${escapeHtml(currentUser.name.charAt(0).toUpperCase())}</div>
+          <div class="profile-avatar">${getAvatarHTML()}</div>
           <div class="profile-details">
             <h2>${escapeHtml(currentUser.name)}</h2>
             <div class="status">BIN ID: ${currentUser.binId || 'Загрузка...'}</div>
@@ -654,10 +786,11 @@
       var d = new Date(p.date || p.createdAt);
       if (!isNaN(d.getTime())) dateStr = d.toLocaleString('ru-RU');
     } catch(e) {}
+    var avatarContent = escapeHtml(name.charAt(0).toUpperCase());
     return `
       <div class="post-item">
         <div class="post-author">
-          <div class="post-author-avatar">${escapeHtml(name.charAt(0).toUpperCase())}</div>
+          <div class="post-author-avatar">${avatarContent}</div>
           <div>
             <div class="post-author-name">${escapeHtml(name)}</div>
             <div class="post-date">${dateStr}</div>
@@ -669,7 +802,6 @@
   }
 
   async function renderMessages() {
-    // Проверяем доступность API
     var apiAvailable = await testAPI();
     console.log('API доступен:', apiAvailable);
     
@@ -773,7 +905,11 @@
         var searchInput = document.getElementById('chatSearchInput');
         renderChatList(searchInput ? searchInput.value : '');
       }
-    }, 5000); // Проверка каждые 5 секунд
+    }, 5000);
+  }
+
+  function getChatContactAvatar(name) {
+    return escapeHtml(name.charAt(0).toUpperCase());
   }
 
   function renderChatList(filter) {
@@ -798,7 +934,7 @@
       }
       return `
         <div class="chat-contact ${c.id === currentChatId ? 'active' : ''}" data-chat-id="${c.id}">
-          <div class="chat-contact-avatar">${escapeHtml(c.name.charAt(0).toUpperCase())}</div>
+          <div class="chat-contact-avatar">${getChatContactAvatar(c.name)}</div>
           <div style="flex:1;">
             <div style="font-weight:600;">${escapeHtml(c.name)}</div>
             <div style="font-size:12px;color:#888;">${escapeHtml(lastMsg)}</div>
@@ -847,17 +983,13 @@
         sendBtn.textContent = 'Отправка...';
       }
       
-      // Отправляем сообщение
       await sendMessageViaAPI(chat, text);
       
-      // Очищаем поле
       msgInput.value = '';
       
-      // Обновляем отображение
       renderChatMessages(chat);
       renderChatList(document.getElementById('chatSearchInput')?.value || '');
       
-      // Ответ бота
       if (chat.binId === 'bot.official') {
         setTimeout(async function() {
           var botMsg = {
@@ -930,8 +1062,7 @@
     msgContainer.scrollTop = msgContainer.scrollHeight;
   }
 
-  // ============== НАВИГАЦИЯ ==============
-
+  // ====================== НАВИГАЦИЯ ======================
   document.querySelectorAll('.header-nav span').forEach(function(el) {
     el.addEventListener('click', function() {
       navigateTo(this.getAttribute('data-page'));
@@ -953,6 +1084,7 @@
     if (newName && newName.trim()) {
       currentUser.name = newName.trim();
       localStorage.setItem('mismos_username', currentUser.name);
+      saveAccountToAPI();
       navigateTo('profile');
       showToast('Имя изменено');
     }
@@ -978,35 +1110,131 @@
     renderPage(page);
   }
 
-  // ============== РЕГИСТРАЦИЯ ==============
-
+  // ====================== РЕГИСТРАЦИЯ И ВХОД ======================
   var registerNameInput = document.getElementById('registerNameInput');
+  var registerPasswordInput = document.getElementById('registerPasswordInput');
   var registerBtn = document.getElementById('registerBtn');
-  
+  var loginBtn = document.getElementById('loginBtn');
+
+  function updateRegisterBtn() {
+    var name = registerNameInput.value.trim();
+    var password = registerPasswordInput.value.trim();
+    registerBtn.disabled = name.length === 0 || password.length < 4;
+  }
+
   if (registerNameInput) {
-    registerNameInput.addEventListener('input', function(e) {
-      registerBtn.disabled = e.target.value.trim().length === 0;
-    });
+    registerNameInput.addEventListener('input', updateRegisterBtn);
     registerNameInput.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter' && this.value.trim().length > 0) {
+      if (e.key === 'Enter') {
+        registerPasswordInput.focus();
+      }
+    });
+  }
+
+  if (registerPasswordInput) {
+    registerPasswordInput.addEventListener('input', updateRegisterBtn);
+    registerPasswordInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && !registerBtn.disabled) {
         registerBtn.click();
       }
     });
   }
 
+  // РЕГИСТРАЦИЯ
   if (registerBtn) {
-    registerBtn.addEventListener('click', function() {
+    registerBtn.addEventListener('click', async function() {
       var name = registerNameInput.value.trim();
-      if (!name) return;
+      var password = registerPasswordInput.value.trim();
+      
+      if (!name || password.length < 4) return;
+      
+      // Проверяем, существует ли уже такой пользователь
+      showToast('Проверка...');
+      var existing = await findAccountByName(name);
+      
+      if (existing) {
+        showToast('Пользователь с таким именем уже существует! Используйте кнопку "Войти".', true);
+        return;
+      }
+      
+      // Создаём нового пользователя
+      ensureUserId();
       currentUser.name = name;
+      currentUser.password = password;
+      
       localStorage.setItem('mismos_username', name);
+      localStorage.setItem('mismos_password', password);
       localStorage.setItem('mismos_registered', 'true');
       isRegistered = true;
+      
+      await getOrCreateBinId();
+      var saved = await saveAccountToAPI();
+      if (saved) {
+        currentUser.apiAccountId = saved.id;
+        localStorage.setItem('mismos_api_account_id', saved.id);
+      }
+      
+      showToast('Регистрация успешна!');
       document.getElementById('registerScreen').classList.add('hidden');
       document.getElementById('licenseScreen').classList.remove('hidden');
     });
   }
 
+  // ВХОД
+  if (loginBtn) {
+    loginBtn.addEventListener('click', async function() {
+      var name = registerNameInput.value.trim();
+      var password = registerPasswordInput.value.trim();
+      
+      if (!name || !password) {
+        showToast('Введите имя и пароль!', true);
+        return;
+      }
+      
+      showToast('Вход...');
+      var existing = await findAccountByName(name);
+      
+      if (!existing) {
+        showToast('Пользователь не найден! Проверьте имя или зарегистрируйтесь.', true);
+        return;
+      }
+      
+      if (existing.password !== password) {
+        showToast('Неверный пароль!', true);
+        return;
+      }
+      
+      // Вход успешен
+      currentUser.id = existing.userId;
+      currentUser.name = existing.name;
+      currentUser.password = existing.password;
+      currentUser.binId = existing.binId;
+      currentUser.apiAccountId = existing.id;
+      
+      localStorage.setItem('mismos_user_id', currentUser.id);
+      localStorage.setItem('mismos_username', currentUser.name);
+      localStorage.setItem('mismos_password', currentUser.password);
+      localStorage.setItem('mismos_bin_id', currentUser.binId);
+      localStorage.setItem('mismos_api_account_id', existing.id);
+      localStorage.setItem('mismos_registered', 'true');
+      isRegistered = true;
+      
+      // Обновляем lastLogin
+      await updateAccountInAPI(existing.id, {
+        userId: currentUser.id,
+        name: currentUser.name,
+        password: currentUser.password,
+        binId: currentUser.binId,
+        lastLogin: new Date().toISOString()
+      });
+      
+      showToast('Вход выполнен! Добро пожаловать, ' + currentUser.name + '!');
+      document.getElementById('registerScreen').classList.add('hidden');
+      document.getElementById('licenseScreen').classList.remove('hidden');
+    });
+  }
+
+  // ====================== ЛИЦЕНЗИЯ ======================
   document.getElementById('licenseAcceptBtn').addEventListener('click', async function() {
     localStorage.setItem('mismos_license', 'true');
     licenseAccepted = true;
@@ -1024,25 +1252,44 @@
     localStorage.removeItem('mismos_registered');
     localStorage.removeItem('mismos_license');
     localStorage.removeItem('mismos_username');
+    localStorage.removeItem('mismos_password');
+    localStorage.removeItem('mismos_api_account_id');
+    localStorage.removeItem('mismos_user_id');
     currentUser.name = '';
+    currentUser.password = '';
+    currentUser.id = null;
+    currentUser.apiAccountId = null;
     isRegistered = false;
     licenseAccepted = false;
     document.getElementById('rejectScreen').classList.add('hidden');
     document.getElementById('registerScreen').classList.remove('hidden');
     registerNameInput.value = '';
+    registerPasswordInput.value = '';
     registerBtn.disabled = true;
   });
 
-  // ============== ИНИЦИАЛИЗАЦИЯ ==============
-
+  // ====================== ИНИЦИАЛИЗАЦИЯ ======================
   async function initApp() {
     await getOrCreateBinId();
     
-    // Тестируем API
+    if (!currentUser.apiAccountId) {
+      var existing = await findAccountByName(currentUser.name);
+      if (existing) {
+        currentUser.apiAccountId = existing.id;
+        localStorage.setItem('mismos_api_account_id', existing.id);
+        if (!currentUser.binId && existing.binId) {
+          currentUser.binId = existing.binId;
+          localStorage.setItem('mismos_bin_id', existing.binId);
+        }
+      } else {
+        await saveAccountToAPI();
+      }
+    }
+    
     var apiOk = await testAPI();
     if (!apiOk) {
-      showToast('API недоступен. Сообщения будут сохраняться локально и не дойдут до получателя.', true);
-      console.warn('API недоступен. Работаем в локальном режиме.');
+      showToast('API сообщений недоступен. Сообщения будут сохраняться локально и не дойдут до получателя.', true);
+      console.warn('API сообщений недоступен. Работаем в локальном режиме.');
     }
     
     await buildChatsFromAPI();
@@ -1071,6 +1318,7 @@
       mi.classList.add('hidden');
       registerBtn.disabled = true;
       registerNameInput.value = '';
+      registerPasswordInput.value = '';
     } else if (isRegistered && currentUser.name && !licenseAccepted) {
       rs.classList.add('hidden');
       ls.classList.remove('hidden');
@@ -1084,4 +1332,4 @@
 })();
 </script>
 </body>
-  </html>
+</html>
